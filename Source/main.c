@@ -106,6 +106,7 @@ int main() {
     shader_add_texture(&rect_shader2, "../assets/container.jpg", "textures[0]", TEXTURE_VERTICAL_FLIP);
 
     while (!glfwWindowShouldClose(window)) {
+        double start_time = glfwGetTime();
         process_input(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -117,6 +118,10 @@ int main() {
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+        double end_time = glfwGetTime();
+        double delta_time_seconds = end_time - start_time;
+        // LOG_DEBUG("%llfms\n", delta_time_seconds * 1000);
+        // LOG_DEBUG("FPS: %lld\n", (u64)(1.0 / delta_time_seconds));
     }
 
 

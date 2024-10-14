@@ -42,7 +42,8 @@ build_gcc/
 c_build/
 *.ps1
 !bootstrap.ps1
-!Libraries/
+!Libraries/glfw/
+!Libraries/glad/
 ckg/
 ckit/
 c_build_dependency_cache_*.json

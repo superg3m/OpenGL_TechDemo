@@ -38,10 +38,7 @@
 
 # c-build
 build_cl/
-/Tests/CoreTest/build_cl
-/Tests/GraphicsTest/build_cl
-
-build_cl/
+build_gcc/
 c_build/
 *.ps1
 !bootstrap.ps1

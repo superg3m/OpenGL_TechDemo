@@ -3,6 +3,7 @@
         "glad.h": "c",
         "ckit.h": "c",
         "shader.h": "c",
-        "stb_image.h": "c"
+        "stb_image.h": "c",
+        "xstring": "c"
     }
 }

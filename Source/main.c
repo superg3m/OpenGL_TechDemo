@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <shader.h>
 #include <mesh.h>
+#include <stb_image.h>
 
 void window_resize_callback(GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow *window);
@@ -56,30 +57,29 @@ int main() {
     rect_shader = shader_create(rect_shader_paths, ArrayCount(rect_shader_paths));
 
     float vertices[] = {
-        +0.5f, +0.5f, +0.0f,  // top right
-        +0.5f, -0.5f, +0.0f,  // bottom right
-        -0.5f, -0.5f, +0.0f,  // bottom left
-        -0.5f,  0.5f, +0.0f   // top left 
+        // positions          // colors           // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
+    };
+    unsigned int indices[] = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
     };
 
-    u32 indices[] = {  // note that we start from 0!
-        0, 1, 3,  // first Triangle
-        1, 2, 3   // second Triangle
-    };
-
-
-
-    u32 vertex_components[] = {3};
-
+    u32 vertex_components[] = {3, 3, 2};
     CKIT_Vector3 rect_postion = {0.0, 0.0, 0.0};
     VertexBuffer vertex_buffer = vertex_buffer_create(vertices, ArrayCount(vertices), vertex_components, ArrayCount(vertex_components)); 
     rect_mesh = mesh_create(rect_postion, &rect_shader, vertex_buffer, indices, ArrayCount(indices), GL_STATIC_DRAW);
+    shader_add_texture(&rect_shader, "../assets/container.jpg", "texture1", TEXTURE_VERTICAL_FLIP);
+    shader_add_texture(&rect_shader, "../assets/awesomeface.png", "texture2", TEXTURE_VERTICAL_FLIP);
+
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
 
         mesh_draw(&rect_mesh);
         // game_update();
@@ -111,7 +111,6 @@ void process_input(GLFWwindow *window) {
 
 
 void window_resize_callback(GLFWwindow* window, int width, int height) {
-    LOG_DEBUG("Width: %d | Height: %d\n", width, height);
     glViewport(0, 0, width, height);
 }
 

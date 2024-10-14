@@ -43,7 +43,7 @@ Mesh mesh_create(CKIT_Vector3 position, Shader* shader, VertexBuffer vertex_buff
     for (int i = 0; i < vertex_buffer.vertex_component_count; i++) {
         u32 num_components = vertex_buffer.vertex_component[i];
         glEnableVertexAttribArray(i);
-        glVertexAttribPointer(i, num_components, GL_FLOAT, GL_FALSE, ret.vertex_buffer.stride * sizeof(float), (void*)(0 + vertex_component_offset));
+        glVertexAttribPointer(i, num_components, GL_FLOAT, GL_FALSE, ret.vertex_buffer.stride * sizeof(float), (void*)(vertex_component_offset * sizeof(float)));
         vertex_component_offset += num_components;
     }    
 
@@ -55,6 +55,8 @@ Mesh mesh_create(CKIT_Vector3 position, Shader* shader, VertexBuffer vertex_buff
 
 void mesh_draw(Mesh* mesh) {
     shader_use(mesh->shader);
+    shader_bind_textures(mesh->shader);
+
     glBindVertexArray(mesh->VAO);
 
     if (mesh->indices_count != 0) {

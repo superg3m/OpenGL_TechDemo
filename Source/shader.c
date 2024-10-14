@@ -90,32 +90,56 @@ Shader shader_create(const char** shader_source_path, u32 shader_source_path_cou
 }
 
 void shader_free(Shader* shader) {
-    //ckit_vector_free(shader->textures);
+    if (shader->textures) {
+        ckit_vector_free(shader->textures);
+    }
 }
 
-void shader_add_texture(Shader* shader, const char* texture_path) {
-    ckit_assert_msg(ckit_vector_count(shader->textures) <= TEXTURE_MAX, "Texture max hit!");
+void shader_add_texture(Shader* shader, const char* texture_path, const char* shader_name, u8 texture_flags) {
+    if (shader->textures) {
+        ckit_assert_msg(ckit_vector_count(shader->textures) <= TEXTURE_MAX, "Texture max hit!");
+    }
+    ckit_assert_msg(ckit_os_path_exists(texture_path), "Texture path doesn't exist!");
+
+    GLenum MIPMAP_TYPE = GET_BIT(texture_flags, 0) ? GL_NEAREST : GL_LINEAR;
+    GLenum TEXTURE_VERTICAL_FLIP = GET_BIT(texture_flags, 1);
 
     u32 texture;
     glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glBindTexture(GL_TEXTURE_2D, texture); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIPMAP_TYPE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MIPMAP_TYPE);
 
     int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(TEXTURE_VERTICAL_FLIP);
+
     u8 *data = stbi_load(texture_path, &width, &height, &nrChannels, 0);
+
+    GLenum format = 0;
+    if (nrChannels == 1) {
+        format = GL_RED;
+    } else if (nrChannels == 3) {
+        format = GL_RGB;
+    } else if (nrChannels == 4) {
+        format = GL_RGBA;
+    } else {
+        ckit_assert(FALSE);
+    }
+
     if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
         LOG_ERROR("Failed to load texture\n");
     }
+
     stbi_image_free(data);
+    stbi_set_flip_vertically_on_load(FALSE);
 
     ckit_vector_push(shader->textures, texture);
+    shader_set_int(shader, shader_name, ckit_vector_count(shader->textures) - 1);
 }
 
 void shader_bind_textures(Shader* shader) {
@@ -127,4 +151,19 @@ void shader_bind_textures(Shader* shader) {
 
 void shader_use(Shader* shader) {
     glUseProgram(shader->id);
+}
+
+void shader_set_bool(Shader* shader, const char* name, Boolean value) {   
+    shader_use(shader);      
+    glUniform1i(glGetUniformLocation(shader->id, name), (int)value); 
+}
+
+void shader_set_int(Shader* shader, const char* name, int value) { 
+    shader_use(shader);
+    glUniform1i(glGetUniformLocation(shader->id, name), value); 
+}
+
+void shader_set_float(Shader* shader, const char* name, float value) { 
+    shader_use(shader);
+    glUniform1f(glGetUniformLocation(shader->id, name), value); 
 }

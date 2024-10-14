@@ -40,6 +40,7 @@ internal ShaderType shader_type_from_extension(const char* shader_source_path) {
 // NOTE(Jovanni): You might not even need this shader_discriptors
 Shader shader_create(const char** shader_source_path, u32 shader_source_path_count) {
     Shader ret = {0};
+    ret.textures = ckit_vector_reserve(1, u32);
     u32* shader_source_ids = NULLPTR; 
 
     ret.id = glCreateProgram();
@@ -147,6 +148,13 @@ void shader_bind_textures(Shader* shader) {
     for (u32 i = 0; i < ckit_vector_count(shader->textures); i++) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, shader->textures[i]);
+    }
+}
+
+void shader_unbind_textures(Shader* shader) {
+    for (u32 i = 0; i < ckit_vector_count(shader->textures); i++) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 }
 

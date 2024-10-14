@@ -27,6 +27,9 @@ Mesh mesh_create(CKIT_Vector3 position, Shader* shader, VertexBuffer vertex_buff
     ret.indices_count = indices_count;
     ret.draw_mode = draw_mode;
     ret.shader = shader;
+    ret.VAO = -1;
+    ret.VBO = -1;
+    ret.EBO = -1;
 
     glGenVertexArrays(1, &ret.VAO);
     glGenBuffers(1, &ret.VBO);
@@ -37,7 +40,7 @@ Mesh mesh_create(CKIT_Vector3 position, Shader* shader, VertexBuffer vertex_buff
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * ret.vertex_buffer.vertex_count, ret.vertex_buffer.vertices, draw_mode);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ret.EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices_count, ret.indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * indices_count, ret.indices, draw_mode);
 
     u64 vertex_component_offset = 0;
     for (int i = 0; i < vertex_buffer.vertex_component_count; i++) {
@@ -64,6 +67,8 @@ void mesh_draw(Mesh* mesh) {
     } else {
         glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_buffer.vertex_count);
     }
+
+    shader_unbind_textures(mesh->shader);
 }
 
 void mesh_set_position(Mesh* mesh, CKIT_Vector3 position) {
@@ -72,10 +77,17 @@ void mesh_set_position(Mesh* mesh, CKIT_Vector3 position) {
 void mesh_set_vertices(Mesh* mesh, VertexBuffer vertex_buffer) {
     ckit_assert_msg(mesh->draw_mode != GL_STATIC_DRAW, "You may not modify a mesh that is marked as GL_STATIC_DRAW\n");
 
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertex_buffer.vertex_count * sizeof(float), vertex_buffer.vertices);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     mesh->vertex_buffer = vertex_buffer;
 }
 void mesh_set_indices(Mesh* mesh, u32* indices, u32 indices_count) {
     ckit_assert_msg(mesh->draw_mode != GL_STATIC_DRAW, "You may not modify a mesh that is marked as GL_STATIC_DRAW\n");
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices_count * sizeof(GLuint), indices);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     mesh->indices = indices;
     mesh->indices_count = indices_count;

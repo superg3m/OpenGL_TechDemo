@@ -4,6 +4,7 @@
         "ckit.h": "c",
         "shader.h": "c",
         "stb_image.h": "c",
-        "xstring": "c"
+        "xstring": "c",
+        "mesh.h": "c"
     }
 }

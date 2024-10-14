@@ -72,8 +72,8 @@ int main() {
     CKIT_Vector3 rect_postion = {0.0, 0.0, 0.0};
     VertexBuffer vertex_buffer = vertex_buffer_create(vertices, ArrayCount(vertices), vertex_components, ArrayCount(vertex_components)); 
     rect_mesh = mesh_create(rect_postion, &rect_shader, vertex_buffer, indices, ArrayCount(indices), GL_STATIC_DRAW);
-    shader_add_texture(&rect_shader, "../assets/container.jpg", "texture1", TEXTURE_VERTICAL_FLIP);
-    shader_add_texture(&rect_shader, "../assets/awesomeface.png", "texture2", TEXTURE_VERTICAL_FLIP);
+    shader_add_texture(&rect_shader, "../assets/container.jpg", "textures[0]", TEXTURE_VERTICAL_FLIP);
+    shader_add_texture(&rect_shader, "../assets/awesomeface.png", "textures[1]", TEXTURE_VERTICAL_FLIP);
 
 
     while (!glfwWindowShouldClose(window)) {

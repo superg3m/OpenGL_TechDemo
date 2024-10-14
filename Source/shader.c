@@ -46,14 +46,15 @@ Shader shader_create(const char** shader_source_path, u32 shader_source_path_cou
     for (int i = 0; i < shader_source_path_count; i++) {
         const char* path = shader_source_path[i];
         size_t file_size = 0;
-        char* shader_source = ckit_os_read_entire_file(path, &file_size);
+        GLchar* shader_source = ckit_os_read_entire_file(path, &file_size);
+        const GLchar* const_shader_source = (const GLchar*)shader_source;
         ShaderType type = shader_type_from_extension(path);
         u32 source_id;
 
         switch (type) {
             case VERTEX_SHADER: {
                 source_id = glCreateShader(GL_VERTEX_SHADER);
-                glShaderSource(source_id, 1, &shader_source, NULL);
+                glShaderSource(source_id, 1, &const_shader_source, NULL);
                 glCompileShader(source_id);
                 shader_check_compile_errors(source_id, "VERTEX");
                 glAttachShader(ret.id, source_id);
@@ -61,7 +62,7 @@ Shader shader_create(const char** shader_source_path, u32 shader_source_path_cou
 
             case FRAGMENT_SHADER: {
                 source_id = glCreateShader(GL_FRAGMENT_SHADER);
-                glShaderSource(source_id, 1, &shader_source, NULL);
+                glShaderSource(source_id, 1, &const_shader_source, NULL);
                 glCompileShader(source_id);
                 shader_check_compile_errors(source_id, "FRAGMENT");
                 glAttachShader(ret.id, source_id);

@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <shader.h>
+#include <mesh.h>
 
 void window_resize_callback(GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow *window);
@@ -13,6 +14,7 @@ const u32 SCR_HEIGHT = 600;
 
 Shader rect_shader;
 unsigned int VBO, VAO, EBO;
+Mesh rect_mesh;
 
 int main() {
     ckit_init();
@@ -48,71 +50,47 @@ int main() {
     // assumes the extension is supported .frag, .vert, .compute, ect...
     const char* rect_shader_paths[] = {
         "../shader_source/basic.frag",
-        "../shader_source/basic.vert",
-        "../shader_source/basic.geo"
+        "../shader_source/basic.vert"
     };
 
     rect_shader = shader_create(rect_shader_paths, ArrayCount(rect_shader_paths));
 
     float vertices[] = {
-         0.5f,  0.5f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left 
+        +0.5f, +0.5f, +0.0f,  // top right
+        +0.5f, -0.5f, +0.0f,  // bottom right
+        -0.5f, -0.5f, +0.0f,  // bottom left
+        -0.5f,  0.5f, +0.0f   // top left 
     };
 
-    unsigned int indices[] = {  // note that we start from 0!
+    u32 indices[] = {  // note that we start from 0!
         0, 1, 3,  // first Triangle
         1, 2, 3   // second Triangle
     };
-    
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0); 
-
-    // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    glBindVertexArray(0); 
 
 
-    // uncomment this call to draw in wireframe polygons.
-    //
+
+    u32 vertex_components[] = {3};
+
+    CKIT_Vector3 rect_postion = {0.0, 0.0, 0.0};
+    VertexBuffer vertex_buffer = vertex_buffer_create(vertices, ArrayCount(vertices), vertex_components, ArrayCount(vertex_components)); 
+    rect_mesh = mesh_create(rect_postion, &rect_shader, vertex_buffer, indices, ArrayCount(indices), GL_STATIC_DRAW);
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // draw our first triangle
-        shader_use(&rect_shader);
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        //glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        // glBindVertexArray(0); // no need to unbind it every time 
 
+        mesh_draw(&rect_mesh);
         // game_update();
         // game_render();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+
+    shader_free(&rect_shader);
 
     glfwTerminate();
     ckit_cleanup();
@@ -133,6 +111,7 @@ void process_input(GLFWwindow *window) {
 
 
 void window_resize_callback(GLFWwindow* window, int width, int height) {
+    LOG_DEBUG("Width: %d | Height: %d\n", width, height);
     glViewport(0, 0, width, height);
 }
 
@@ -140,15 +119,7 @@ void window_refresh_callback(GLFWwindow* window) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // draw our first triangle
-    shader_use(&rect_shader);
-    glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-    //glDrawArrays(GL_TRIANGLES, 0, 6);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    // glBindVertexArray(0); // no need to unbind it every time 
-
-    // game_update();
-    // game_render();
+    mesh_draw(&rect_mesh);
 
     glfwSwapBuffers(window);
 }

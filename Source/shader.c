@@ -22,17 +22,17 @@ internal void shader_check_compile_errors(u32 shaderID, const char* type) {
 }
 
 internal ShaderType shader_type_from_extension(const char* shader_source_path) {
-    ckit_assert_msg(ckit_str_contains(shader_source_path, "."), "Missing extension (.vert, .frag)");
+    ckit_assert_msg(ckit_str_contains(shader_source_path, "."), "Missing extension (.vert, .frag)\n");
 
     u32 str_length = ckit_cstr_length(shader_source_path);
-    String extension = ckit_substring(shader_source_path, ckit_str_last_index_of(shader_source_path, "."), str_length);
+    String extension = ckit_substring(shader_source_path, ckit_str_last_index_of(shader_source_path, "."), str_length - 1);
     if (ckit_str_contains(extension, ".vert")) {
         return VERTEX_SHADER;
     } else if (ckit_str_contains(extension, ".frag")) {
         return FRAGMENT_SHADER;
     }
 
-    ckit_assert_msg(FALSE, "Unsupported extension: %s | Expetcted: (.vert, .frag)", extension);
+    ckit_assert_msg(FALSE, "Unsupported extension: %s | Expected: (.vert, .frag)\n", extension);
     return INVALID_SHADER;
 }
 
@@ -46,7 +46,7 @@ Shader shader_create(const char** shader_source_path, u32 shader_source_path_cou
     for (int i = 0; i < shader_source_path_count; i++) {
         const char* path = shader_source_path[i];
         size_t file_size = 0;
-        const char* shader_source = ckit_os_read_entire_file(path, &file_size);
+        char* shader_source = ckit_os_read_entire_file(path, &file_size);
         ShaderType type = shader_type_from_extension(path);
         u32 source_id;
 
@@ -68,6 +68,7 @@ Shader shader_create(const char** shader_source_path, u32 shader_source_path_cou
             } break;
         }
 
+        ckit_free(shader_source);
         ckit_vector_push(shader_source_ids, source_id);
     }
     glLinkProgram(ret.id);
@@ -83,8 +84,13 @@ Shader shader_create(const char** shader_source_path, u32 shader_source_path_cou
     for (int i = 0; i < ckit_vector_count(shader_source_ids); i++) {
         glDeleteShader(shader_source_ids[i]);
     }
+    ckit_vector_free(shader_source_ids);
 
     return ret;
+}
+
+void shader_free(Shader* shader) {
+    //ckit_vector_free(shader->textures);
 }
 
 void shader_add_texture(Shader* shader, const char* texture_path) {

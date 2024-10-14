@@ -11,7 +11,7 @@ compiler_treat_warnings_as_errors = True
 project_name = "OpenGL_TechDemo"
 project_dependencies = ["ckit"]
 project_rebuild_project_dependencies = False
-project_debug_with_visual_studio = True
+project_debug_with_visual_studio = False
 project_executable_procedures = ["OpenGL_TechDemo.exe"]
 
 if compiler_name == "cl":

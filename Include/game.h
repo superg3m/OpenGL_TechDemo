@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ckit.h>
 
 typedef struct GameContext {

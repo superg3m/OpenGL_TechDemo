@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ckit.h>
 #include <glad/glad.h>
 
@@ -20,6 +22,7 @@ typedef struct Shader {
 } Shader;
 
 Shader shader_create(const char** shader_source_path, u32 shader_source_path_count);
+void shader_free(Shader* shader);
 void shader_add_texture(Shader* shader, const char* texture_path);
 void shader_bind_textures(Shader* shader);
 void shader_use(Shader* shader);

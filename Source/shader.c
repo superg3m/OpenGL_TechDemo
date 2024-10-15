@@ -41,6 +41,7 @@ internal ShaderType shader_type_from_extension(const char* shader_source_path) {
 Shader shader_create(const char** shader_source_paths, u32 shader_source_path_count) {
     Shader ret = {0};
     ret.textures = ckit_vector_reserve(1, u32);
+    ret.attributes = ckit_vector_reserve(1, u32);
     u32* shader_source_ids = NULLPTR; 
 
     ret.id = glCreateProgram();

@@ -5,6 +5,8 @@
 #include <mesh.h>
 #include <stb_image.h>
 
+#include <vertex_data.h>
+
 void window_resize_callback(GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow *window);
 void window_refresh_callback(GLFWwindow* window);
@@ -13,34 +15,13 @@ void window_refresh_callback(GLFWwindow* window);
 const u32 SCR_WIDTH = 800;
 const u32 SCR_HEIGHT = 600;
 
-unsigned int VBO, VAO, EBO;
+float* vertices_vec = NULLPTR;
+u32* indices_vec = NULLPTR;
 
-float vertices2[] = {
-    // positions          // colors           // texture coords
-    +0.25f, +0.25f, +0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-    +0.25f, -0.25f, +0.0f,   1.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-    -0.25f, -0.25f, +0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 0.0f, // bottom left
-    -0.25f, +0.25f, +0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 1.0f  // top left 
-};
-unsigned int indices2[] = {
-    0, 1, 3, // first triangle
-    1, 2, 3  // second triangle
-};
+float* vertices_vec2 = NULLPTR;
+float* vertices_vec3 = NULLPTR;
 
-// supppsed to me messed up
-float vertices3[] = {
-    // positions          // colors           // texture coords
-    +0.15f, +0.5f, +0.0f,   1.0f, 0.0f, 1.0f,   1.0f, 1.0f, // top right
-    +0.15f, -0.5f, +0.0f,   0.0f, 1.0f, 1.0f,   1.0f, 0.0f, // bottom right
-    -0.15f, -0.15f, +0.0f,   0.0f, 1.0f, 1.0f,   0.0f, 0.0f, // bottom left
-    -0.15f, +0.15f, +0.0f,   1.0f, 0.0f, 1.0f,   0.0f, 1.0f  // top left 
-};
-unsigned int indices3[] = {
-    0, 1, 3, // first triangle
-    1, 2, 3  // second triangle
-};
-
-u32 vertex_components[] = {3, 3, 2};
+Mesh rect_mesh2;
 
 int main() {
     ckit_init();
@@ -89,52 +70,40 @@ int main() {
     ckit_vector_push(primative_shader2.attributes, 3);
     ckit_vector_push(primative_shader2.attributes, 2);
 
-    float vertices[] = {
-        // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
-    };
+    // ------------------------------------------------------ VERTEX STUFF ------------------------------------------------------------
 
-    u32 indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
-
-    float* vertices_vec = ckit_vector_reserve(ArrayCount(vertices), float);
+    vertices_vec = ckit_vector_reserve(ArrayCount(vertices), float);
     ckit_memory_copy(vertices, vertices_vec, ArrayCount(vertices) * sizeof(float), ArrayCount(vertices) * sizeof(float));
     ckit_vector_base(vertices_vec)->count = ArrayCount(vertices);
 
-    u32* indices_vec = ckit_vector_reserve(ArrayCount(indices), u32);
+    indices_vec = ckit_vector_reserve(ArrayCount(indices), u32);
     ckit_memory_copy(indices, indices_vec, ArrayCount(indices) * sizeof(u32), ArrayCount(indices) * sizeof(u32));
     ckit_vector_base(indices_vec)->count = ArrayCount(indices);
 
- 
-    RenderGroup primative_group = render_group_create(GL_TRIANGLES, GL_STATIC_DRAW);
+    vertices_vec2 = ckit_vector_reserve(ArrayCount(vertices2), float);
+    ckit_memory_copy(vertices2, vertices_vec2, ArrayCount(vertices2) * sizeof(float), ArrayCount(vertices2) * sizeof(float));
+    ckit_vector_base(vertices_vec2)->count = ArrayCount(vertices2);
 
+    vertices_vec3 = ckit_vector_reserve(ArrayCount(vertices3), float);
+    ckit_memory_copy(vertices3, vertices_vec3, ArrayCount(vertices3) * sizeof(float), ArrayCount(vertices3) * sizeof(float));
+    ckit_vector_base(vertices_vec3)->count = ArrayCount(vertices3);
+
+    // ------------------------------------------------------------------------------------------------------------------
+ 
+    RenderGroup primative_group = render_group_create(GL_TRIANGLES);
     CKIT_Vector3 rect_postion = {0.0, 0.0, 0.0};
 
     // Date: October 15, 2024
     // TODO(Jovanni): You can get rid of specifying textures[0] u can just do that internally
-    Mesh rect_mesh = mesh_create(rect_postion, &primative_shader, vertices_vec, indices_vec);
-    // shader_add_texture(&primative_shader, "../assets/container.jpg", "textures[0]", TEXTURE_PIXEL_PERFECT|TEXTURE_VERTICAL_FLIP);
-    // shader_add_texture(&primative_shader, "../assets/awesomeface.png", "textures[1]", TEXTURE_VERTICAL_FLIP);
+    Mesh rect_mesh = mesh_create(rect_postion, &primative_shader, vertices_vec, indices_vec, GL_STATIC_DRAW);
+    shader_add_texture(&primative_shader, "../assets/container.jpg", "textures[0]", TEXTURE_PIXEL_PERFECT|TEXTURE_VERTICAL_FLIP);
+    shader_add_texture(&primative_shader, "../assets/awesomeface.png", "textures[1]", TEXTURE_VERTICAL_FLIP);
 
-    float* vertices_vec2 = ckit_vector_reserve(ArrayCount(vertices2), float);
-    ckit_memory_copy(vertices2, vertices_vec2, ArrayCount(vertices2) * sizeof(float), ArrayCount(vertices2) * sizeof(float));
-    ckit_vector_base(vertices_vec2)->count = ArrayCount(vertices2);
-
-    u32* indices_vec2 = ckit_vector_reserve(ArrayCount(indices2), u32);
-    ckit_memory_copy(indices2, indices_vec2, ArrayCount(indices2) * sizeof(u32), ArrayCount(indices2) * sizeof(u32));
-    ckit_vector_base(indices_vec2)->count = ArrayCount(indices2);
-
-    Mesh rect_mesh2 = mesh_create(rect_postion, &primative_shader, vertices_vec2, indices_vec2);
-    // shader_add_texture(&primative_shader2, "../assets/awesomeface.png", "textures[0]", TEXTURE_VERTICAL_FLIP);
+    rect_mesh2 = mesh_create(rect_postion, &primative_shader2, vertices_vec2, indices_vec, GL_DYNAMIC_DRAW);
+    shader_add_texture(&primative_shader2, "../assets/container.jpg", "textures[0]", TEXTURE_VERTICAL_FLIP);
 
     render_group_add(&primative_group, &rect_mesh);
-    // render_group_add(&primative_group, &rect_mesh2);
-    render_group_finalize(&primative_group);
+    render_group_add(&primative_group, &rect_mesh2);
 
     while (!glfwWindowShouldClose(window)) {
         double start_time = glfwGetTime();
@@ -161,7 +130,7 @@ int main() {
     ckit_vector_free(vertices_vec);
     ckit_vector_free(indices_vec);
     ckit_vector_free(vertices_vec2);
-    ckit_vector_free(indices_vec2);
+    ckit_vector_free(vertices_vec3);
 
     glfwTerminate();
     ckit_cleanup();
@@ -180,11 +149,9 @@ void process_input(GLFWwindow *window) {
     }
 
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-        // VertexBuffer vertex_buffer = vertex_buffer_create(vertices3, ArrayCount(vertices3), vertex_components, ArrayCount(vertex_components)); 
-        // mesh_set_vertices(&rect_mesh2, vertex_buffer);
+        mesh_set_vertices(&rect_mesh2, vertices_vec3);
     } else {
-        // VertexBuffer vertex_buffer = vertex_buffer_create(vertices2, ArrayCount(vertices2), vertex_components, ArrayCount(vertex_components)); 
-        // mesh_set_vertices(&rect_mesh2, vertex_buffer);
+        mesh_set_vertices(&rect_mesh2, vertices_vec2);
     }
 }
 

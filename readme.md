@@ -10,3 +10,5 @@ offload pretty much all of the commpute to the gpu with instanceID which is perf
 // Then there is batching which is typically rendering multiple different meshes with one draw call the only thing you have to be careful of is if the layout/Number of VertexAttributeComponents is the same. IF they are then you can just store the offset and transforms and with one draw call you can render multiple meshes at once. Keep in mind that each mesh still needs a unique shader instance I believe. But they can use the same or different shader source shouldn't matter much.
 
 // I haven't done the batching yet, but I have a good idea on how to do it and I think i'm pretty close.
+
+void glMultiDrawArrays(GLenum mode, const GLint * first, const GLsizei * count, GLsizei drawcount);

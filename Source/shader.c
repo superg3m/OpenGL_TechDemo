@@ -38,14 +38,14 @@ internal ShaderType shader_type_from_extension(const char* shader_source_path) {
 
 // Date: August 15, 2024
 // NOTE(Jovanni): You might not even need this shader_discriptors
-Shader shader_create(const char** shader_source_path, u32 shader_source_path_count) {
+Shader shader_create(const char** shader_source_paths, u32 shader_source_path_count) {
     Shader ret = {0};
     ret.textures = ckit_vector_reserve(1, u32);
     u32* shader_source_ids = NULLPTR; 
 
     ret.id = glCreateProgram();
     for (int i = 0; i < shader_source_path_count; i++) {
-        const char* path = shader_source_path[i];
+        const char* path = shader_source_paths[i];
         size_t file_size = 0;
         GLchar* shader_source = ckit_os_read_entire_file(path, &file_size);
         const GLchar* const_shader_source = (const GLchar*)shader_source;
@@ -54,6 +54,9 @@ Shader shader_create(const char** shader_source_path, u32 shader_source_path_cou
 
         switch (type) {
             case VERTEX_SHADER: {
+                // Determine the vertex_attribute_components
+                // ret.attributes = 
+
                 source_id = glCreateShader(GL_VERTEX_SHADER);
                 glShaderSource(source_id, 1, &const_shader_source, NULL);
                 glCompileShader(source_id);

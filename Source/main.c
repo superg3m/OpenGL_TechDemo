@@ -121,8 +121,8 @@ int main() {
 
         double end_time = glfwGetTime();
         double delta_time_seconds = end_time - start_time;
-        LOG_DEBUG("%llfms\n", delta_time_seconds * 1000);
-        LOG_DEBUG("FPS: %lld\n", (u64)(1.0 / delta_time_seconds));
+        // LOG_DEBUG("%llfms\n", delta_time_seconds * 1000);
+        // LOG_ERROR("FPS: %lld\n", (u64)(1.0 / delta_time_seconds));
     }
 
 

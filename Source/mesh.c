@@ -19,6 +19,21 @@ VertexBuffer vertex_buffer_create(float* vertices, u32 vertex_count, u32* vertex
     return ret;
 }
 
+RenderGroup render_group_create(GLenum draw_mode) {
+    RenderGroup ret;
+    ret.draw_mode = draw_mode;
+
+    return ret;
+}
+
+void render_group_add_mesh(RenderGroup* render_group, NewMesh* mesh) {
+    // render_group.
+}
+
+void render_group_finalize(RenderGroup* render_group) {
+
+}
+
 Mesh mesh_create(CKIT_Vector3 position, Shader* shader, VertexBuffer vertex_buffer, u32* indices, u32 indices_count, GLenum draw_mode) {
     Mesh ret;
     ret.position = position;

@@ -98,6 +98,8 @@ void shader_free(Shader* shader) {
     if (shader->textures) {
         ckit_vector_free(shader->textures);
     }
+
+    ckit_vector_free(shader->attributes);
 }
 
 void shader_add_texture(Shader* shader, const char* texture_path, const char* shader_name, u8 texture_flags) {
@@ -148,6 +150,7 @@ void shader_add_texture(Shader* shader, const char* texture_path, const char* sh
 }
 
 void shader_bind_textures(Shader* shader) {
+    shader_use(shader);
     for (u32 i = 0; i < ckit_vector_count(shader->textures); i++) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, shader->textures[i]);
@@ -155,6 +158,7 @@ void shader_bind_textures(Shader* shader) {
 }
 
 void shader_unbind_textures(Shader* shader) {
+    shader_use(shader);
     for (u32 i = 0; i < ckit_vector_count(shader->textures); i++) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);

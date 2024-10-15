@@ -14,8 +14,6 @@ const u32 SCR_WIDTH = 800;
 const u32 SCR_HEIGHT = 600;
 
 unsigned int VBO, VAO, EBO;
-Mesh rect_mesh;
-Mesh rect_mesh2;
 
 float vertices2[] = {
     // positions          // colors           // texture coords
@@ -29,10 +27,11 @@ unsigned int indices2[] = {
     1, 2, 3  // second triangle
 };
 
+// supppsed to me messed up
 float vertices3[] = {
     // positions          // colors           // texture coords
-    +0.15f, +0.15f, +0.0f,   1.0f, 0.0f, 1.0f,   1.0f, 1.0f, // top right
-    +0.15f, -0.15f, +0.0f,   0.0f, 1.0f, 1.0f,   1.0f, 0.0f, // bottom right
+    +0.15f, +0.5f, +0.0f,   1.0f, 0.0f, 1.0f,   1.0f, 1.0f, // top right
+    +0.15f, -0.5f, +0.0f,   0.0f, 1.0f, 1.0f,   1.0f, 0.0f, // bottom right
     -0.15f, -0.15f, +0.0f,   0.0f, 1.0f, 1.0f,   0.0f, 0.0f, // bottom left
     -0.15f, +0.15f, +0.0f,   1.0f, 0.0f, 1.0f,   0.0f, 1.0f  // top left 
 };
@@ -80,7 +79,15 @@ int main() {
         "../shader_source/basic.vert"
     };
 
-    Shader rect_shader = shader_create(rect_shader_paths, ArrayCount(rect_shader_paths));
+    Shader primative_shader = shader_create(rect_shader_paths, ArrayCount(rect_shader_paths));
+    ckit_vector_push(primative_shader.attributes, 3);
+    ckit_vector_push(primative_shader.attributes, 3);
+    ckit_vector_push(primative_shader.attributes, 2);
+
+    Shader primative_shader2 = shader_create(rect_shader_paths, ArrayCount(rect_shader_paths));
+    ckit_vector_push(primative_shader2.attributes, 3);
+    ckit_vector_push(primative_shader2.attributes, 3);
+    ckit_vector_push(primative_shader2.attributes, 2);
 
     float vertices[] = {
         // positions          // colors           // texture coords
@@ -89,21 +96,45 @@ int main() {
         -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
         -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
     };
-    unsigned int indices[] = {
+
+    u32 indices[] = {
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };
 
-    CKIT_Vector3 rect_postion = {0.0, 0.0, 0.0};
-    VertexBuffer vertex_buffer = vertex_buffer_create(vertices, ArrayCount(vertices), vertex_components, ArrayCount(vertex_components)); 
-    rect_mesh = mesh_create(rect_postion, &rect_shader, vertex_buffer, indices, ArrayCount(indices), GL_STATIC_DRAW);
-    shader_add_texture(&rect_shader, "../assets/container.jpg", "textures[0]", TEXTURE_PIXEL_PERFECT|TEXTURE_VERTICAL_FLIP);
-    shader_add_texture(&rect_shader, "../assets/awesomeface.png", "textures[1]", TEXTURE_VERTICAL_FLIP);
+    float* vertices_vec = ckit_vector_reserve(ArrayCount(vertices), float);
+    ckit_memory_copy(vertices, vertices_vec, ArrayCount(vertices) * sizeof(float), ArrayCount(vertices) * sizeof(float));
+    ckit_vector_base(vertices_vec)->count = ArrayCount(vertices);
 
-    Shader rect_shader2 = shader_create(rect_shader_paths, ArrayCount(rect_shader_paths));
-    VertexBuffer vertex_buffer2 = vertex_buffer_create(vertices2, ArrayCount(vertices2), vertex_components, ArrayCount(vertex_components)); 
-    rect_mesh2 = mesh_create(rect_postion, &rect_shader2, vertex_buffer2, indices2, ArrayCount(indices2), GL_DYNAMIC_DRAW);
-    shader_add_texture(&rect_shader2, "../assets/container.jpg", "textures[0]", TEXTURE_VERTICAL_FLIP);
+    u32* indices_vec = ckit_vector_reserve(ArrayCount(indices), u32);
+    ckit_memory_copy(indices, indices_vec, ArrayCount(indices) * sizeof(u32), ArrayCount(indices) * sizeof(u32));
+    ckit_vector_base(indices_vec)->count = ArrayCount(indices);
+
+ 
+    RenderGroup primative_group = render_group_create(GL_TRIANGLES, GL_STATIC_DRAW);
+
+    CKIT_Vector3 rect_postion = {0.0, 0.0, 0.0};
+
+    // Date: October 15, 2024
+    // TODO(Jovanni): You can get rid of specifying textures[0] u can just do that internally
+    Mesh rect_mesh = mesh_create(rect_postion, &primative_shader, vertices_vec, indices_vec);
+    // shader_add_texture(&primative_shader, "../assets/container.jpg", "textures[0]", TEXTURE_PIXEL_PERFECT|TEXTURE_VERTICAL_FLIP);
+    // shader_add_texture(&primative_shader, "../assets/awesomeface.png", "textures[1]", TEXTURE_VERTICAL_FLIP);
+
+    float* vertices_vec2 = ckit_vector_reserve(ArrayCount(vertices2), float);
+    ckit_memory_copy(vertices2, vertices_vec2, ArrayCount(vertices2) * sizeof(float), ArrayCount(vertices2) * sizeof(float));
+    ckit_vector_base(vertices_vec2)->count = ArrayCount(vertices2);
+
+    u32* indices_vec2 = ckit_vector_reserve(ArrayCount(indices2), u32);
+    ckit_memory_copy(indices2, indices_vec2, ArrayCount(indices2) * sizeof(u32), ArrayCount(indices2) * sizeof(u32));
+    ckit_vector_base(indices_vec2)->count = ArrayCount(indices2);
+
+    Mesh rect_mesh2 = mesh_create(rect_postion, &primative_shader, vertices_vec2, indices_vec2);
+    // shader_add_texture(&primative_shader2, "../assets/awesomeface.png", "textures[0]", TEXTURE_VERTICAL_FLIP);
+
+    render_group_add(&primative_group, &rect_mesh);
+    // render_group_add(&primative_group, &rect_mesh2);
+    render_group_finalize(&primative_group);
 
     while (!glfwWindowShouldClose(window)) {
         double start_time = glfwGetTime();
@@ -111,8 +142,7 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        mesh_draw(&rect_mesh);
-        mesh_draw(&rect_mesh2);
+        render_group_draw(&primative_group);
         // game_update();
         // game_render();
 
@@ -125,9 +155,13 @@ int main() {
         // LOG_ERROR("FPS: %lld\n", (u64)(1.0 / delta_time_seconds));
     }
 
-
-    shader_free(&rect_shader);
-    shader_free(&rect_shader2);
+    render_group_free(&primative_group);
+    shader_free(&primative_shader);
+    shader_free(&primative_shader2);
+    ckit_vector_free(vertices_vec);
+    ckit_vector_free(indices_vec);
+    ckit_vector_free(vertices_vec2);
+    ckit_vector_free(indices_vec2);
 
     glfwTerminate();
     ckit_cleanup();
@@ -146,11 +180,11 @@ void process_input(GLFWwindow *window) {
     }
 
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-        VertexBuffer vertex_buffer = vertex_buffer_create(vertices3, ArrayCount(vertices3), vertex_components, ArrayCount(vertex_components)); 
-        mesh_set_vertices(&rect_mesh2, vertex_buffer);
+        // VertexBuffer vertex_buffer = vertex_buffer_create(vertices3, ArrayCount(vertices3), vertex_components, ArrayCount(vertex_components)); 
+        // mesh_set_vertices(&rect_mesh2, vertex_buffer);
     } else {
-        VertexBuffer vertex_buffer = vertex_buffer_create(vertices2, ArrayCount(vertices2), vertex_components, ArrayCount(vertex_components)); 
-        mesh_set_vertices(&rect_mesh2, vertex_buffer);
+        // VertexBuffer vertex_buffer = vertex_buffer_create(vertices2, ArrayCount(vertices2), vertex_components, ArrayCount(vertex_components)); 
+        // mesh_set_vertices(&rect_mesh2, vertex_buffer);
     }
 }
 
@@ -162,9 +196,6 @@ void window_resize_callback(GLFWwindow* window, int width, int height) {
 void window_refresh_callback(GLFWwindow* window) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-
-    mesh_draw(&rect_mesh);
-    mesh_draw(&rect_mesh2);
 
     glfwSwapBuffers(window);
 }

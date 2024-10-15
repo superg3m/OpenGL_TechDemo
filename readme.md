@@ -12,3 +12,24 @@ offload pretty much all of the commpute to the gpu with instanceID which is perf
 // I haven't done the batching yet, but I have a good idea on how to do it and I think i'm pretty close.
 
 void glMultiDrawArrays(GLenum mode, const GLint * first, const GLsizei * count, GLsizei drawcount);
+
+const char* rectShaderPaths[] = {
+    "../shader_source/basic.frag",
+    "../shader_source/basic.vert"
+};
+
+Shader primative_shader(rectShaderPaths);
+RenderGroup primativeGroup = render_group_create(GL_TRIANGLES, GL_STATIC_DRAW);
+Mesh rect({0, 0, 0}, &rectShader, getSquareGeometry(side_length));
+Mesh circle(&rect_shader, getCircleGeometry(radius));
+primativeGroup->add({rect, circle}); // ensures that that every single shader in the mesh has the same attributes
+
+
+// Vector<Mesh> getModelGeometry(path)
+RenderGroup modelGroup(GL_TRIANGLES, GL_STATIC_DRAW);
+Model backpack_model({1, 10, 5}, &model_shader, getModelGeometry(backpack_path));
+Model skull_model({1, 10, 5}, &model_shader, getModelGeometry(skull_path));
+modelGroup->add({backpack_model, skull_model});
+
+primativeGroup->draw();
+modelGroup->draw();

@@ -5,6 +5,10 @@
         "shader.h": "c",
         "stb_image.h": "c",
         "xstring": "c",
-        "mesh.h": "c"
+        "mesh.h": "c",
+        "glfw3.h": "c",
+        "xutility": "c",
+        "initializer_list": "c",
+        "type_traits": "c"
     }
 }

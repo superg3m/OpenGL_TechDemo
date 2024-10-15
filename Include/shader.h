@@ -24,6 +24,7 @@ typedef struct ShaderDescriptor {
 
 typedef struct Shader {
     u32* textures;
+    u32* attributes;
     u32 id;
 } Shader;
 

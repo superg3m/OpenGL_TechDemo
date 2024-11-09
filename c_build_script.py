@@ -41,7 +41,14 @@ procedures_config = {
         "source_files": ["../Source/*.c", "../Libraries/glad/src/glad.c"],
         "additional_libs": libs,
         "compile_time_defines": [],
-        "include_paths": ["../Include", "../ckit", "../Libraries/stb", "../Libraries/glad/include", "../Libraries/glfw"],
+        "include_paths": [
+            "../Include", 
+            "../ckit",
+            "../Libraries",
+            "../Libraries/stb",
+            "../Libraries/glad/include", 
+            "../Libraries/glfw",
+        ],
     },
 }
 

@@ -3,6 +3,10 @@
 #include <ckit.h>
 #include <glad/glad.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #define TEXTURE_MAX 32
 
 typedef enum TextureFlag {
@@ -37,3 +41,9 @@ void shader_use(Shader* shader);
 void shader_set_bool(Shader* shader, const char* name, Boolean value);
 void shader_set_int(Shader* shader, const char* name, int value);
 void shader_set_float(Shader* shader, const char* name, float value);
+void shader_set_mat2(Shader* shader, const char* name, const glm::mat2 &mat);
+void shader_set_mat3(Shader* shader, const char* name, const glm::mat3 &mat);
+void shader_set_mat4(Shader* shader, const char* name, const glm::mat4 &mat);
+void shader_set_vec2(Shader* shader, const char* name, const glm::vec2 &value);
+void shader_set_vec3(Shader* shader, const char* name, const glm::vec3 &value);
+void shader_set_vec4(Shader* shader, const char* name, const glm::vec4 &value);

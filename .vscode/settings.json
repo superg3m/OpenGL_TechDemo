@@ -12,6 +12,11 @@
         "type_traits": "c",
         "iterator": "c",
         "vertex_data.h": "c",
-        "locale": "cpp"
+        "locale": "cpp",
+        "xlocale": "cpp",
+        "xlocmes": "cpp",
+        "xlocmon": "cpp",
+        "xlocnum": "cpp",
+        "xloctime": "cpp"
     }
 }

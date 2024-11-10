@@ -1,5 +1,7 @@
 #include <ckit.h>
 
+// #include <game.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
@@ -125,6 +127,8 @@ int main() {
 
     glm::mat4 camera_matrix = camera(1.0, glm::vec2(3.0));
 
+    // game_init();
+
     while (!glfwWindowShouldClose(window)) {
         double start_time = glfwGetTime();
         process_input(window);
@@ -136,8 +140,7 @@ int main() {
         mesh_set_scale(&rect_mesh, glm::vec3(sinf(glfwGetTime())));
 
         render_group_draw(&primative_group);
-        // game_update(); When I actually do the hot code reloading
-        // game_render();
+        // void game_update_and_render(double delta)
 
         glfwSwapBuffers(window);
         glfwPollEvents();

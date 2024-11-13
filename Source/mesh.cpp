@@ -39,17 +39,28 @@ void render_group_add(RenderGroup* render_group, Mesh* mesh) {
 
 void mesh_draw(Mesh* mesh, GLenum draw_mode) {
     shader_use(mesh->shader);
-    shader_bind_textures(mesh->shader);
+    // shader_bind_textures(mesh->shader);
 
     glBindVertexArray(mesh->VAO);
 
     if (ckit_vector_count(mesh->indices) != 0) {
-        glDrawElements(draw_mode, ckit_vector_count(mesh->indices), GL_UNSIGNED_INT, 0);
+        GLsizei halfIndexCount = ckit_vector_count(mesh->indices) / 2;
+        size_t byte_offset = (halfIndexCount * sizeof(u32));
+
+        shader_use(mesh->shader);
+        glActiveTexture(GL_TEXTURE0 + 0);
+        glBindTexture(GL_TEXTURE_2D, mesh->shader->textures[0]);
+        glDrawElements(draw_mode, halfIndexCount, GL_UNSIGNED_INT, (void*)0);
+
+        glActiveTexture(GL_TEXTURE0 + 1);
+        glBindTexture(GL_TEXTURE_2D, mesh->shader->textures[1]);
+        glDrawElements(draw_mode, halfIndexCount, GL_UNSIGNED_INT, (void*)byte_offset);
     } else {
         glDrawArrays(draw_mode, 0, ckit_vector_count(mesh->vertices));
     }
 
     shader_unbind_textures(mesh->shader);
+
     glBindVertexArray(0);
 }
 

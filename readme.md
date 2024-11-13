@@ -35,3 +35,6 @@ primativeGroup->draw();
 modelGroup->draw();
 
 This is on pause until I switch to c++
+
+Revisit this when I have SPL and also
+fragment shader can be used to do different textures based on the face using the frag.pos

@@ -160,7 +160,7 @@ int main() {
     ckit_vector_free(vertices_vec3);
 
     glfwTerminate();
-    ckit_cleanup();
+    ckit_cleanup(TRUE);
     return 0;
 }
 

@@ -22,13 +22,14 @@ internal void shader_check_compile_errors(u32 shaderID, const char* type) {
 }
 
 internal ShaderType shader_type_from_extension(const char* shader_source_path) {
-    ckit_assert_msg(ckit_str_contains(shader_source_path, "."), "Missing extension (.vert, .frag)\n");
+    u64 shader_source_path_length = ckg_cstr_length(shader_source_path);
+    s64 extension_index = ckg_cstr_last_index_of(shader_source_path, shader_source_path_length, CKG_LIT_ARG("."));
+    ckit_assert_msg(extension_index != -1, "Missing extension (.vert, .frag)\n");
 
-    u32 str_length = ckit_cstr_length(shader_source_path);
-    String extension = ckit_substring(shader_source_path, ckit_str_last_index_of(shader_source_path, "."), str_length - 1);
-    if (ckit_str_contains(extension, ".vert")) {
+    String extension = ckit_str_create_custom(shader_source_path + extension_index, shader_source_path_length - extension_index, 0);
+    if (ckg_cstr_contains((char*)extension, ckit_str_length(extension), CKG_LIT_ARG(".vert"))) {
         return VERTEX_SHADER;
-    } else if (ckit_str_contains(extension, ".frag")) {
+    } else if (ckg_cstr_contains((char*)extension, ckit_str_length(extension), CKG_LIT_ARG(".frag"))) {
         return FRAGMENT_SHADER;
     }
 

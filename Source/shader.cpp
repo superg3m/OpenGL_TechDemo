@@ -46,7 +46,7 @@ Shader shader_create(const char** shader_source_paths, u32 shader_source_path_co
     u32* shader_source_ids = NULLPTR; 
 
     ret.id = glCreateProgram();
-    for (int i = 0; i < shader_source_path_count; i++) {
+    for (u32 i = 0; i < shader_source_path_count; i++) {
         const char* path = shader_source_paths[i];
         size_t file_size = 0;
         u8* shader_source = (u8*)ckit_os_read_entire_file(path, &file_size);
@@ -88,7 +88,7 @@ Shader shader_create(const char** shader_source_paths, u32 shader_source_path_co
         LOG_ERROR("LINKING_FAILED\n");
     }
 
-    for (int i = 0; i < ckit_vector_count(shader_source_ids); i++) {
+    for (u32 i = 0; i < ckit_vector_count(shader_source_ids); i++) {
         glDeleteShader(shader_source_ids[i]);
     }
     ckit_vector_free(shader_source_ids);

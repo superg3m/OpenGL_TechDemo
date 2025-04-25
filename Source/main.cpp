@@ -117,10 +117,14 @@ int main() {
     rect_mesh = mesh_create(&primative_shader, vertices_vec, indices_vec, GL_STATIC_DRAW);
     shader_add_texture(&primative_shader, "../assets/container.jpg", "textures[0]", TEXTURE_PIXEL_PERFECT|TEXTURE_VERTICAL_FLIP);
     shader_add_texture(&primative_shader, "../assets/awesomeface.png", "textures[1]", TEXTURE_VERTICAL_FLIP);
-    mesh_set_position(&rect_mesh, glm::vec3(0.5f, -0.5f, 0.0f));
+    mesh_set_position(&rect_mesh, glm::vec3(0.5f, 0.0f, 0.0f));
 
     rect_mesh2 = mesh_create(&primative_shader2, vertices_vec2, indices_vec, GL_DYNAMIC_DRAW);
     shader_add_texture(&primative_shader2, "../assets/container.jpg", "textures[0]", TEXTURE_VERTICAL_FLIP);
+    shader_add_texture(&primative_shader2, "../assets/awesomeface.png", "textures[1]", TEXTURE_VERTICAL_FLIP);
+
+    mesh_set_position(&rect_mesh2, glm::vec3(0.0f, 0.0f, 0.0f));
+    mesh_set_rotation(&rect_mesh2, 0, glm::vec3(0.0f, 0.0f, 1.0f));
 
     render_group_add(&primative_group, &rect_mesh);
     render_group_add(&primative_group, &rect_mesh2);
@@ -136,8 +140,8 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         const float SPEED = 2.0f;
-        mesh_set_rotation(&rect_mesh, glfwGetTime() * SPEED, glm::vec3(0.0f, 0.0f, 1.0f));
-        mesh_set_scale(&rect_mesh, glm::vec3(sinf(glfwGetTime())));
+        mesh_set_rotation(&rect_mesh, (float)glfwGetTime() * SPEED, glm::vec3(0.0f, 0.0f, 1.0f));
+        mesh_set_scale(&rect_mesh, glm::vec3(sinf((float)glfwGetTime())));
 
         render_group_draw(&primative_group);
         // void game_update_and_render(double delta)
@@ -188,14 +192,5 @@ void window_resize_callback(GLFWwindow* window, int width, int height) {
 }
 
 void window_refresh_callback(GLFWwindow* window) {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
 
-    const float SPEED = 2.0f;
-    mesh_set_rotation(&rect_mesh, glfwGetTime() * SPEED, glm::vec3(0.0f, 0.0f, 1.0f)); // This is probably getting messed up because glfwGetTime()
-    mesh_set_scale(&rect_mesh, glm::vec3(sinf(glfwGetTime()))); // This is probably getting messed up because glfwGetTime()
-
-    render_group_draw(&primative_group);
-
-    glfwSwapBuffers(window);
 }

@@ -20,7 +20,7 @@ internal Boolean mesh_attributes_are_similar(Mesh* previous_mesh, Mesh* new_mesh
     ckit_assert(ckit_vector_count(previous_mesh->shader->attributes) == ckit_vector_count(new_mesh->shader->attributes));
 
     u32 sum = 0;
-    for (int i = 0; i < ckit_vector_count(previous_mesh->shader->attributes); i++) {
+    for (u32 i = 0; i < ckit_vector_count(previous_mesh->shader->attributes); i++) {
         sum += new_mesh->shader->attributes[i];
         if (previous_mesh->shader->attributes[i] != new_mesh->shader->attributes[i]) {
             return FALSE;
@@ -39,22 +39,13 @@ void render_group_add(RenderGroup* render_group, Mesh* mesh) {
 
 void mesh_draw(Mesh* mesh, GLenum draw_mode) {
     shader_use(mesh->shader);
-    // shader_bind_textures(mesh->shader);
+    shader_bind_textures(mesh->shader);
 
     glBindVertexArray(mesh->VAO);
 
     if (ckit_vector_count(mesh->indices) != 0) {
-        GLsizei halfIndexCount = ckit_vector_count(mesh->indices) / 2;
-        size_t byte_offset = (halfIndexCount * sizeof(u32));
-
-        shader_use(mesh->shader);
-        glActiveTexture(GL_TEXTURE0 + 0);
-        glBindTexture(GL_TEXTURE_2D, mesh->shader->textures[0]);
-        glDrawElements(draw_mode, halfIndexCount, GL_UNSIGNED_INT, (void*)0);
-
-        glActiveTexture(GL_TEXTURE0 + 1);
-        glBindTexture(GL_TEXTURE_2D, mesh->shader->textures[1]);
-        glDrawElements(draw_mode, halfIndexCount, GL_UNSIGNED_INT, (void*)byte_offset);
+        GLsizei index_count = ckit_vector_count(mesh->indices);
+        glDrawElements(draw_mode, index_count, GL_UNSIGNED_INT, (void*)0);
     } else {
         glDrawArrays(draw_mode, 0, ckit_vector_count(mesh->vertices));
     }
@@ -65,7 +56,7 @@ void mesh_draw(Mesh* mesh, GLenum draw_mode) {
 }
 
 void render_group_draw(RenderGroup* render_group) {
-    for (int i = 0; i < ckit_vector_count(render_group->meshes); i++) {
+    for (u32 i = 0; i < ckit_vector_count(render_group->meshes); i++) {
         Mesh* current_mesh = render_group->meshes[i];
 
         glm::mat4 transform = glm::mat4(1.0f);
@@ -73,7 +64,6 @@ void render_group_draw(RenderGroup* render_group) {
         transform = glm::scale(transform, current_mesh->scale);
         transform = glm::rotate(transform, current_mesh->rotation_speed, current_mesh->rotation);
 
-        shader_use(current_mesh->shader);
         shader_set_mat4(current_mesh->shader, "transform", transform);
 
         mesh_draw(current_mesh, render_group->draw_mode);
@@ -107,12 +97,12 @@ Mesh mesh_create(Shader* shader, float* vertices, u32* indices, GLenum binded_dr
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * ckit_vector_count(ret.indices), ret.indices, binded_draw_state);
 
     u32 stride = 0;
-    for (int i = 0; i < ckit_vector_count(shader->attributes); i++) {
+    for (u32 i = 0; i < ckit_vector_count(shader->attributes); i++) {
         stride += shader->attributes[i];
     }
 
     u64 vertex_component_offset = 0;
-    for (int i = 0; i < ckit_vector_count(shader->attributes); i++) {
+    for (u32 i = 0; i < ckit_vector_count(shader->attributes); i++) {
         u32 num_components = shader->attributes[i];
         glEnableVertexAttribArray(i);
         glVertexAttribPointer(i, num_components, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(vertex_component_offset * sizeof(float)));

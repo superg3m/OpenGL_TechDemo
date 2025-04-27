@@ -21,7 +21,7 @@ pc: ProjectConfig = ProjectConfig(
     project_dependencies = ["ckit"],
     project_debug_with_visual_studio = True,
     project_rebuild_project_dependencies = True,
-    project_executable_procedures  = ["OpenGL_TechDemo.exe"]
+    project_executable_names  = ["OpenGL_TechDemo.exe"]
 )
 
 cc: CompilerConfig = CompilerConfig(
@@ -62,13 +62,11 @@ libs += (["Kernel32.lib", "User32.lib", "Gdi32.lib", "OpenGL32.lib", f"{glfw_lib
          else ["-lUser32", "-lGdi32", "-lopengl32", f"{glfw_lib_path}"]) # Opengl and glfw
 
 procedures_config = {
-    "OpenGL_TechDemo": ProcedureConfigElement(
+    "OpenGL_TechDemo": ProcedureConfig(
         build_directory = f"./build_{cc.compiler_name}",
         output_name = f"OpenGL_TechDemo.exe",
         source_files = ["../Source/*.cpp", "../Libraries/glad/src/glad.c"],
         additional_libs = libs,
-        compile_time_defines = [],
-        compiler_inject_into_args = [],
         include_paths = [
             "../Include", 
             "../ckit",

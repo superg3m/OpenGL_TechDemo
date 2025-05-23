@@ -45,5 +45,5 @@ c_build/
 !Libraries/glfw/
 !Libraries/glad/
 ckg/
-ckit/
+GameMath/
 c_build_dependency_cache_*.json

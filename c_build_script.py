@@ -18,6 +18,12 @@ from c_build.source.Manager import *
 
 pc: ProjectConfig = ProjectConfig(
     project_name = "OpenGL_TechDemo",
+    project_dependencies = [
+        Dependency(
+            name="ckg",
+            branch_name="CompleteRewrite"
+        )
+    ],
     project_debug_with_visual_studio = True,
     project_rebuild_project_dependencies = True,
     project_executable_names  = ["OpenGL_TechDemo.exe"]
@@ -25,7 +31,7 @@ pc: ProjectConfig = ProjectConfig(
 
 cc: CompilerConfig = CompilerConfig(
     compiler_name = C_BUILD_COMPILER_NAME() if C_BUILD_IS_DEPENDENCY() else "INVALID_COMPILER",
-    compiler_std_version = "c11",
+    compiler_std_version = "",
     compiler_warning_level = "",
     compiler_disable_specific_warnings = [""],
     compiler_treat_warnings_as_errors = True,
@@ -42,23 +48,30 @@ elif IS_LINUX() and not C_BUILD_IS_DEPENDENCY():
 
 # Do different things depending on the platform
 if cc.compiler_name == "cl":
-    cc.compiler_warning_level = "3"
+    cc.compiler_warning_level = "2"
     cc.compiler_disable_specific_warnings = ["5105", "4668", "4820", "4996"]
 else:
     cc.compiler_warning_level = "all"
     cc.compiler_disable_specific_warnings = ["deprecated", "parentheses"]
 
-ckit_lib = GET_LIB_NAME(cc, 'ckit')
-glfw_lib_path = "../Libraries/glfw/" 
 
+glfw_lib_path = "../Libraries/glfw/" 
 if cc.compiler_name == "cl":
     glfw_lib_path += "lib-static-ucrt/glfw3dll.lib"
 else:
     glfw_lib_path += "lib-mingw-w64/libglfw3dll.a"
 
-libs = []
-libs += (["Kernel32.lib", "User32.lib", "Gdi32.lib", "OpenGL32.lib", f"{glfw_lib_path}"] if cc.compiler_name == "cl" 
-         else ["-lUser32", "-lGdi32", "-lopengl32", f"{glfw_lib_path}"]) # Opengl and glfw
+
+build_postfix = f"build_{cc.compiler_name}/{C_BUILD_BUILD_TYPE()}"
+
+libs = [
+    GET_LIB_FLAG(cc, "Kernel32"),
+    GET_LIB_FLAG(cc, "User32"),
+    GET_LIB_FLAG(cc, "Gdi32"),
+    GET_LIB_FLAG(cc, "OpenGL32"),
+    f"../ckg/{build_postfix}/{GET_LIB_NAME(cc, 'ckg')}",
+    glfw_lib_path
+]
 
 procedures_config = {
     "OpenGL_TechDemo": ProcedureConfig(
@@ -68,6 +81,7 @@ procedures_config = {
         additional_libs = libs,
         include_paths = [
             "../Include", 
+            "../ckg",
             "../Libraries",
             "../Libraries/stb",
             "../Libraries/glad/include", 

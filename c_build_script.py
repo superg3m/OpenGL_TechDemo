@@ -18,11 +18,6 @@ from c_build.source.Manager import *
 
 pc: ProjectConfig = ProjectConfig(
     project_name = "OpenGL_TechDemo",
-    project_dependencies = [
-        Dependency(
-            name="ckit"
-        )
-    ],
     project_debug_with_visual_studio = True,
     project_rebuild_project_dependencies = True,
     project_executable_names  = ["OpenGL_TechDemo.exe"]
@@ -61,7 +56,7 @@ if cc.compiler_name == "cl":
 else:
     glfw_lib_path += "lib-mingw-w64/libglfw3dll.a"
 
-libs = [f"../ckit/build_{cc.compiler_name}/{ckit_lib}"] # ckit
+libs = []
 libs += (["Kernel32.lib", "User32.lib", "Gdi32.lib", "OpenGL32.lib", f"{glfw_lib_path}"] if cc.compiler_name == "cl" 
          else ["-lUser32", "-lGdi32", "-lopengl32", f"{glfw_lib_path}"]) # Opengl and glfw
 
@@ -73,7 +68,6 @@ procedures_config = {
         additional_libs = libs,
         include_paths = [
             "../Include", 
-            "../ckit",
             "../Libraries",
             "../Libraries/stb",
             "../Libraries/glad/include", 

@@ -22,10 +22,13 @@ pc: ProjectConfig = ProjectConfig(
         Dependency(
             name="ckg",
             branch_name="CompleteRewrite"
+        ),
+        Dependency(
+            name="GameMath",
         )
     ],
     project_debug_with_visual_studio = True,
-    project_rebuild_project_dependencies = True,
+    project_rebuild_project_dependencies = False,
     project_executable_names  = ["OpenGL_TechDemo.exe"]
 )
 
@@ -70,6 +73,7 @@ libs = [
     GET_LIB_FLAG(cc, "Gdi32"),
     GET_LIB_FLAG(cc, "OpenGL32"),
     f"../ckg/{build_postfix}/{GET_LIB_NAME(cc, 'ckg')}",
+    f"../GameMath/{build_postfix}/{GET_LIB_NAME(cc, 'gm')}",
     glfw_lib_path
 ]
 
@@ -77,11 +81,15 @@ procedures_config = {
     "OpenGL_TechDemo": ProcedureConfig(
         build_directory = f"./build_{cc.compiler_name}",
         output_name = f"OpenGL_TechDemo.exe",
-        source_files = ["../Source/*.cpp", "../Libraries/glad/src/glad.c"],
+        source_files = [
+            "../Source/*.cpp",
+            "../Libraries/glad/src/glad.c"
+        ],
         additional_libs = libs,
         include_paths = [
             "../Include", 
             "../ckg",
+            "../GameMath",
             "../Libraries",
             "../Libraries/stb",
             "../Libraries/glad/include", 

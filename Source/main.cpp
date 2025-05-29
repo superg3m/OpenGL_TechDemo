@@ -106,10 +106,10 @@ int main() {
         GM_Matrix4 model = gm_mat4_identity();
         GM_Matrix4 view = gm_mat4_identity();
         GM_Matrix4 projection = gm_mat4_perspective(45.0f, (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        model = gm_mat4_scale_xyz(model, 0.5f, 0.5f, 0.5f);
+        model = gm_mat4_scale_xyz(model, 0.1f, 0.1f, 0.1f);
         model = gm_mat4_rotate_xyz(model, RAD_TO_DEGREES(glfwGetTime()), 0.5f, 1.0f, 0.0f);
 
-        view = gm_mat4_translate_xyz(view, 0.0f, 0.0f, -2.0f);
+        view = gm_mat4_translate_xyz(view, 0.0f, 0.0f, -0.5f);
 
         ourShader.bindTextures();
         ourShader.setMat4("model", model);

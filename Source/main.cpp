@@ -45,63 +45,51 @@ int main() {
         return -1;
     }
 
-    Shader ourShader({"../shader_source/basic.vert", "../shader_source/basic.frag"});
+    Shader ourShader({"../shader_source/model.vert", "../shader_source/model.frag"});
+    Shader lightCubeShader({"../shader_source/point_light.vert", "../shader_source/point_light.frag"});
 
     float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-    };
-
-    GM_Vec3 cube_positions[] = {
-        gm_vec3_create( 0.0f,  0.0f,  0.0f),
-        gm_vec3_create( 2.0f,  5.0f, -15.0f),
-        gm_vec3_create(-1.5f, -2.2f, -2.5f),
-        gm_vec3_create(-3.8f, -2.0f, -12.3f),
-        gm_vec3_create( 2.4f, -0.4f, -3.5f),
-        gm_vec3_create(-1.7f,  3.0f, -7.5f),
-        gm_vec3_create( 1.3f, -2.0f, -2.5f),
-        gm_vec3_create( 1.5f,  2.0f, -2.5f),
-        gm_vec3_create( 1.5f,  0.2f, -1.5f),
-        gm_vec3_create(-1.3f,  1.0f, -1.5f)
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
 
     unsigned int VBO, VAO;
@@ -113,15 +101,28 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    Mesh cubeMesh(Material::BasicMaterial(), Geometry::Cube());
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     ourShader.addTexture("../assets/container.jpg", "texture1", TEXTURE_VERTICAL_FLIP);
     ourShader.addTexture("../assets/awesomeface.png", "texture2", TEXTURE_VERTICAL_FLIP);
+
+    // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
+    unsigned int lightCubeVAO;
+    glGenVertexArrays(1, &lightCubeVAO);
+    glBindVertexArray(lightCubeVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // note that we update the lamp's position attribute's stride to reflect the updated buffer data
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -135,15 +136,17 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-        const float radius = 10.0f;
-        camera.position.x = sinf(glfwGetTime()) * radius;
-        camera.position.z = cos(glfwGetTime()) * radius;
-        GM_Matrix4 view = camera.look_at(0, 0, 0);
+        ourShader.use();
+        ourShader.setVec3("objectColor", gm_vec3_create(1.0f, 0.5f, 0.31f));
+        ourShader.setVec3("lightColor", gm_vec3_create(1.0f, 1.0f, 1.0f));
+        ourShader.setVec3("lightPos", lightPos);
+        ourShader.setVec3("viewPos", camera.position);
+
+        GM_Matrix4 view = camera.get_view_matrix();
         ourShader.setMat4("view", view);
 
         GM_Matrix4 projection = gm_mat4_perspective(camera.zoom, (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader.setMat4("projection", projection);
-
 
         ourShader.bindTextures();
         glBindVertexArray(VAO);

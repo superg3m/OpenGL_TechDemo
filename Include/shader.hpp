@@ -16,7 +16,6 @@ typedef enum TextureFlag {
 
 struct Shader {
     std::vector<unsigned int> textures;
-    std::vector<unsigned int> attributes;
     unsigned int id;
 
     Shader(std::vector<const char*> shader_paths);

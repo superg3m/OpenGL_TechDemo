@@ -27,7 +27,7 @@ pc: ProjectConfig = ProjectConfig(
             name="GameMath",
         )
     ],
-    project_debug_with_visual_studio = False,
+    project_debug_with_visual_studio = True,
     project_rebuild_project_dependencies = False,
     project_executable_names  = ["OpenGL_TechDemo.exe"]
 )
@@ -58,7 +58,7 @@ else:
     cc.compiler_disable_specific_warnings = ["deprecated", "parentheses"]
 
 
-glfw_lib_path = "../Libraries/glfw/" 
+glfw_lib_path = "../../Libraries/glfw/" 
 if cc.compiler_name == "cl":
     glfw_lib_path += "lib-static-ucrt/glfw3dll.lib"
 else:
@@ -72,28 +72,28 @@ libs = [
     GET_LIB_FLAG(cc, "User32"),
     GET_LIB_FLAG(cc, "Gdi32"),
     GET_LIB_FLAG(cc, "OpenGL32"),
-    f"../ckg/{build_postfix}/{GET_LIB_NAME(cc, 'ckg')}",
-    f"../GameMath/{build_postfix}/{GET_LIB_NAME(cc, 'gm')}",
+    f"../../ckg/{build_postfix}/{GET_LIB_NAME(cc, 'ckg')}",
+    f"../../GameMath/{build_postfix}/{GET_LIB_NAME(cc, 'gm')}",
     glfw_lib_path
 ]
 
 procedures_config = {
     "OpenGL_TechDemo": ProcedureConfig(
-        build_directory = f"./build_{cc.compiler_name}",
+        build_directory = f"./{build_postfix}",
         output_name = f"OpenGL_TechDemo.exe",
         source_files = [
-            "../Source/*.cpp",
-            "../Libraries/glad/src/glad.c"
+            "../../Source/*.cpp",
+            "../../Libraries/glad/src/glad.c"
         ],
         additional_libs = libs,
         include_paths = [
-            "../Include", 
-            "../ckg",
-            "../GameMath",
-            "../Libraries",
-            "../Libraries/stb",
-            "../Libraries/glad/include", 
-            "../Libraries/glfw",
+            "../../Include", 
+            "../../ckg",
+            "../../GameMath",
+            "../../Libraries",
+            "../../Libraries/stb",
+            "../../Libraries/glad/include", 
+            "../../Libraries/glfw",
         ],
     )
 }

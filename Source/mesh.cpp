@@ -1,35 +1,60 @@
 #include <mesh.hpp>
 #include <glad/glad.h>
 
-void setup_geometry(Geometry* geometry) {
-    // Create buffers/arrays
-	glGenVertexArrays(1, &geometry->VAO);
-	glGenBuffers(1, &geometry->VBO);
-	glGenBuffers(1, &geometry->EBO);
+Mesh::Mesh(Material material, Geometry geometry, GM_Matrix4 transform) {
+    this->material = material;
+    this->geometry = geometry;
+    this->transform = transform;
+}
 
-	glBindVertexArray(geometry->VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry->VBO);
-	glBufferData(GL_ARRAY_BUFFER, geometry->verticies.size() * sizeof(Vertex), &geometry->verticies[0], GL_STATIC_DRAW);
+Material::Material(Shader* shader) {
+    this->shader = shader;
+}
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, geometry->indicies.size() * sizeof(unsigned int), &geometry->indicies[0], GL_STATIC_DRAW);
+void Mesh::draw() {
+    this->material.shader->bindTextures();
 
-    int stride = 0;
-    for (int i = 0; i < geometry->attributes.size(); i++) {
-        stride += geometry->attributes[i];
+    glBindVertexArray(this->geometry.VAO);
+    GLsizei index_count = this->geometry.indicies.size();
+    if (index_count != 0) {
+        glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, (void*)0);
+    } else {
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+
+    this->material.shader->unbindTextures();
+    glBindVertexArray(0);
+}
+
+void Geometry::setup() {
+	glGenVertexArrays(1, &this->VAO);
+	glGenBuffers(1, &this->VBO);
+
+	glBindVertexArray(this->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(float), &this->vertices[0], GL_STATIC_DRAW);
+
+    if (this->indicies.size() != 0) {
+        glGenBuffers(1, &this->EBO);
+	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
+	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indicies.size() * sizeof(unsigned int), &this->indicies[0], GL_STATIC_DRAW);
+    }
+
+    for (int i = 0; i < this->attributes.size(); i++) {
+        this->stride += this->attributes[i];
     }
 
     int attribute_index = 0;
     int vertex_attribute_offset = 0;
-    for (u32 i = 0; i <  geometry->attributes.size(); i++) {
-        unsigned int attribute = geometry->attributes[i];
+    for (u32 i = 0; i <  this->attributes.size(); i++) {
+        unsigned int attribute = this->attributes[i];
         
         if (attribute == 0) {
             continue;
         }
 
         glEnableVertexAttribArray(attribute_index);
-        glVertexAttribPointer(attribute_index, attribute, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(vertex_attribute_offset * sizeof(float)));
+        glVertexAttribPointer(attribute_index, attribute, GL_FLOAT, GL_FALSE, this->stride * sizeof(float), (void*)(vertex_attribute_offset * sizeof(float)));
         vertex_attribute_offset += attribute;
 
         attribute_index++;
@@ -39,12 +64,11 @@ void setup_geometry(Geometry* geometry) {
     glBindVertexArray(0); 
 }
 
-Geometry Geometry::Cube(std::vector<unsigned int> attributes = {3, 0, 3, 2}) {
+Geometry::Geometry(std::vector<unsigned int> attributes, std::vector<float>& vertices, std::vector<unsigned int> indicies) {
+    this->attributes = attributes;
+    this->vertices = vertices;
+    this->indicies = indicies;
+    this->stride = 0;
 
-}
-
-Mesh::Mesh(Material material, Geometry geometry, GM_Matrix4 transform = gm_mat4_identity()) {
-    this->material = material;
-    this->geometry = geometry;
-    this->transform = transform;
+    this->setup();
 }

@@ -109,8 +109,7 @@ int main() {
         GM_Matrix4 projection = gm_mat4_perspective(camera.zoom, (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
         cubeMesh.transform = gm_mat4_identity();
-        cubeMesh.transform = gm_mat4_rotate_xyz(cubeMesh.transform, DEGREES_TO_RAD((float)glfwGetTime()), 0.5f, 1.0f, 0.0f);
-        cubeMesh.material.shader->setMat4("model", cubeMesh.transform);
+        cubeMesh.transform = gm_mat4_rotate_xyz(cubeMesh.transform, RAD_TO_DEGREES((float)glfwGetTime()), 0.5f, 1.0f, 0.0f);
         cubeMesh.material.shader->setMat4("view", view);
         cubeMesh.material.shader->setMat4("projection", projection);
         cubeMesh.draw();

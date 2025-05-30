@@ -12,6 +12,7 @@ Material::Material(Shader* shader) {
 }
 
 void Mesh::draw() {
+    this->material.shader->setMat4("model", this->transform);
     this->material.shader->bindTextures();
 
     glBindVertexArray(this->geometry.VAO);

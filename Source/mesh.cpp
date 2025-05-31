@@ -1,32 +1,6 @@
 #include <mesh.hpp>
 #include <glad/glad.h>
 
-Mesh::Mesh(Material material, Geometry geometry, GM_Matrix4 transform) {
-    this->material = material;
-    this->geometry = geometry;
-    this->transform = transform;
-}
-
-Material::Material(Shader* shader) {
-    this->shader = shader;
-}
-
-void Mesh::draw() {
-    this->material.shader->setMat4("model", this->transform);
-    this->material.shader->bindTextures();
-
-    glBindVertexArray(this->geometry.VAO);
-    GLsizei index_count = this->geometry.indicies.size();
-    if (index_count != 0) {
-        glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, (void*)0);
-    } else {
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
-
-    this->material.shader->unbindTextures();
-    glBindVertexArray(0);
-}
-
 void Geometry::setup() {
 	glGenVertexArrays(1, &this->VAO);
 	glGenBuffers(1, &this->VBO);
@@ -54,8 +28,8 @@ void Geometry::setup() {
             continue;
         }
 
-        glEnableVertexAttribArray(attribute_index);
         glVertexAttribPointer(attribute_index, attribute, GL_FLOAT, GL_FALSE, this->stride * sizeof(float), (void*)(vertex_attribute_offset * sizeof(float)));
+        glEnableVertexAttribArray(attribute_index);
         vertex_attribute_offset += attribute;
 
         attribute_index++;
@@ -72,4 +46,30 @@ Geometry::Geometry(std::vector<unsigned int> attributes, std::vector<float>& ver
     this->stride = 0;
 
     this->setup();
+}
+
+Material::Material(Shader* shader) {
+    this->shader = shader;
+}
+
+Mesh::Mesh(Material material, Geometry geometry, GM_Matrix4 transform) {
+    this->material = material;
+    this->geometry = geometry;
+    this->transform = transform;
+}
+
+void Mesh::draw() {
+    this->material.shader->setMat4("model", this->transform);
+    this->material.shader->bindTextures();
+
+    glBindVertexArray(this->geometry.VAO);
+    GLsizei index_count = this->geometry.indicies.size();
+    if (index_count != 0) {
+        glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, (void*)0);
+    } else {
+        glDrawArrays(GL_TRIANGLES, 0, this->geometry.vertices.size() / this->geometry.stride);
+    }
+
+    this->material.shader->unbindTextures();
+    glBindVertexArray(0);
 }

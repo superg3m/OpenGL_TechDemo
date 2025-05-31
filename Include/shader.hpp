@@ -31,5 +31,6 @@ struct Shader {
     void setMat4(const char*name, const GM_Matrix4 &mat);
     void setVec2(const char*name, const GM_Vec2 &value);
     void setVec3(const char*name, const GM_Vec3 &value);
+    void setVec3(const char* name, float x, float y, float z);
     void setVec4(const char*name, const GM_Vec4 &value);
 };

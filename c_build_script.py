@@ -72,8 +72,6 @@ libs = [
     GET_LIB_FLAG(cc, "User32"),
     GET_LIB_FLAG(cc, "Gdi32"),
     GET_LIB_FLAG(cc, "OpenGL32"),
-    f"../../ckg/{build_postfix}/{GET_LIB_NAME(cc, 'ckg')}",
-    f"../../GameMath/{build_postfix}/{GET_LIB_NAME(cc, 'gm')}",
     glfw_lib_path
 ]
 
@@ -83,6 +81,8 @@ procedures_config = {
         output_name = f"OpenGL_TechDemo.exe",
         source_files = [
             "../../Source/*.cpp",
+            "../../ckg/*.c",
+            "../../GameMath/*.c",
             "../../Libraries/glad/src/glad.c"
         ],
         additional_libs = libs,

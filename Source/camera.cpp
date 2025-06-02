@@ -1,12 +1,8 @@
 #include <camera.hpp>
 
 void Camera::update_camera_vectors() {
-    GM_Vec3 new_front;
-    new_front.x = cosf(DEGREES_TO_RAD(this->yaw)) * cosf(DEGREES_TO_RAD(this->pitch));
-    new_front.y = sinf(DEGREES_TO_RAD(this->pitch));
-    new_front.z = sinf(DEGREES_TO_RAD(this->yaw)) * cosf(DEGREES_TO_RAD(this->pitch));
+    GM_Vec3 new_front = gm_euler_to_vec3(this->yaw, this->pitch);
     this->front = gm_vec3_normalize(new_front);
-
     this->right = gm_vec3_normalize(gm_vec3_cross(this->front, this->world_up));
     this->up    = gm_vec3_normalize(gm_vec3_cross(this->right, this->front));
 }

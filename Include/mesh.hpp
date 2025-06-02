@@ -31,7 +31,7 @@ private:
 typedef int GLTextureID;
 struct Material {
     Shader* shader;
-    GM_RGB color;
+    GM_RGBA color;
     GLTextureID textures[TEXTURE_MAX];
     GLTextureID alphaMap;
     GLTextureID heightMap;

@@ -76,9 +76,9 @@ std::vector<float> quad_vertices = {
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f  // Bottom-left
 };
 
-std::vector<float> line_vertices[] = {
-    0.0f, 0.0f, 0.0f, // Start
-    0.0f, 0.0f, 1.0f  // End (1 unit along Z)
+std::vector<float> line_vertices = {
+    0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f
 };
 
 int main() {
@@ -111,19 +111,18 @@ int main() {
 
     Shader cubeShader({"../../shader_source/model.vert", "../../shader_source/model.frag"});
     cubeShader.addTexture("../../assets/container.jpg", "texture1", TEXTURE_VERTICAL_FLIP);
-    Mesh cubeMesh(GL_TRIANGLES, Material(&cubeShader), Geometry({3, 3, 2}, vertices));
+    Mesh cubeMesh(Material(&cubeShader), Geometry({3, 3, 2}, vertices));
 
     Shader billboardShader({"../../shader_source/billboard.vert", "../../shader_source/billboard.frag"});
     billboardShader.addTexture("../../assets/slime_monster.png", "texture1", TEXTURE_VERTICAL_FLIP);
-    Mesh quadMesh(GL_TRIANGLES, Material(&billboardShader), Geometry({3, 3, 2}, quad_vertices));
+    Mesh quadMesh(Material(&billboardShader), Geometry({3, 3, 2}, quad_vertices));
 
     GM_Vec3 lightPos = gm_vec3_create(-1.2f, 1.0f, 2.0f);
     Shader lightCubeShader({"../../shader_source/light_cube.vert", "../../shader_source/light_cube.frag"});
-    Mesh lightCubeMesh(GL_TRIANGLES, Material(&lightCubeShader), Geometry({3, 3, 2}, vertices));
+    Mesh lightCubeMesh(Material(&lightCubeShader), Geometry({3, 3, 2}, vertices));
 
     Shader lineShader({"../../shader_source/billboard.vert", "../../shader_source/billboard.frag"});
-    lineShader.addTexture("../../assets/slime_monster.png", "texture1", TEXTURE_VERTICAL_FLIP);
-    Mesh lineMesh(GL_LINES, Material(&lineShader), Geometry({3}, line_vertices));
+    Mesh lineMesh(Material(&lineShader), Geometry({3}, line_vertices, {}, GL_DYNAMIC_DRAW), gm_mat4_identity(), GL_LINES);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -161,17 +160,29 @@ int main() {
         billboard_model.v[1].w = billboard_position.y;
         billboard_model.v[2].w = billboard_position.z;
         quadMesh.transform = billboard_model;
-    
         quadMesh.material.shader->setMat4("view", view);
         quadMesh.material.shader->setMat4("projection", projection);
         quadMesh.draw();
 
-        // billboard sprite
-        lineMesh.transform = gm_mat4_transpose(view);
+
+        // line sprite
+        GM_Vec3 p1 = gm_vec3_add(camera.position, GM_Vec3Lit(0.25f, -0.25f, 0));
+        GM_Vec3 p2 = gm_vec3_add(p1, gm_vec3_scale(camera.front, 100.0f));
+
+        line_vertices[0] = p1.x;
+        line_vertices[1] = p1.y;
+        line_vertices[2] = p1.z;
+
+        line_vertices[3] = p2.x;
+        line_vertices[4] = p2.y;
+        line_vertices[5] = p2.z;
+
+        lineMesh.setVertices(line_vertices);
+
+        lineMesh.transform = gm_mat4_identity();
         lineMesh.material.shader->setMat4("view", view);
         lineMesh.material.shader->setMat4("projection", projection);
         lineMesh.draw();
-
 
         lightCubeMesh.transform = gm_mat4_identity();
         lightCubeMesh.transform = gm_mat4_scale_xyz(lightCubeMesh.transform, 0.5f, 0.5f, 0.5f);

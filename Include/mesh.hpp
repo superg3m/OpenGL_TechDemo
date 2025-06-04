@@ -13,47 +13,58 @@ struct Vertex {
 };
 
 struct Geometry {
-    unsigned int VBO, VAO, EBO;
-    unsigned int stride;
+    unsigned int VBO = 0, VAO = 0, EBO = 0;
+    unsigned int stride = 0;
     std::vector<unsigned int> attributes;
     std::vector<float> vertices;
-    std::vector<unsigned int> indicies;
+    std::vector<unsigned int> indices;
+    GLenum usage = GL_STATIC_DRAW; // Renamed from binded_draw_state for clarity
 
     Geometry() = default;
-    Geometry(std::vector<unsigned int> attributes, std::vector<float>& vertices, std::vector<unsigned int> indicies = std::vector<unsigned int>());
-    static Geometry Cube(std::vector<unsigned int> attributes = {3, 0, 3, 2});
-    static Geometry Sphere(int segments, std::vector<unsigned int> attributes = {3, 0, 3, 2});
-    static Geometry Torus(std::vector<unsigned int> attributes = {3, 0, 3, 2});
+    Geometry(const std::vector<unsigned int>& attributes, 
+             const std::vector<float>& vertices,
+             const std::vector<unsigned int>& indices = {},
+             GLenum usage = GL_STATIC_DRAW);
+
+    // Factory methods for common shapes
+    static Geometry Cube(const std::vector<unsigned int>& attributes = {3, 0, 3, 2});
+    static Geometry Sphere(int segments, const std::vector<unsigned int>& attributes = {3, 0, 3, 2});
+    static Geometry Torus(const std::vector<unsigned int>& attributes = {3, 0, 3, 2});
 
 private:
     void setup();
+    friend struct Mesh; // Allow Mesh to call setup if needed
 };
 
-typedef int GLTextureID;
+using GLTextureID = int;
+
 struct Material {
-    Shader* shader;
+    Shader* shader = nullptr;
     GM_RGBA color;
-    GLTextureID textures[TEXTURE_MAX];
-    GLTextureID alphaMap;
-    GLTextureID heightMap;
-    GLTextureID normalMap;
+    GLTextureID textures[TEXTURE_MAX] = {0};
+    GLTextureID alphaMap = 0;
+    GLTextureID heightMap = 0;
+    GLTextureID normalMap = 0;
 
     Material() = default;
-    Material(Shader* shader);
-    static Material BasicMaterial();    // Just basic color no lighting
-    static Material StandardMaterial(); // Physics Based Rendering (PBR)
+    explicit Material(Shader* shader);
+
+    static Material BasicMaterial();    // Simple color, no lighting
+    static Material StandardMaterial(); // PBR (Physics Based Rendering)
 };
 
-// Date: June 03, 2025
-// TODO(Jovanni): Yo jovanni it doens't really make sense to have a transform here no?
-// entities should have a mesh and that enetiy hsould have a transform
+// TODO(Jovanni): Consider removing transform from Mesh, 
+// as entities typically have transforms, not meshes themselves.
 struct Mesh {
-    GLenum draw_type;
     Geometry geometry;
     Material material;
-    GM_Matrix4 transform;
+    GM_Matrix4 transform = gm_mat4_identity();
+    GLenum draw_type = GL_TRIANGLES; // GL_TRIANGLES, GL_LINES, ...
 
     Mesh() = default;
-    Mesh(GLenum draw_type, Material material, Geometry geometry, GM_Matrix4 transform = gm_mat4_identity());
+    Mesh(Material material, Geometry geometry, GM_Matrix4 transform = gm_mat4_identity(), GLenum draw_type = GL_TRIANGLES);
+
     void draw();
+    void setVertices(const std::vector<float>& vertices);
+    void setIndices(const std::vector<unsigned int>& indices);
 };

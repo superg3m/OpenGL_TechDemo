@@ -2,75 +2,86 @@
 #include <glad/glad.h>
 
 void Geometry::setup() {
-	glGenVertexArrays(1, &this->VAO);
-	glGenBuffers(1, &this->VBO);
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
 
-	glBindVertexArray(this->VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(float), &this->vertices[0], GL_STATIC_DRAW);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), usage);
 
-    if (this->indicies.size() != 0) {
-        glGenBuffers(1, &this->EBO);
-	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
-	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indicies.size() * sizeof(unsigned int), &this->indicies[0], GL_STATIC_DRAW);
+    if (!indices.empty()) {
+        glGenBuffers(1, &EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usage);
     }
 
-    for (int i = 0; i < this->attributes.size(); i++) {
-        this->stride += this->attributes[i];
+    stride = 0;
+    for (auto a : attributes) {
+        stride += a;
     }
 
-    int attribute_index = 0;
-    int vertex_attribute_offset = 0;
-    for (u32 i = 0; i <  this->attributes.size(); i++) {
-        unsigned int attribute = this->attributes[i];
-        
-        if (attribute == 0) {
-            continue;
-        }
+    int offset = 0;
+    for (unsigned int i = 0; i < attributes.size(); ++i) {
+        unsigned int size = attributes[i];
+        if (size == 0) continue;
 
-        glVertexAttribPointer(attribute_index, attribute, GL_FLOAT, GL_FALSE, this->stride * sizeof(float), (void*)(vertex_attribute_offset * sizeof(float)));
-        glEnableVertexAttribArray(attribute_index);
-        vertex_attribute_offset += attribute;
+        glVertexAttribPointer(i, size, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(offset * sizeof(float)));
+        glEnableVertexAttribArray(i);
 
-        attribute_index++;
-    }    
+        offset += size;
+    }
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0); 
-    glBindVertexArray(0); 
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
-Geometry::Geometry(std::vector<unsigned int> attributes, std::vector<float>& vertices, std::vector<unsigned int> indicies) {
+Geometry::Geometry(const std::vector<unsigned int>& attributes, const std::vector<float>& vertices,  const std::vector<unsigned int>& indices, GLenum usage) {
     this->attributes = attributes;
     this->vertices = vertices;
-    this->indicies = indicies;
+    this->indices = indices;
+    this->usage = usage;
     this->stride = 0;
-
+    
     this->setup();
 }
 
-Material::Material(Shader* shader) {
-    this->shader = shader;
-}
+Material::Material(Shader* shader) : shader(shader) {}
 
-Mesh::Mesh(GLenum draw_type, Material material, Geometry geometry, GM_Matrix4 transform) {
-    this->draw_type = draw_type;
+Mesh::Mesh(Material material, Geometry geometry, GM_Matrix4 transform, GLenum draw_type) {
     this->material = material;
     this->geometry = geometry;
     this->transform = transform;
+    this->draw_type = draw_type;
+}
+
+void Mesh::setVertices(const std::vector<float>& vertices) {
+    geometry.vertices = vertices;
+
+    glBindBuffer(GL_ARRAY_BUFFER, geometry.VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Mesh::setIndices(const std::vector<unsigned int>& indices) {
+    geometry.indices = indices;
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.EBO);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(unsigned int), indices.data());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Mesh::draw() {
-    this->material.shader->setMat4("model", this->transform);
-    this->material.shader->bindTextures();
+    material.shader->setMat4("model", transform);
+    material.shader->bindTextures();
 
-    glBindVertexArray(this->geometry.VAO);
-    GLsizei index_count = this->geometry.indicies.size();
-    if (index_count != 0) {
-        glDrawElements(this->draw_type, index_count, GL_UNSIGNED_INT, (void*)0);
+    glBindVertexArray(geometry.VAO);
+    GLsizei index_count = static_cast<GLsizei>(geometry.indices.size());
+    if (index_count > 0) {
+        glDrawElements(draw_type, index_count, GL_UNSIGNED_INT, nullptr);
     } else {
-        glDrawArrays(this->draw_type, 0, this->geometry.vertices.size() / this->geometry.stride);
+        glDrawArrays(draw_type, 0, static_cast<GLsizei>(geometry.vertices.size() / geometry.stride));
     }
 
-    this->material.shader->unbindTextures();
+    material.shader->unbindTextures();
     glBindVertexArray(0);
 }

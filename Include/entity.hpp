@@ -1,6 +1,6 @@
 struct Transform {
     GM_Vec3 translation;
-    Quaternion orientation
+    Quaternion orientation;
     GM_Vec3 scale;
 };
 

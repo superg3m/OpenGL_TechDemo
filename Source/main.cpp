@@ -130,16 +130,16 @@ int main() {
 
     Shader cubeShader({"../../shader_source/model.vert", "../../shader_source/model.frag"});
     cubeShader.addTexture("../../assets/container.jpg", "texture1", TEXTURE_VERTICAL_FLIP);
-    Mesh cubeMesh(Material(&cubeShader), Geometry({3, 3, 2}, vertices));
+    Mesh cubeMesh(GL_TRIANGLES, Material(&cubeShader), Geometry({3, 3, 2}, vertices));
 
     
     Shader billboardShader({"../../shader_source/billboard.vert", "../../shader_source/billboard.frag"});
     billboardShader.addTexture("../../assets/slime_monster.png", "texture1", TEXTURE_VERTICAL_FLIP);
-    Mesh quadMesh(Material(&billboardShader), Geometry({3, 3, 2}, quad_vertices));
+    Mesh quadMesh(GL_TRIANGLES, Material(&billboardShader), Geometry({3, 3, 2}, quad_vertices));
 
     GM_Vec3 lightPos = gm_vec3_create(-1.2f, 1.0f, 2.0f);
     Shader lightCubeShader({"../../shader_source/light_cube.vert", "../../shader_source/light_cube.frag"});
-    Mesh lightCubeMesh(Material(&lightCubeShader), Geometry({3, 3, 2}, vertices));
+    Mesh lightCubeMesh(GL_TRIANGLES, Material(&lightCubeShader), Geometry({3, 3, 2}, vertices));
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -176,10 +176,8 @@ int main() {
         billboard_model.v[0].w = billboard_position.x;
         billboard_model.v[1].w = billboard_position.y;
         billboard_model.v[2].w = billboard_position.z;
-
-        quadMesh.transform = gm_mat4_identity();
-        // quadMesh.transform = billboard_model;
-        quadMesh.transform = gm_mat4_look_at_model(GM_Vec3Lit(-1, -2, -3), camera.position, camera.world_up);
+        quadMesh.transform = billboard_model;
+        
         quadMesh.material.shader->setMat4("view", view);
         quadMesh.material.shader->setMat4("projection", projection);
         quadMesh.material.shader->setVec3("objectColor", 1.0f, 0.5f, 0.31f);

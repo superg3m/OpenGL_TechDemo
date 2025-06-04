@@ -52,7 +52,8 @@ Material::Material(Shader* shader) {
     this->shader = shader;
 }
 
-Mesh::Mesh(Material material, Geometry geometry, GM_Matrix4 transform) {
+Mesh::Mesh(GLenum draw_type, Material material, Geometry geometry, GM_Matrix4 transform) {
+    this->draw_type = draw_type;
     this->material = material;
     this->geometry = geometry;
     this->transform = transform;
@@ -65,9 +66,9 @@ void Mesh::draw() {
     glBindVertexArray(this->geometry.VAO);
     GLsizei index_count = this->geometry.indicies.size();
     if (index_count != 0) {
-        glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, (void*)0);
+        glDrawElements(this->draw_type, index_count, GL_UNSIGNED_INT, (void*)0);
     } else {
-        glDrawArrays(GL_TRIANGLES, 0, this->geometry.vertices.size() / this->geometry.stride);
+        glDrawArrays(this->draw_type, 0, this->geometry.vertices.size() / this->geometry.stride);
     }
 
     this->material.shader->unbindTextures();

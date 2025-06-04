@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glad/glad.h>
 #include <gm.h>
 #include <shader.hpp>
 #include <vector>
@@ -47,11 +48,12 @@ struct Material {
 // TODO(Jovanni): Yo jovanni it doens't really make sense to have a transform here no?
 // entities should have a mesh and that enetiy hsould have a transform
 struct Mesh {
+    GLenum draw_type;
     Geometry geometry;
     Material material;
     GM_Matrix4 transform;
 
     Mesh() = default;
-    Mesh(Material material, Geometry geometry, GM_Matrix4 transform = gm_mat4_identity());
+    Mesh(GLenum draw_type, Material material, Geometry geometry, GM_Matrix4 transform = gm_mat4_identity());
     void draw();
 };

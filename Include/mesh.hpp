@@ -43,6 +43,9 @@ struct Material {
     static Material StandardMaterial(); // Physics Based Rendering (PBR)
 };
 
+// Date: June 03, 2025
+// TODO(Jovanni): Yo jovanni it doens't really make sense to have a transform here no?
+// entities should have a mesh and that enetiy hsould have a transform
 struct Mesh {
     Geometry geometry;
     Material material;

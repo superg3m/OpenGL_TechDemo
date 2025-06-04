@@ -81,6 +81,8 @@ std::vector<float> line_vertices = {
     0.0f, 0.0f, 0.0f
 };
 
+bool fire_tracer = false;
+
 int main() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -112,10 +114,22 @@ int main() {
     Shader cubeShader({"../../shader_source/model.vert", "../../shader_source/model.frag"});
     cubeShader.addTexture("../../assets/container.jpg", "texture1", TEXTURE_VERTICAL_FLIP);
     Mesh cubeMesh(Material(&cubeShader), Geometry({3, 3, 2}, vertices));
+    GM_Vec3 cube_position = GM_Vec3Lit(-0.5, -0.5, -0.5);
+    GM_RectangleReference3D cube_aabb = gm_rectangle_reference3d_create(&cube_position, 1, 1, 1);
+
+    Shader cube2Shader({"../../shader_source/model.vert", "../../shader_source/model.frag"});
+    cube2Shader.addTexture("../../assets/container.jpg", "texture1", TEXTURE_VERTICAL_FLIP);
+    Mesh explosionCubeMesh(Material(&cube2Shader), Geometry({3, 3, 2}, vertices));
 
     Shader billboardShader({"../../shader_source/billboard.vert", "../../shader_source/billboard.frag"});
     billboardShader.addTexture("../../assets/slime_monster.png", "texture1", TEXTURE_VERTICAL_FLIP);
     Mesh quadMesh(Material(&billboardShader), Geometry({3, 3, 2}, quad_vertices));
+    GM_Vec3 billboard_position = GM_Vec3Lit(-1, -2, -3);
+    GM_RectangleReference3D quad_aabb = gm_rectangle_reference3d_create(&billboard_position, 1, 1, 1);
+
+    Shader explosionShader({"../../shader_source/billboard.vert", "../../shader_source/billboard.frag"});
+    explosionShader.addTexture("../../assets/explosion.png", "texture1", TEXTURE_VERTICAL_FLIP);
+    Mesh explosionMesh(Material(&explosionShader), Geometry({3, 3, 2}, quad_vertices));
 
     GM_Vec3 lightPos = gm_vec3_create(-1.2f, 1.0f, 2.0f);
     Shader lightCubeShader({"../../shader_source/light_cube.vert", "../../shader_source/light_cube.frag"});
@@ -128,8 +142,12 @@ int main() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
 
-    GM_Vec3 billboard_position = GM_Vec3Lit(-1, -2, -3);
+    float explosion_scale_goal = 0.4f;
+    float explosion_scale_current = explosion_scale_goal;
 
+    glfwSwapInterval(1);
+
+    GM_Vec3 intersection;
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = (float)glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -144,7 +162,7 @@ int main() {
         GM_Matrix4 projection = gm_mat4_perspective(camera.zoom, (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
         cubeMesh.transform = gm_mat4_identity();
-        cubeMesh.transform = gm_mat4_rotate_xyz(cubeMesh.transform, RAD_TO_DEGREES((float)glfwGetTime()), 0.5f, 1.0f, 0.0f);
+        cubeMesh.transform = gm_mat4_scale_xyz(cubeMesh.transform, 0.45f, 0.45f, 0.45f);
         cubeMesh.material.shader->setMat4("view", view);
         cubeMesh.material.shader->setMat4("projection", projection);
         cubeMesh.material.shader->setVec3("objectColor", 1.0f, 0.5f, 0.31f);
@@ -166,23 +184,72 @@ int main() {
 
 
         // line sprite
-        GM_Vec3 p1 = gm_vec3_add(camera.position, GM_Vec3Lit(0.25f, -0.25f, 0));
-        GM_Vec3 p2 = gm_vec3_add(p1, gm_vec3_scale(camera.front, 100.0f));
+        if (fire_tracer) {
+            GM_Vec3 p0 = gm_vec3_add(camera.position, GM_Vec3Lit(0.25f, -0.25f, 0));
+            GM_Vec3 p1 = gm_vec3_add(p0, gm_vec3_scale(camera.front, 10.0f));
+            line_vertices[0] = p0.x;
+            line_vertices[1] = p0.y;
+            line_vertices[2] = p0.z;
 
-        line_vertices[0] = p1.x;
-        line_vertices[1] = p1.y;
-        line_vertices[2] = p1.z;
+            line_vertices[3] = p1.x;
+            line_vertices[4] = p1.y;
+            line_vertices[5] = p1.z;
 
-        line_vertices[3] = p2.x;
-        line_vertices[4] = p2.y;
-        line_vertices[5] = p2.z;
+            lineMesh.setVertices(line_vertices);
 
-        lineMesh.setVertices(line_vertices);
+            lineMesh.transform = gm_mat4_identity();
+            lineMesh.material.shader->setMat4("view", view);
+            lineMesh.material.shader->setMat4("projection", projection);
+            lineMesh.draw();
 
-        lineMesh.transform = gm_mat4_identity();
-        lineMesh.material.shader->setMat4("view", view);
-        lineMesh.material.shader->setMat4("projection", projection);
-        lineMesh.draw();
+
+            if (gm_intersection3d_line_aabb(p0, p1, cube_aabb, &intersection, NULLPTR)) {
+                line_vertices[3] = intersection.x;
+                line_vertices[4] = intersection.y;
+                line_vertices[5] = intersection.z;
+                explosion_scale_current = 0.0f;
+            } else {
+                line_vertices[3] = p1.x;
+                line_vertices[4] = p1.y;
+                line_vertices[5] = p1.z;
+            }
+
+            fire_tracer = false;
+        }
+
+        if (explosion_scale_current != explosion_scale_goal) {
+            /*
+            GM_Matrix4 explosion_model = gm_mat4_transpose(view);
+            explosion_model.v[0].w = intersection.x;
+            explosion_model.v[1].w = intersection.y;
+            explosion_model.v[2].w = intersection.z;
+
+            explosion_scale_current = gm_move_toward(explosion_scale_current, explosion_scale_goal, 0.02f);
+            explosion_model.v[0].x *= explosion_scale_current;
+            explosion_model.v[1].y *= explosion_scale_current;
+            explosion_model.v[2].z *= explosion_scale_current;
+            
+            explosionMesh.transform = explosion_model;
+
+            explosionMesh.material.shader->setMat4("view", view);
+            explosionMesh.material.shader->setMat4("projection", projection);
+            explosionMesh.draw();
+            */
+
+            cubeMesh.transform = gm_mat4_identity();
+            explosion_scale_current = gm_move_toward(explosion_scale_current, explosion_scale_goal, 0.02f);
+            cubeMesh.transform = gm_mat4_scale_xyz(cubeMesh.transform, explosion_scale_goal, explosion_scale_goal, explosion_scale_goal);
+            cubeMesh.transform = gm_mat4_translate(cubeMesh.transform, intersection);
+
+            cubeMesh.material.shader->setMat4("view", view);
+            cubeMesh.material.shader->setMat4("projection", projection);
+            cubeMesh.material.shader->setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+            cubeMesh.material.shader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+            cubeMesh.material.shader->setVec3("lightPos", lightPos);
+            cubeMesh.material.shader->setVec3("viewPos", camera.position);
+            cubeMesh.draw();
+        }
+
 
         lightCubeMesh.transform = gm_mat4_identity();
         lightCubeMesh.transform = gm_mat4_scale_xyz(lightCubeMesh.transform, 0.5f, 0.5f, 0.5f);
@@ -202,6 +269,12 @@ int main() {
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        fire_tracer = true;
+    } else {
+        fire_tracer = false;
     }
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {

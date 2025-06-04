@@ -1,15 +1,14 @@
-
-
 #version 330 core
 out vec4 FragColor;
 
 in vec3 Normal;  
 in vec3 FragPos;  
-  
+in vec2 TexCoords;
+
 uniform vec3 lightPos; 
 uniform vec3 viewPos; 
 uniform vec3 lightColor;
-uniform vec3 objectColor;
+uniform sampler2D texture1;
 
 void main() {
     // ambient
@@ -28,8 +27,11 @@ void main() {
     vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
     vec3 specular = specularStrength * spec * lightColor;  
-        
-    vec3 result = (ambient + diffuse + specular) * objectColor;
-    FragColor = vec4(result, 1.0);
-} 
+    
+    // get texture color (now includes alpha)
+    vec4 texColor = texture(texture1, TexCoords);
 
+    // combine
+    vec3 result = (ambient + diffuse + specular) * texColor.rgb;
+    FragColor = vec4(result, texColor.a);
+}

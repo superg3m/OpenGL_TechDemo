@@ -76,6 +76,30 @@ std::vector<float> quad_vertices = {
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f  // Bottom-left
 };
 
+// Found at: https://www.khronos.org/opengl/wiki/GluLookAt_code
+GM_Matrix4 gm_mat4_look_at_model(GM_Vec3 position, GM_Vec3 target, GM_Vec3 world_up) {
+    GM_Vec3 forward = gm_vec3_normalize(gm_vec3_sub(target, position));
+    GM_Vec3 right   = gm_vec3_normalize(gm_vec3_cross(world_up, forward));
+    GM_Vec3 up      = gm_vec3_cross(forward, right);
+
+    float dot_right   = -gm_vec3_dot(right, position);
+    float dot_up      = -gm_vec3_dot(up, position);
+    float dot_forward = -gm_vec3_dot(forward, position);
+
+    GM_Matrix4 rotation = {
+        .data = {
+            right.x,   right.y,   right.z,   0,
+            up.x,      up.y,      up.z,      0,
+            forward.x, forward.y, forward.z, 0,
+            0.0f,      0.0f,      0.0f,      1.0f
+        }
+    };
+    
+    GM_Matrix4 translation = gm_mat4_translate_xyz(gm_mat4_identity(), -position.x, -position.y, -position.z);
+
+    return gm_mat4_mult(rotation, translation);
+}
+
 int main() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -154,7 +178,8 @@ int main() {
         billboard_model.v[2].w = billboard_position.z;
 
         quadMesh.transform = gm_mat4_identity();
-        quadMesh.transform = billboard_model;
+        // quadMesh.transform = billboard_model;
+        quadMesh.transform = gm_mat4_look_at_model(GM_Vec3Lit(-1, -2, -3), camera.position, camera.world_up);
         quadMesh.material.shader->setMat4("view", view);
         quadMesh.material.shader->setMat4("projection", projection);
         quadMesh.material.shader->setVec3("objectColor", 1.0f, 0.5f, 0.31f);

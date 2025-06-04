@@ -13,6 +13,17 @@ typedef struct EntityID {
     u32 entity_index;
 } EntityID;
 
+typedef enum EntityType {
+    ENTITY_TYPE_NONE,
+    ENTITY_TYPE_PLAYER,
+    ENTITY_TYPE_DRAGON,
+    ENTITY_TYPE_PRESSURE_PLATE,
+    ENTITY_TYPE_DOOR,
+    ENTITY_TYPE_LEVER,
+    ENTITY_TYPE_TRAP,
+    ENTITY_TYPE_SEQUENCE_CONTROLLER,
+} EntityType;
+
 typedef struct Entity {
     // base
     EntityID identifer;

@@ -1,51 +1,6 @@
+#include <ckg.h>
 #include <mesh.hpp>
 #include <glad/glad.h>
-
-void Geometry::setup() {
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), usage);
-
-    if (!indices.empty()) {
-        glGenBuffers(1, &EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usage);
-    }
-
-    stride = 0;
-    for (auto a : attributes) {
-        stride += a;
-    }
-
-    int offset = 0;
-    for (unsigned int i = 0; i < attributes.size(); ++i) {
-        unsigned int size = attributes[i];
-        if (size == 0) continue;
-
-        glVertexAttribPointer(i, size, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(offset * sizeof(float)));
-        glEnableVertexAttribArray(i);
-
-        offset += size;
-    }
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-Geometry::Geometry(const std::vector<unsigned int>& attributes, const std::vector<float>& vertices,  const std::vector<unsigned int>& indices, GLenum usage) {
-    this->attributes = attributes;
-    this->vertices = vertices;
-    this->indices = indices;
-    this->usage = usage;
-    this->stride = 0;
-    
-    this->setup();
-}
-
-Material::Material(Shader* shader) : shader(shader) {}
 
 Mesh::Mesh(Material material, Geometry geometry, GM_Matrix4 transform, GLenum draw_type) {
     this->material = material;
@@ -54,15 +9,18 @@ Mesh::Mesh(Material material, Geometry geometry, GM_Matrix4 transform, GLenum dr
     this->draw_type = draw_type;
 }
 
-void Mesh::setVertices(const std::vector<float>& vertices) {
+void Mesh::setVertices(const std::vector<Vertex>& vertices) {
+    ckg_assert(this->geometry.usage == GL_DYNAMIC_DRAW);
+
     geometry.vertices = vertices;
 
     glBindBuffer(GL_ARRAY_BUFFER, geometry.VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Mesh::setIndices(const std::vector<unsigned int>& indices) {
+    ckg_assert(this->geometry.usage == GL_DYNAMIC_DRAW);
     geometry.indices = indices;
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.EBO);
@@ -71,17 +29,49 @@ void Mesh::setIndices(const std::vector<unsigned int>& indices) {
 }
 
 void Mesh::draw() {
-    material.shader->setMat4("model", transform);
-    material.shader->bindTextures();
+    this->material.shader->setMat4("model", transform);
+    this->material.bindTextures();
 
     glBindVertexArray(geometry.VAO);
-    GLsizei index_count = static_cast<GLsizei>(geometry.indices.size());
+    int index_count = geometry.indices.size();
     if (index_count > 0) {
         glDrawElements(draw_type, index_count, GL_UNSIGNED_INT, nullptr);
     } else {
-        glDrawArrays(draw_type, 0, static_cast<GLsizei>(geometry.vertices.size() / geometry.stride));
+        glDrawArrays(draw_type, 0, (geometry.vertices.size() / sizeof(Vertex)));
     }
 
-    material.shader->unbindTextures();
+    this->material.unbindTextures();
     glBindVertexArray(0);
 }
+
+void Mesh::setScale(float s) {
+    this->transform = gm_mat4_scale(this->transform, s)
+}
+
+void Mesh::setScale(float x, float y, float z, float s) {
+    this->transform = gm_mat4_scale(this->transform, s)
+}
+
+void Mesh::setScale(GM_Vec3 s) {
+    this->transform = gm_mat4_scale(this->transform, s)
+}
+
+
+void Mesh::setRotaion(float theta, float x, float y, float z) {
+    this->transform = gm_mat4_scale(this->transform, s)
+}
+
+void Mesh::setRotaion(float theta, GM_Vec3 r) {
+    this->transform = gm_mat4_scale(this->transform, s)
+}
+
+
+void Mesh::setPosition(GM_Vec3 p) {
+    this->transform = gm_mat4_scale(this->transform, s)
+}
+
+void Mesh::setPosition(float x, float y, float z) {
+    this->transform = gm_mat4_translate_xyz(this->transform, x, y, z)
+}
+
+getTrasform()

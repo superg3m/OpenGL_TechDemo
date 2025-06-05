@@ -1,49 +1,23 @@
 #include <main.hpp>
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
-
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
-
+const unsigned int WINDOW_WIDTH = 800;
+const unsigned int WINDOW_HEIGHT = 600;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 int main() {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    GLFWwindow* window = initalize_glfw_and_glad();
+    ckg_assert_msg(window, "failed to initalize glfw or glad");
 
-    #ifdef __APPLE__
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    #endif
+    Game application(WINDOW_WIDTH, WINDOW_HEIGHT);
+    application.initializeResources();
+    application.initializeProjection();
 
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
-    if (window == NULL) {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    Shader cubeShader({"../../shader_source/model.vert", "../../shader_source/model.frag"});
+    cubeShader.addTexture("../../assets/container.jpg", "texture1", TEXTURE_VERTICAL_FLIP);
+    Mesh cubeMesh(Material(&cubeShader), Geometry({3, 3, 2}, vertices));
+    GM_Vec3 cube_position = GM_Vec3Lit(-0.5, -0.5, -0.5);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_DEPTH_TEST);
-
-    float explosion_scale_goal = 0.4f;
-    float explosion_scale_current = explosion_scale_goal;
-
-    glfwSwapInterval(1);
-
-    GM_Vec3 intersection;
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = (float)glfwGetTime();
         deltaTime = currentFrame - lastFrame;

@@ -1,5 +1,5 @@
 struct Transform {
-    GM_Vec3 translation;
+    GM_Vec3 position;
     Quaternion orientation;
     GM_Vec3 scale;
 };
@@ -16,12 +16,9 @@ typedef struct EntityID {
 typedef enum EntityType {
     ENTITY_TYPE_NONE,
     ENTITY_TYPE_PLAYER,
-    ENTITY_TYPE_DRAGON,
-    ENTITY_TYPE_PRESSURE_PLATE,
-    ENTITY_TYPE_DOOR,
-    ENTITY_TYPE_LEVER,
-    ENTITY_TYPE_TRAP,
-    ENTITY_TYPE_SEQUENCE_CONTROLLER,
+    ENTITY_TYPE_BALL,
+    ENTITY_TYPE_BLOCK,
+    ENTITY_TYPE_POWERUP,
 } EntityType;
 
 typedef struct Entity {

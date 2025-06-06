@@ -17,12 +17,12 @@ enum TextureType {
 
 using GLTextureID = int;
 struct Material {
-    Shader* shader;
+    Shader shader;
     GM_RGBA color;
     GLTextureID textures[TEXTURE_MAX] = {0};
 
     Material() = default;
-    Material(Shader* shader);
+    Material(Shader shader);
 
     void bindTextures();
     void unbindTextures();

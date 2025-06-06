@@ -8,6 +8,7 @@
 
 struct Shader {
     unsigned int id;
+    Shader() = default;
     Shader(std::vector<const char*> shader_paths);
 
     void use();

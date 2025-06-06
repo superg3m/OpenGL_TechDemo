@@ -1,75 +1,7 @@
 #include <game.hpp>
 
-std::vector<Entity> Game::entities;
 unsigned int Game::WINDOW_WIDTH;
 unsigned int Game::WINDOW_HEIGHT;
-
-EntityID::EntityID() {
-    // Date: June 05, 2025
-    // TODO(Jovanni): Eventually have a system where it check for the next available entity index
-    this->entity_index = Game::entities.size();
-    this->reference_id = Game::getReferenceID();
-}
-
-Entity::Entity(EntityType type, Mesh mesh) {
-    this->identifer = EntityID();
-    this->type = type;
-
-    this->position = GM_Vec3Lit(0, 0, 0);
-    this->orientation = GM_QuaternionLit(1, 0, 0, 0);
-    this->scale = GM_Vec3Lit(1, 1, 1);
-
-    this->mesh = mesh;
-}
-
-void Entity::setPosition(GM_Vec3 position) {
-    this->position = position;
-}
-
-void Entity::setPosition(float x, float y, float z) {
-    this->position = GM_Vec3Lit(x, y, z);
-}
-
-
-void Entity::setOrientation(GM_Quaternion orientation) {
-    this->orientation = orientation;
-}
-
-void Entity::setEulerAngles(GM_Vec3 euler) {
-    this->orientation = gm_quat_from_euler(euler);
-}
-
-void Entity::setEulerAngles(float theta_x, float theta_y, float theta_z) {
-    this->orientation = gm_quat_from_euler(GM_Vec3Lit(-theta_x, -theta_y, -theta_z));
-}
-
-void Entity::setScale(float scale) {
-    this->scale = GM_Vec3Lit(scale, scale, scale);
-}
-
-void Entity::setScale(GM_Vec3 scale) {
-    this->scale = scale;
-}
-
-void Entity::setScale(float scale_x, float scale_y, float scale_z) {
-    this->scale = GM_Vec3Lit(scale_x, scale_y, scale_z);
-}
-
-GM_Matrix4 Entity::getTransform() {
-    GM_Matrix4 transform = gm_mat4_identity();
-    transform = gm_mat4_scale(transform, this->scale);
-
-    float theta; GM_Vec3 axis;
-    gm_quat_to_axis_angle(this->orientation, &theta, &axis);
-    transform = gm_mat4_rotate(transform, theta, axis);
-    transform = gm_mat4_translate(transform, this->position);
-
-    return transform;
-}
-
-void Entity::draw() {
-    this->mesh.draw(this->getTransform());
-}
 
 Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     this->state = GAME_ACTIVE;
@@ -115,16 +47,14 @@ GLFWwindow* Game::initalizeWindow() {
     return window;
 }
 
-void Game:: initalizeEntities() {
-    // Shader cubeShader({"../../shader_source/no_projection.vert", "../../shader_source/no_projection.frag"});
-    // Material cubeMaterial = Material(&cubeShader);
-    // cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("container");
-    // cubeMaterial.textures[TEXTURE_DECAL] = ResourceLoader::getTexture("smiley_face");
-    // Mesh cubeMesh = Mesh(cubeMaterial, Geometry::Quad());
-    // Entity player = Entity(ENTITY_TYPE_PLAYER, cubeMesh);
-    // Game::entities.push_back(player);
-
-    // if I put it in here it goes out of scope so I think I will have to allocate these or use a static array of elements
+void Game::initalizeEntities() {
+    Shader cubeShader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
+    Material cubeMaterial = Material(cubeShader);
+    cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("smiley_face");
+    Mesh cubeMesh = Mesh(cubeMaterial, Geometry::Quad());
+    Entity* player = new Entity(ENTITY_TYPE_PLAYER, cubeMesh);
+    player->setScale(1, 1.25f, 1);
+    ResourceLoader::setEntityReference("player", player);
 }
 
 void Game::initializeResources() {
@@ -149,7 +79,10 @@ u64 Game::getReferenceID() {
 }
 
 void Game::update(float dt) {
-    
+    local_persist float currentTime = 0; currentTime += dt;
+
+    Entity* player = ResourceLoader::getEntityReference("player");
+    player->setEulerAngles(0.0f, 0.0f, sinf(currentTime) * 90.0f);
 }
 
 void Game::processInput(GLFWwindow* window, float dt) {
@@ -159,9 +92,8 @@ void Game::processInput(GLFWwindow* window, float dt) {
 }
 
 void Game::render() {
-    for (int i = 0; i < Game::entities.size(); i++) {
-        Entity e = Game::entities[i];
-        e.draw();
+    for (std::map<std::string, Entity*>::iterator it = ResourceLoader::entities.begin(); it != ResourceLoader::entities.end(); it++) {
+        it->second->draw();
     }
 }
 

@@ -3,12 +3,13 @@
 #include <stb_image.h>
 
 std::map<std::string, int> ResourceLoader::textures;
+std::map<std::string, Entity*> ResourceLoader::entities;
 
 GLTextureID ResourceLoader::loadTexture(std::string key, const char *file, int texture_flags) {
     ckg_assert_msg(ckg_io_path_exists(file), "Texture path doesn't exist!\n");
 
     if (ResourceLoader::textures.count(key)) {
-        CKG_LOG_DEBUG("ResourceLoader | Key: '%s' already exists loading cached TextureID\n", key.c_str());
+        CKG_LOG_WARN("ResourceLoader | Key: '%s' already exists loading cached TextureID\n", key.c_str());
         return ResourceLoader::getTexture(key);
     }
 
@@ -62,4 +63,22 @@ GLTextureID ResourceLoader::getTexture(std::string key) {
     }
 
     return ResourceLoader::textures[key];
+}
+
+
+void ResourceLoader::setEntityReference(std::string key, Entity* entity) {
+    if (ResourceLoader::entities.count(key)) {
+        CKG_LOG_WARN("ResourceLoader | Key: '%s' already exists overwriting entity\n", key.c_str());
+    }
+
+    ResourceLoader::entities[key] = entity;
+}
+
+Entity* ResourceLoader::getEntityReference(std::string key) {
+    if (!ResourceLoader::entities.count(key)) {
+        CKG_LOG_ERROR("ResourceLoader | Key: '%s' doesn't exist for entity\n", key.c_str());
+        return nullptr;
+    }
+
+    return ResourceLoader::entities[key];
 }

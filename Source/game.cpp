@@ -86,9 +86,7 @@ void Game::initalizeEntities() {
 void Game::update(float dt) {
     local_persist float currentTime = 0; currentTime += dt;
 
-    // GM_Matrix4 projection = this->getProjectionMatrix();
-
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Game::WINDOW_WIDTH), static_cast<float>(Game::WINDOW_HEIGHT), 0.0f, -1.0f, 1.0f);
+    GM_Matrix4 projection = this->getProjectionMatrix();
 
     for (const auto& pair : ResourceLoader::entities) {
         Entity* entity = pair.second;
@@ -96,8 +94,7 @@ void Game::update(float dt) {
     }
 
     Entity* player = ResourceLoader::getEntityReference("player");
-    player->setEulerAngles(0.0f, 0.0f, 0.64f);
-    // CKG_LOG_PRINT("angle: %f\n", sinf(currentTime) * 90.0f);
+    player->setEulerAngles(0.0f, 0.0f, sinf(currentTime) * 90.0f);
 }
 
 void Game::processInput(GLFWwindow* window, float dt) {

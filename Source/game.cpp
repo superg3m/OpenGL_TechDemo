@@ -1,5 +1,6 @@
 #include <game.hpp>
 
+GM_Matrix4 Game::projection;
 unsigned int Game::WINDOW_WIDTH;
 unsigned int Game::WINDOW_HEIGHT;
 
@@ -47,30 +48,16 @@ GLFWwindow* Game::initalizeWindow() {
     return window;
 }
 
-void Game::initalizeEntities() {
-    Shader cubeShader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
-    Material cubeMaterial = Material(cubeShader);
-    cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("smiley_face");
-    Mesh cubeMesh = Mesh(cubeMaterial, Geometry::Quad());
-    Entity* player = new Entity(ENTITY_TYPE_PLAYER, cubeMesh);
-    player->setScale(1, 1.25f, 1);
-    ResourceLoader::setEntityReference("player", player);
-}
-
-void Game::initializeResources() {
-    ResourceLoader::loadTexture("container", "../../assets/container.jpg");
-    ResourceLoader::loadTexture("smiley_face", "../../assets/awesomeface.png", TEXTURE_VERTICAL_FLIP);
-}
-
-void Game::initializeProjection() {
+GM_Matrix4 Game::getProjectionMatrix() {
     float aspect_ratio = (float)this->WINDOW_WIDTH / (float)this->WINDOW_HEIGHT;
-    float l = 0.0f;
-    float r = (float)this->WINDOW_WIDTH;
+    float l = 0.0f; 
+    float r = (float)this->WINDOW_WIDTH; 
     float b = (float)this->WINDOW_HEIGHT;
-    float t = 0.0f;
-    float near_plane = -1.0f;
+    float t = 0.0f; 
+    float near_plane = -1.0f; 
     float far_plane = 1.0f;
-    GM_Matrix4 projection = gm_mat4_orthographic(l, r, b, t, near_plane, far_plane);
+
+    return gm_mat4_orthographic(l, r, b, t, near_plane, far_plane);
 }
 
 u64 Game::getReferenceID() {
@@ -78,11 +65,32 @@ u64 Game::getReferenceID() {
     return referenceID++;
 }
 
+void Game::initializeResources() {
+    ResourceLoader::loadTexture("container", "../../assets/container.jpg");
+    ResourceLoader::loadTexture("smiley_face", "../../assets/awesomeface.png", TEXTURE_VERTICAL_FLIP);
+}
+
+void Game::initalizeEntities() {
+    Shader cubeShader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
+    Material cubeMaterial = Material(cubeShader);
+    cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("smiley_face");
+    Mesh cubeMesh = Mesh(cubeMaterial, Geometry::Quad());
+    Entity* player = new Entity(ENTITY_TYPE_PLAYER, cubeMesh);
+    player->setScale(100.0f, 100.0f, 1.0f);
+    ResourceLoader::setEntityReference("player", player);
+}
+
 void Game::update(float dt) {
     local_persist float currentTime = 0; currentTime += dt;
 
+    GM_Matrix4 projection = this->getProjectionMatrix();
+    for (const auto& pair : ResourceLoader::entities) {
+        Entity* entity = pair.second;
+        entity->mesh.material.shader.setMat4("projection", projection);
+    }
+
     Entity* player = ResourceLoader::getEntityReference("player");
-    player->setEulerAngles(0.0f, 0.0f, sinf(currentTime) * 90.0f);
+    //player->setEulerAngles(0.0f, 0.0f, sinf(currentTime) * 90.0f);
 }
 
 void Game::processInput(GLFWwindow* window, float dt) {
@@ -92,8 +100,9 @@ void Game::processInput(GLFWwindow* window, float dt) {
 }
 
 void Game::render() {
-    for (std::map<std::string, Entity*>::iterator it = ResourceLoader::entities.begin(); it != ResourceLoader::entities.end(); it++) {
-        it->second->draw();
+    for (const auto& pair : ResourceLoader::entities) {
+        Entity* entity = pair.second;
+        entity->draw();
     }
 }
 

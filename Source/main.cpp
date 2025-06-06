@@ -9,7 +9,6 @@ int main() {
     ckg_assert_msg(window, "failed to initalize glfw or glad\n");
 
     application.initializeResources();
-    application.initializeProjection();
     application.initalizeEntities();
 
     while (!glfwWindowShouldClose(window)) {

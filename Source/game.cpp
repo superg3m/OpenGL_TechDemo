@@ -76,7 +76,7 @@ void Game::initalizeEntities() {
     cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("smiley_face");
     Mesh cubeMesh = Mesh(cubeMaterial, Geometry::Quad());
     Entity* player = new Entity(ENTITY_TYPE_PLAYER, cubeMesh);
-    player->setEulerAngles(0, 0, 45.0f);
+
     player->setScale(300.0f, 400.0f, 1.0f);
     player->setPosition(200.0f, 200.0f, 0.0f);
 
@@ -86,7 +86,9 @@ void Game::initalizeEntities() {
 void Game::update(float dt) {
     local_persist float currentTime = 0; currentTime += dt;
 
-    GM_Matrix4 projection = this->getProjectionMatrix();
+    // GM_Matrix4 projection = this->getProjectionMatrix();
+
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Game::WINDOW_WIDTH), static_cast<float>(Game::WINDOW_HEIGHT), 0.0f, -1.0f, 1.0f);
 
     for (const auto& pair : ResourceLoader::entities) {
         Entity* entity = pair.second;
@@ -94,7 +96,8 @@ void Game::update(float dt) {
     }
 
     Entity* player = ResourceLoader::getEntityReference("player");
-    player->setEulerAngles(0.0f, 0.0f, sinf(currentTime) * 90.0f);
+    player->setEulerAngles(0.0f, 0.0f, 0.64f);
+    // CKG_LOG_PRINT("angle: %f\n", sinf(currentTime) * 90.0f);
 }
 
 void Game::processInput(GLFWwindow* window, float dt) {
@@ -112,6 +115,9 @@ void Game::processInput(GLFWwindow* window, float dt) {
 }
 
 void Game::render() {
+    glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
     for (const auto& pair : ResourceLoader::entities) {
         Entity* entity = pair.second;
         entity->draw();

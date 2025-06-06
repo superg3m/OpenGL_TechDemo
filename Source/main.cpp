@@ -24,13 +24,9 @@ int main() {
         lastFrame = currentFrame;
 
         application.processInput(window, deltaTime);
-
-        glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
         application.update(deltaTime);
         application.render();
-    
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

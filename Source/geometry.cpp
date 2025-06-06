@@ -1,17 +1,17 @@
 #include <geometry.hpp>
 
-Geometry Quad() {
+Geometry Geometry::Quad() {
     std::vector<Vertex> quad_vertices = {
-        //         Position         Normal     UV
-        Vertex{-0.5f, -0.5f, 0.0f,  0, 0, 1,  0, 0}, // Bottom-left
-        Vertex{ 0.5f, -0.5f, 0.0f,  0, 0, 1,  1, 0}, // Bottom-right
-        Vertex{ 0.5f,  0.5f, 0.0f,  0, 0, 1,  1, 1}, // Top-right
-        Vertex{-0.5f,  0.5f, 0.0f,  0, 0, 1,  0, 1}  // Top-left
+        //         Position             Normal          UV
+        Vertex{ 0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1, 1}, // top right
+        Vertex{ 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1, 0}, // bottom right
+        Vertex{-0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0, 0}, // bottom left
+        Vertex{-0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0, 1}  // top left 
     };
 
     std::vector<unsigned int> quad_indices = {
-        0, 1, 2,
-        2, 3, 0
+        0, 1, 3,
+        1, 2, 3
     };
 
     Geometry ret;
@@ -24,7 +24,7 @@ Geometry Quad() {
 }
 
 
-Geometry Cube() {
+Geometry Geometry::Cube() {
     std::vector<Vertex> cube_vertices = {
         // Front face
         Vertex{-0.5f, -0.5f, -0.5f,  0, 0, -1,  0, 0}, // 0
@@ -81,7 +81,7 @@ Geometry Cube() {
     return ret;
 }
 
-Geometry Sphere(int segments) {
+Geometry Geometry::Sphere(int segments) {
     std::vector<Vertex> sphere_vertices;
     std::vector<unsigned int> sphere_indices;
 
@@ -154,11 +154,11 @@ void Geometry::setup() {
     glEnableVertexAttribArray(0);
 
     // normal
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(OFFSET_OF(Vertex, normal)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(OFFSET_OF(Vertex, normal)));
     glEnableVertexAttribArray(1);
 
     // texture uv
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(OFFSET_OF(Vertex, uv)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(OFFSET_OF(Vertex, uv)));
     glEnableVertexAttribArray(2);
 
 

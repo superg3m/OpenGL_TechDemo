@@ -74,7 +74,7 @@ Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHTs) {
 
 void Game::initializeResources() {
     ResourceLoader::loadTexture("container", "../../assets/container.jpg");
-    ResourceLoader::loadTexture("smiley_face", "../../assets/awesomeface.png");
+    ResourceLoader::loadTexture("smiley_face", "../../assets/awesomeface.png", TEXTURE_VERTICAL_FLIP);
 }
 
 void Game::initializeProjection() {

@@ -28,13 +28,12 @@ void Mesh::setIndices(const std::vector<unsigned int>& indices) {
 }
 
 void Mesh::draw(GM_Matrix4 transform) {
-    this->material.shader->setMat4("model", transform);
     this->material.bindTextures();
 
     glBindVertexArray(geometry.VAO);
     int index_count = geometry.indices.size();
     if (index_count > 0) {
-        glDrawElements(draw_type, index_count, GL_UNSIGNED_INT, nullptr);
+        glDrawElements(draw_type, index_count, GL_UNSIGNED_INT, 0);
     } else {
         glDrawArrays(draw_type, 0, (geometry.vertices.size() / sizeof(Vertex)));
     }

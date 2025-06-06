@@ -29,7 +29,7 @@ void Entity::setEulerAngles(GM_Vec3 euler) {
 }
 
 void Entity::setEulerAngles(float theta_x, float theta_y, float theta_z) {
-    this->orientation = gm_quat_from_euler(GM_Vec3Lit(-theta_x, -theta_y, -theta_z));
+    this->orientation = gm_quat_from_euler(GM_Vec3Lit(theta_x, theta_y, theta_z));
 }
 
 void Entity::setScale(float scale) {

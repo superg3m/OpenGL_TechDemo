@@ -121,6 +121,10 @@ void Shader::setMat4(const char* name, const GM_Matrix4 &mat) {
     glUniformMatrix4fv(glGetUniformLocation(this->id, name), 1, GL_TRUE, &mat.data[0]);
 }
 
+void Shader::setMat4(const char* name, const glm::mat4 &mat) const {
+    glUniformMatrix4fv(glGetUniformLocation(this->id, name), 1, GL_FALSE, &mat[0][0]);
+}
+
 void Shader::setVec2(const char* name, const GM_Vec2 &value) {
     this->use();
     glUniform2fv(glGetUniformLocation(this->id, name), 1, &value.v[0]);

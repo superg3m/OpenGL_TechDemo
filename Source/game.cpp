@@ -67,7 +67,7 @@ u64 Game::getReferenceID() {
 
 void Game::initializeResources() {
     ResourceLoader::loadTexture("container", "../../assets/container.jpg");
-    ResourceLoader::loadTexture("smiley_face", "../../assets/awesomeface.png", TEXTURE_VERTICAL_FLIP);
+    ResourceLoader::loadTexture("smiley_face", "../../assets/awesomeface.png");
 }
 
 void Game::initalizeEntities() {
@@ -76,7 +76,10 @@ void Game::initalizeEntities() {
     cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("smiley_face");
     Mesh cubeMesh = Mesh(cubeMaterial, Geometry::Quad());
     Entity* player = new Entity(ENTITY_TYPE_PLAYER, cubeMesh);
-    player->setScale(100.0f, 100.0f, 1.0f);
+    player->setEulerAngles(0, 0, 45.0f);
+    player->setScale(300.0f, 400.0f, 1.0f);
+    player->setPosition(200.0f, 200.0f, 0.0f);
+
     ResourceLoader::setEntityReference("player", player);
 }
 
@@ -84,18 +87,27 @@ void Game::update(float dt) {
     local_persist float currentTime = 0; currentTime += dt;
 
     GM_Matrix4 projection = this->getProjectionMatrix();
+
     for (const auto& pair : ResourceLoader::entities) {
         Entity* entity = pair.second;
         entity->mesh.material.shader.setMat4("projection", projection);
     }
 
     Entity* player = ResourceLoader::getEntityReference("player");
-    //player->setEulerAngles(0.0f, 0.0f, sinf(currentTime) * 90.0f);
+    player->setEulerAngles(0.0f, 0.0f, sinf(currentTime) * 90.0f);
 }
 
 void Game::processInput(GLFWwindow* window, float dt) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
+
+    local_persist bool mouse_captured = true;
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && mouse_captured) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    } else if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && !mouse_captured) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        mouse_captured = true;
     }
 }
 

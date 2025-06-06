@@ -3,6 +3,11 @@
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+// Date: June 06, 2025
+// TODO(Jovanni): I think resource loader should also load geometry because
+// you can resuse a VAO instead of having to make an bind new ones all the time
+// this would be especially good with Geometry::Cube() or Geometry::Sphere becuaes I don't have to regenerate the vertex data;
+
 int main() {
     Game application(800, 600);
     GLFWwindow* window = application.initalizeWindow();

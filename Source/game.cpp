@@ -40,7 +40,7 @@ void Entity::setEulerAngles(GM_Vec3 euler) {
 }
 
 void Entity::setEulerAngles(float theta_x, float theta_y, float theta_z) {
-    this->orientation = gm_quat_from_euler(GM_Vec3Lit(theta_x, theta_y, theta_z));
+    this->orientation = gm_quat_from_euler(GM_Vec3Lit(-theta_x, -theta_y, -theta_z));
 }
 
 void Entity::setScale(float scale) {
@@ -58,7 +58,10 @@ void Entity::setScale(float scale_x, float scale_y, float scale_z) {
 GM_Matrix4 Entity::getTransform() {
     GM_Matrix4 transform = gm_mat4_identity();
     transform = gm_mat4_scale(transform, this->scale);
-    transform = gm_quat_to_mat4(this->orientation);
+
+    float theta; GM_Vec3 axis;
+    gm_quat_to_axis_angle(this->orientation, &theta, &axis);
+    transform = gm_mat4_rotate(transform, theta, axis);
     transform = gm_mat4_translate(transform, this->position);
 
     return transform;

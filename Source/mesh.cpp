@@ -28,6 +28,7 @@ void Mesh::setIndices(const std::vector<unsigned int>& indices) {
 }
 
 void Mesh::draw(GM_Matrix4 transform) {
+    this->material.shader->setMat4("model", transform);
     this->material.bindTextures();
 
     glBindVertexArray(geometry.VAO);

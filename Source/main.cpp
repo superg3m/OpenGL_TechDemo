@@ -16,7 +16,7 @@ int main() {
     cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("smiley_face");
     Mesh cubeMesh = Mesh(cubeMaterial, Geometry::Quad());
     Entity player = Entity(ENTITY_TYPE_PLAYER, cubeMesh);
-    player.setEulerAngles(0, 0, 45.0f);
+    player.setScale(1, 1.25f, 1);
     Game::entities.push_back(player);
 
     while (!glfwWindowShouldClose(window)) {
@@ -29,7 +29,10 @@ int main() {
         glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-        application.render();
+        player.setEulerAngles(0.0f, 0.0f, sinf(currentFrame) * 90.0f);
+        player.draw();
+
+        //application.render();
     
         glfwSwapBuffers(window);
         glfwPollEvents();

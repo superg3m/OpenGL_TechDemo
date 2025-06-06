@@ -13,8 +13,7 @@ int main() {
     GLFWwindow* window = application.initalizeWindow();
     ckg_assert_msg(window, "failed to initalize glfw or glad\n");
 
-    application.initializeResources();
-    application.initalizeEntities();
+    application.initalizeResources();
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = (float)glfwGetTime();

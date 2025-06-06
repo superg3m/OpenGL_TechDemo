@@ -65,12 +65,10 @@ u64 Game::getReferenceID() {
     return referenceID++;
 }
 
-void Game::initializeResources() {
+void Game::initalizeResources() {
     ResourceLoader::loadTexture("container", "../../assets/container.jpg");
     ResourceLoader::loadTexture("smiley_face", "../../assets/awesomeface.png");
-}
 
-void Game::initalizeEntities() {
     Shader cubeShader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
     Material cubeMaterial = Material(cubeShader);
     cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("smiley_face");

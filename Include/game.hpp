@@ -28,8 +28,7 @@ struct Game {
     Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
 
     GLFWwindow* initalizeWindow();
-    void initializeResources();
-    void initalizeEntities();
+    void initalizeResources();
 
     static u64 getReferenceID();
 

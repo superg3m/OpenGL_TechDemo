@@ -1,7 +1,5 @@
 #include <main.hpp>
 
-const unsigned int WINDOW_WIDTH = 800;
-const unsigned int WINDOW_HEIGHT = 600;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
@@ -14,9 +12,13 @@ int main() {
     application.initializeProjection();
 
     Shader cubeShader({"../../shader_source/model.vert", "../../shader_source/model.frag"});
-    cubeShader.addTexture("../../assets/container.jpg", "texture1", TEXTURE_VERTICAL_FLIP);
-    Mesh cubeMesh(Material(&cubeShader), Geometry({3, 3, 2}, vertices));
-    GM_Vec3 cube_position = GM_Vec3Lit(-0.5, -0.5, -0.5);
+    Material cubeMaterial = Material(&cubeShader);
+    cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("container");
+    cubeMaterial.textures[TEXTURE_DECAL] = ResourceLoader::getTexture("smiley_face");
+
+    // cubeShader.addTexture(, "texture1", TEXTURE_VERTICAL_FLIP);
+    // Mesh cubeMesh(, Geometry({3, 3, 2}, vertices));
+    // GM_Vec3 cube_position = GM_Vec3Lit(-0.5, -0.5, -0.5);
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = (float)glfwGetTime();
@@ -27,6 +29,8 @@ int main() {
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+        application.render();
     
         glfwSwapBuffers(window);
         glfwPollEvents();

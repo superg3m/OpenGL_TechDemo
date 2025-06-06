@@ -9,6 +9,12 @@
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
 
+const unsigned int WINDOW_WIDTH = 800;
+const unsigned int WINDOW_HEIGHT = 600;
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow *window);
+
 GLFWwindow* initalize_glfw_and_glad() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -43,6 +49,3 @@ GLFWwindow* initalize_glfw_and_glad() {
 
     return window;
 }
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);

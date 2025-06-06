@@ -15,12 +15,6 @@ enum TextureType {
     TEXTURE_MAX
 };
 
-enum TextureFlag {
-    TEXTURE_DEFAULT = 0x0,
-    TEXTURE_PIXEL_PERFECT = 0x1,
-    TEXTURE_VERTICAL_FLIP = 0x2
-};
-
 using GLTextureID = int;
 struct Material {
     Shader* shader;

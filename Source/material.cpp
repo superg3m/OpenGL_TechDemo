@@ -1,5 +1,9 @@
 #include <material.hpp>
 
+Material::Material(Shader* shader) {
+    this->shader = shader;
+}
+
 void Material::bindTextures() {
     this->shader->use();
     for (int i = 0; i < TEXTURE_MAX; i++) {

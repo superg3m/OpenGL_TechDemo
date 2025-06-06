@@ -4,13 +4,12 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 int main() {
-    GLFWwindow* window = initalize_glfw_and_glad();
-    ckg_assert_msg(window, "failed to initalize glfw or glad");
+    Game application(800, 600);
+    GLFWwindow* window = application.initalizeWindow();
+    ckg_assert_msg(window, "failed to initalize glfw or glad\n");
 
-    Game application(WINDOW_WIDTH, WINDOW_HEIGHT);
     application.initializeResources();
-    application.initializeProjection();
-
+    
     Shader cubeShader({"../../shader_source/no_projection.vert", "../../shader_source/no_projection.frag"});
     Material cubeMaterial = Material(&cubeShader);
     cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("container");
@@ -19,12 +18,14 @@ int main() {
     Entity player = Entity(ENTITY_TYPE_PLAYER, cubeMesh);
     Game::entities.push_back(player);
 
+    application.initializeProjection();
+
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = (float)glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        processInput(window);
+        application.processInput(window, deltaTime);
 
         glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -39,13 +40,8 @@ int main() {
     return 0;
 }
 
-void processInput(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, true);
-    }
-}
-
-
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
+    Game::WINDOW_WIDTH = width;
+    Game::WINDOW_HEIGHT = height;
+    glViewport(0, 0, Game::WINDOW_WIDTH, Game::WINDOW_HEIGHT);
 }

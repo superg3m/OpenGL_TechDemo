@@ -5,6 +5,8 @@
 #include <vector>
 #include <mesh.hpp>
 #include <resource_loader.hpp>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 // Date: June 03, 2025
 // TODO(Jovanni): I think the reference ID is a unique ID for serialization?
@@ -64,15 +66,18 @@ struct Game {
   
     bool Keys[1024];
     static std::vector<Entity> entities;
-    unsigned int WINDOW_WIDTH, WINDOW_HEIGHT;
+    static unsigned int WINDOW_WIDTH;
+    static unsigned int WINDOW_HEIGHT;
     Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
 
+    GLFWwindow* initalizeWindow();
     void initializeResources();
     void initializeProjection();
+    void initalizeEntities();
 
     static u64 getReferenceID();
 
-    void processInput(float dt);
+    void processInput(GLFWwindow* window, float dt);
     void update(float dt);
     void render();
 };

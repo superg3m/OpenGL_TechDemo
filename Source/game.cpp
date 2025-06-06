@@ -1,6 +1,8 @@
 #include <game.hpp>
 
 std::vector<Entity> Game::entities;
+unsigned int Game::WINDOW_WIDTH;
+unsigned int Game::WINDOW_HEIGHT;
 
 EntityID::EntityID() {
     // Date: June 05, 2025
@@ -15,7 +17,7 @@ Entity::Entity(EntityType type, Mesh mesh) {
 
     this->position = GM_Vec3Lit(0, 0, 0);
     this->orientation = GM_QuaternionLit(1, 0, 0, 0);
-    this->scale = GM_Vec3Lit(0, 0, 0);
+    this->scale = GM_Vec3Lit(1, 1, 1);
 
     this->mesh = mesh;
 }
@@ -66,10 +68,60 @@ void Entity::draw() {
     this->mesh.draw(this->getTransform());
 }
 
-Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHTs) { 
+Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     this->state = GAME_ACTIVE;
-    this->WINDOW_WIDTH = WINDOW_WIDTH;
-    this->WINDOW_HEIGHT = WINDOW_HEIGHT;
+    Game::WINDOW_WIDTH = WINDOW_WIDTH;
+    Game::WINDOW_HEIGHT = WINDOW_HEIGHT;
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow *window);
+
+GLFWwindow* Game::initalizeWindow() {
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    #ifdef __APPLE__
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    #endif
+
+    GLFWwindow* window = glfwCreateWindow(Game::WINDOW_WIDTH, Game::WINDOW_HEIGHT, "LearnOpenGL", nullptr, nullptr);
+    if (window == nullptr) {
+        CKG_LOG_ERROR("Failed to create GLFW window\n");
+        glfwTerminate();
+        return nullptr;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        CKG_LOG_ERROR("Failed to initialize GLAD\n");
+        glfwTerminate();
+        return nullptr;
+    }
+
+    glfwSwapInterval(1);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_DEPTH_TEST);
+
+    return window;
+}
+
+void Game:: initalizeEntities() {
+    // Shader cubeShader({"../../shader_source/no_projection.vert", "../../shader_source/no_projection.frag"});
+    // Material cubeMaterial = Material(&cubeShader);
+    // cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("container");
+    // cubeMaterial.textures[TEXTURE_DECAL] = ResourceLoader::getTexture("smiley_face");
+    // Mesh cubeMesh = Mesh(cubeMaterial, Geometry::Quad());
+    // Entity player = Entity(ENTITY_TYPE_PLAYER, cubeMesh);
+    // Game::entities.push_back(player);
+
+    // if I put it in here it goes out of scope so I think I will have to allocate these or use a static array of elements
 }
 
 void Game::initializeResources() {
@@ -97,8 +149,10 @@ void Game::update(float dt) {
     
 }
 
-void Game::processInput(float dt) {
-   
+void Game::processInput(GLFWwindow* window, float dt) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, true);
+    }
 }
 
 void Game::render() {

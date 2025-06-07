@@ -32,10 +32,8 @@ struct Game {
 
     static u64 getReferenceID();
 
-    void processInput(GLFWwindow* window, float dt);
     void update(float dt);
     void render();
-
 private:
     GM_Matrix4 getProjectionMatrix();
 };

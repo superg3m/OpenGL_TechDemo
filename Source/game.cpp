@@ -10,8 +10,8 @@ Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) {
     Game::WINDOW_HEIGHT = WINDOW_HEIGHT;
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
 
 GLFWwindow* Game::initalizeWindow() {
     glfwInit();
@@ -31,6 +31,7 @@ GLFWwindow* Game::initalizeWindow() {
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetKeyCallback(window, key_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -86,20 +87,6 @@ void Game::update(float dt) {
 
     Entity* player = ResourceLoader::getEntityReference("player");
     player->setEulerAngles(0.0f, 0.0f, sinf(currentTime) * 90.0f);
-}
-
-void Game::processInput(GLFWwindow* window, float dt) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, true);
-    }
-
-    local_persist bool mouse_captured = true;
-    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && mouse_captured) {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    } else if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && !mouse_captured) {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        mouse_captured = true;
-    }
 }
 
 void Game::render() {

@@ -20,7 +20,6 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        application.processInput(window, deltaTime);
         application.update(deltaTime);
         application.render();
 
@@ -30,6 +29,18 @@ int main() {
 
     glfwTerminate();
     return 0;
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if ((key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)) {
+        glfwSetWindowShouldClose(window, true);
+    }
+
+    local_persist bool mouse_captured = true;
+    if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+        mouse_captured = !mouse_captured;
+        glfwSetInputMode(window, GLFW_CURSOR, mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    }
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {

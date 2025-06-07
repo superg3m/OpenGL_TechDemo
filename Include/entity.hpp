@@ -3,8 +3,6 @@
 #include <vector>
 #include <mesh.hpp>
 
-
-
 enum EntityType {
     ENTITY_TYPE_NONE,
     ENTITY_TYPE_PLAYER,
@@ -18,7 +16,6 @@ enum EntityType {
 // The reference_id is for pointing another entity at this reference in a stable way
 // think of like a puzzle where you reference some type of trigger entity you would use the reference_id
 struct Entity {
-    // base
     u64 reference_identifer;
     EntityType type;
 

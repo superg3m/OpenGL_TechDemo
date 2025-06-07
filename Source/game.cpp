@@ -84,13 +84,6 @@ void Game::initalizeResources() {
 void Game::update(float dt) {
     local_persist float currentTime = 0; currentTime += dt;
 
-    GM_Matrix4 projection = this->getProjectionMatrix();
-
-    for (const auto& pair : ResourceLoader::entities) {
-        Entity* entity = pair.second;
-        entity->mesh.material.shader.setMat4("projection", projection);
-    }
-
     Entity* player = ResourceLoader::getEntityReference("player");
     player->setEulerAngles(0.0f, 0.0f, sinf(currentTime) * 90.0f);
 }
@@ -113,8 +106,11 @@ void Game::render() {
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+    GM_Matrix4 projection = this->getProjectionMatrix();
+
     for (const auto& pair : ResourceLoader::entities) {
         Entity* entity = pair.second;
+        entity->mesh.material.shader.setMat4("projection", projection);
         entity->draw();
     }
 }

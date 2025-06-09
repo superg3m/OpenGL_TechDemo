@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gm.h>
+#include <gm.hpp>
 #include <glad/glad.h>
 #include <shader.hpp>
 #include <vector>
@@ -18,7 +18,7 @@ enum TextureType {
 using GLTextureID = int;
 struct Material {
     Shader shader;
-    GM_RGBA color;
+    //GM_RGBA color;
     GLTextureID textures[TEXTURE_MAX] = {0};
 
     Material() = default;

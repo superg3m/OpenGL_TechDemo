@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gm.h>
+#include <gm.hpp>
 #include <glad/glad.h>
 #include <vector>
 
@@ -8,6 +8,17 @@ struct Vertex {
     GM_Vec3 position;
     GM_Vec3 normal;
     GM_Vec2 uv;
+
+    Vertex(GM_Vec3 position, GM_Vec3 normal, GM_Vec2 uv) {
+        this->position = position;
+        this->normal = normal;
+        this->uv = uv;
+    }
+    Vertex(float px, float py, float pz, float nx, float ny, float nz, float u, float v) {
+        this->position = GM_Vec3(px, py, pz);
+        this->normal = GM_Vec3(nx, ny, nz);
+        this->uv = GM_Vec2(u, v);
+    }
 };
 
 struct Geometry {

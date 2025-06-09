@@ -25,6 +25,7 @@ pc: ProjectConfig = ProjectConfig(
         ),
         Dependency(
             name="GameMath",
+            branch_name="Rework",
         )
     ],
     project_debug_with_visual_studio = False,
@@ -82,7 +83,7 @@ procedures_config = {
         source_files = [
             "../../Source/*.cpp",
             "../../ckg/*.c",
-            "../../GameMath/*.c",
+            "../../GameMath/*.cpp",
             "../../Libraries/glad/src/glad.c"
         ],
         additional_libs = libs,

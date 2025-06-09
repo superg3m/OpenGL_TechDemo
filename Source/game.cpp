@@ -58,7 +58,7 @@ GM_Matrix4 Game::getProjectionMatrix() {
     float near_plane = -1.0f; 
     float far_plane = 1.0f;
 
-    return gm_mat4_orthographic(l, r, b, t, near_plane, far_plane);
+    return GM_Matrix4::orthographic(l, r, b, t, near_plane, far_plane);
 }
 
 u64 Game::getReferenceID() {
@@ -94,7 +94,6 @@ void Game::render() {
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     GM_Matrix4 projection = this->getProjectionMatrix();
-
     for (const auto& pair : ResourceLoader::entities) {
         Entity* entity = pair.second;
         entity->mesh.material.shader.setMat4("projection", projection);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <gm.h>
+#include <gm.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

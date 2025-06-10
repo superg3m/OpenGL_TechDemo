@@ -66,27 +66,80 @@ u64 Game::getReferenceID() {
     return referenceID++;
 }
 
+float grid_cells_per_row = 6.0f;
+float grid_cells_per_column = 6.0f;
+float grid_cell_width = 800.0f / grid_cells_per_row;
+float grid_cell_hieght = 600.0f/ grid_cells_per_column;
+
+float x_offset = (grid_cell_width / 2.0f);
+float y_offset = (grid_cell_hieght / 2.0f);
+
+void create_brick(int brick_type) {
+    Shader brickShader = Shader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
+    Material brickMaterial = Material(brickShader);
+    Mesh brickMesh = Mesh(brickMaterial, Geometry::Quad());
+    Entity* brick = new Entity(ENTITY_TYPE_BRICK, brickMesh);
+
+    local_persist int brick_index = 0;
+    brick->setPosition(GM_Vec3(x_offset, y_offset, 0));
+    brick->setScale(GM_Vec3(grid_cell_width, grid_cell_hieght, 1));
+    x_offset += grid_cell_width;
+    if (x_offset >= Game::WINDOW_WIDTH) {
+        x_offset = grid_cell_width / 2;
+        y_offset += grid_cell_hieght;
+    }
+
+    switch (brick_type) {
+        case 0: {
+            return;
+        } break;
+
+        case 1: {
+            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("SolidBrick");
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
+        } break;
+
+        case 2: {
+            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(0, 0, 1));
+            brick->health = 1;
+        } break;
+
+        case 3: {
+            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(0, 1, 0));
+            brick->health = 2;
+        } break;
+    
+        case 4: {
+            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 0, 0));
+            brick->health = 5;
+        } break;
+    }
+    
+    ResourceLoader::setEntityReference("brick_" + std::to_string(brick_index), brick);
+    brick_index++;
+}
+
 void Game::initalizeResources() {
     ResourceLoader::loadTexture("container", "../../assets/container.jpg");
-    ResourceLoader::loadTexture("smiley_face", "../../assets/awesomeface.png");
+    ResourceLoader::loadTexture("Brick", "../../assets/block.png");
+    ResourceLoader::loadTexture("SolidBrick", "../../assets/block_solid.png");
 
-    Shader cubeShader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
-    Material cubeMaterial = Material(cubeShader);
-    cubeMaterial.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("smiley_face");
-    Mesh cubeMesh = Mesh(cubeMaterial, Geometry::Quad());
-    Entity* player = new Entity(ENTITY_TYPE_PLAYER, cubeMesh);
+    int brick_layout[] = {
+        1, 1, 1, 1, 1, 1, 
+        2, 2, 0, 0, 2, 2,
+        3, 3, 4, 4, 3, 3
+    };
 
-    player->setScale(300.0f, 400.0f, 1.0f);
-    player->setPosition(200.0f, 200.0f, 0.0f);
-
-    ResourceLoader::setEntityReference("player", player);
+    for (int i = 0; i < ArrayCount(brick_layout); i++) {
+        create_brick(brick_layout[i]);
+    }
 }
 
 void Game::update(float dt) {
     local_persist float currentTime = 0; currentTime += dt;
-
-    Entity* player = ResourceLoader::getEntityReference("player");
-    player->setEulerAngles(0.0f, 0.0f, sinf(currentTime) * 90.0f);
 }
 
 void Game::render() {

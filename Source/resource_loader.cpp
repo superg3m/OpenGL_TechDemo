@@ -6,7 +6,7 @@ std::map<std::string, int> ResourceLoader::textures;
 std::map<std::string, Entity*> ResourceLoader::entities;
 
 GLTextureID ResourceLoader::loadTexture(std::string key, const char *file, int texture_flags) {
-    ckg_assert_msg(ckg_io_path_exists(file), "Texture path doesn't exist!\n");
+    ckg_assert_msg(ckg_io_path_exists(file), "Texture path: '%s' doesn't exist!\n", file);
 
     if (ResourceLoader::textures.count(key)) {
         CKG_LOG_WARN("ResourceLoader | Key: '%s' already exists loading cached TextureID\n", key.c_str());

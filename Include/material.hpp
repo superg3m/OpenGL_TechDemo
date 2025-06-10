@@ -18,7 +18,6 @@ enum TextureType {
 using GLTextureID = int;
 struct Material {
     Shader shader;
-    //GM_RGBA color;
     GLTextureID textures[TEXTURE_MAX] = {0};
 
     Material() = default;

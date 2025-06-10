@@ -7,7 +7,7 @@ enum EntityType {
     ENTITY_TYPE_NONE,
     ENTITY_TYPE_PLAYER,
     ENTITY_TYPE_BALL,
-    ENTITY_TYPE_BLOCK,
+    ENTITY_TYPE_BRICK,
     ENTITY_TYPE_POWERUP,
 };
 
@@ -24,6 +24,8 @@ struct Entity {
     GM_Vec3 scale;
 
     Mesh mesh;
+
+    int health;
 
     Entity(EntityType type, Mesh mesh);
 

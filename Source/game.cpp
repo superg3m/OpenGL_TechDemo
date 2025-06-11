@@ -68,6 +68,8 @@ u64 Game::getReferenceID() {
 }
 
 void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hieght, float &x_offset, float &y_offset, int brick_type) {
+    // Date: June 11, 2025
+    // TODO(Jovanni): I hate the fact that you have to declare all of this
     Shader brickShader = Shader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
     Material brickMaterial = Material(brickShader);
     Mesh brickMesh = Mesh(brickMaterial, Geometry::Quad());
@@ -89,6 +91,10 @@ void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hiegh
         } break;
 
         case 1: {
+            // Date: June 11, 2025
+            // TODO(Jovanni): I hate that you have to do brick->mesh.material
+            // should just be brick->setTexture(ResourceLoader::getTexture("SolidBrick"), TEXTURE_COLOR);
+            // should just be brick->setVec3("spriteColor", GM_Vec3(1, 1, 1));
             brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("SolidBrick");
             brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_4");
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));

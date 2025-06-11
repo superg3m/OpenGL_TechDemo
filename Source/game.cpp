@@ -131,7 +131,7 @@ GameLevel::GameLevel(int cells_per_row, int cells_per_column, std::vector<int> l
     this->cells_per_column = cells_per_column;
 
     float cell_width = Game::WINDOW_WIDTH / (float)this->cells_per_row;
-    float cell_height =  Game::WINDOW_HEIGHT / (float)this->cells_per_column;
+    float cell_height = Game::WINDOW_HEIGHT / (float)this->cells_per_column;
 
     float x_offset = (cell_width / 2.0f);
     float y_offset = (cell_height / 2.0f);
@@ -143,7 +143,7 @@ GameLevel::GameLevel(int cells_per_row, int cells_per_column, std::vector<int> l
 
 void GameLevel::update() {
     float cell_width = Game::WINDOW_WIDTH / (float)this->cells_per_row;
-    float cell_height =  Game::WINDOW_HEIGHT / (float)this->cells_per_column;
+    float cell_height = Game::WINDOW_HEIGHT / (float)this->cells_per_column;
     float x_offset = (cell_width / 2.0f);
     float y_offset = (cell_height / 2.0f);
 

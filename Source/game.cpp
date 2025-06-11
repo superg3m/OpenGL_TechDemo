@@ -96,6 +96,7 @@ void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hiegh
 
         case 2: {
             brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
+            brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_4");
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(0, 0, 1));
             brick->health = 1;
         } break;

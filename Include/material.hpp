@@ -12,13 +12,15 @@ enum TextureType {
     TEXTURE_NORMAL,
     TEXTURE_HEIGHT,
     TEXTURE_ALPHA,
-    TEXTURE_MAX
+    TEXTURE_MAX,
+
+    TEXTURE_INVALID = -1,
 };
 
 using GLTextureID = int;
 struct Material {
     Shader shader;
-    GLTextureID textures[TEXTURE_MAX] = {0};
+    GLTextureID textures[TEXTURE_MAX];
 
     Material() = default;
     Material(Shader shader);

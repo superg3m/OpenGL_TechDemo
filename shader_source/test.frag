@@ -2,10 +2,30 @@
 in vec2 TexCoords;
 out vec4 color;
 
-uniform sampler2D texture1;
-uniform sampler2D texture2;
-uniform vec3 spriteColor;
+struct Material {
+    sampler2D mainTexture;
+    sampler2D decalTexture;
+    bool hasDecal;
+};
 
-void main() {    
-    color = vec4(spriteColor, 1.0) * mix(texture(texture1, TexCoords), texture(texture2, TexCoords), 0.2);
-}  
+uniform vec3 spriteColor;
+uniform Material material;
+
+void main() {
+    vec4 mainTex = texture(material.mainTexture, TexCoords);
+    vec3 finalColor = mainTex.rgb;
+    float finalAlpha = mainTex.a;
+
+    finalColor *= spriteColor;
+    
+    if (material.hasDecal) {
+        vec4 decalTex = texture(material.decalTexture, TexCoords);
+        vec3 transparentColor = vec3(1.0, 1.0, 1.0); 
+        float threshold = 0.01;
+        float distToWhite = distance(decalTex.rgb, transparentColor);
+        float blendFactor = step(threshold, distToWhite);
+        finalColor = mix(finalColor, decalTex.rgb, blendFactor);
+    }
+
+    color = vec4(finalColor, finalAlpha);
+}

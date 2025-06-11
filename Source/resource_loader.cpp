@@ -116,7 +116,11 @@ TextureAtlas::TextureAtlas(std::string key, const char *file, int texture_flags)
 
     if (data) {
         this->atlasTexture = data;
+        this->m_height = height;
+        this->m_width = width;
         this->format = format;
+
+
     } else {
         CKG_LOG_ERROR("ResourceLoader | Failed to load texture\n"); 
     }
@@ -134,11 +138,13 @@ void TextureAtlas::bindPartitionedTexture(std::string key, int start_x, int star
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIPMAP_TYPE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MIPMAP_TYPE);
 
-    u8* partitioned_texture = (u8*)ckg_alloc(t_width * t_height);
+    size_t bytes_per_pixel = 4;
+    u8* partitioned_texture = (u8*)ckg_alloc((t_width * t_height) * bytes_per_pixel);
     for (int i = 0; i < t_height - 1; i++) {
-        u8* partitioned_row = partitioned_texture + (t_width * i);
-        u8* atlas_row = this->atlasTexture + (this->m_width * i);
-        ckg_memory_copy(partitioned_row, t_width, atlas_row, t_width);
+        u8* partitioned_row = partitioned_texture + (t_width * bytes_per_pixel * i);
+        u8* atlas_row = this->atlasTexture + (this->m_width * bytes_per_pixel * i);
+
+        ckg_memory_copy(partitioned_row, t_width * bytes_per_pixel, atlas_row, t_width * bytes_per_pixel);
     }
 
     glTexImage2D(GL_TEXTURE_2D, 0, format, t_width, t_height, 0, format, GL_UNSIGNED_BYTE, partitioned_texture);

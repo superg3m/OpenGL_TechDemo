@@ -14,7 +14,7 @@ enum TextureFlag {
 struct TextureAtlas {
     u8* atlasTexture;
     int m_width;
-    int m_hieght;
+    int m_height;
     GLenum format;
     std::map<std::string, GLTextureID> textures;
 

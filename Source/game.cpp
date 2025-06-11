@@ -96,25 +96,26 @@ void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hiegh
             // should just be brick->setTexture(ResourceLoader::getTexture("SolidBrick"), TEXTURE_COLOR);
             // should just be brick->setVec3("spriteColor", GM_Vec3(1, 1, 1));
             brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("SolidBrick");
-            brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_4");
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
         } break;
 
         case 2: {
             brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
-            brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_4");
+            brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_5");
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(0, 0, 1));
             brick->health = 1;
         } break;
 
         case 3: {
             brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
+            brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_2");
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(0, 1, 0));
             brick->health = 2;
         } break;
     
         case 4: {
             brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
+            brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_0");
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 0, 0));
             brick->health = 5;
         } break;
@@ -162,11 +163,19 @@ void GameLevel::update() {
 
 void Game::initalizeResources() {
     TextureAtlas* atlas = ResourceLoader::loadTextureAtlas("breaking", "../../assets/block_breaking_atlas.png");
-    atlas->bindPartitionedTexture("break_4", 0, 0, 396, 408, TEXTURE_PIXEL_PERFECT);
+    int textures_per_row = 2; 
+    int textures_per_column = 3;
+
+    int x_offset = atlas->m_width / textures_per_row;
+    int y_offset = atlas->m_height / textures_per_column;
+
+    atlas->bindPartitionedTexture("break_5", 0,   0,   396, 408, TEXTURE_PIXEL_PERFECT);
+    atlas->bindPartitionedTexture("break_4", 396, 0,   396, 408, TEXTURE_PIXEL_PERFECT);
+    atlas->bindPartitionedTexture("break_3", 0,   408, 396, 408, TEXTURE_PIXEL_PERFECT);
+    atlas->bindPartitionedTexture("break_2", 396, 408, 396, 408, TEXTURE_PIXEL_PERFECT);
+    atlas->bindPartitionedTexture("break_1", 0,   816, 396, 408, TEXTURE_PIXEL_PERFECT);
+    atlas->bindPartitionedTexture("break_0", 396, 816, 396, 408, TEXTURE_PIXEL_PERFECT);
     atlas->freeAtlas();
-    // atlas->bindPartitionedTexture("break_1");
-    // atlas->bindPartitionedTexture("break_2");
-    // atlas->bindPartitionedTexture("break_3");
 
     ResourceLoader::loadTexture("container", "../../assets/container.jpg");
     ResourceLoader::loadTexture("Brick", "../../assets/block.png");

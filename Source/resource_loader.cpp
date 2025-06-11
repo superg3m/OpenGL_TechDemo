@@ -139,10 +139,13 @@ void TextureAtlas::bindPartitionedTexture(std::string key, int start_x, int star
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MIPMAP_TYPE);
 
     size_t bytes_per_pixel = 4;
+
     u8* partitioned_texture = (u8*)ckg_alloc((t_width * t_height) * bytes_per_pixel);
+    u8* start_atlas = this->atlasTexture + ((start_x * bytes_per_pixel) + (this->m_width * bytes_per_pixel * start_y));
+
     for (int i = 0; i < t_height - 1; i++) {
         u8* partitioned_row = partitioned_texture + (t_width * bytes_per_pixel * i);
-        u8* atlas_row = this->atlasTexture + (this->m_width * bytes_per_pixel * i);
+        u8* atlas_row = start_atlas + (this->m_width * bytes_per_pixel * i);
 
         ckg_memory_copy(partitioned_row, t_width * bytes_per_pixel, atlas_row, t_width * bytes_per_pixel);
     }

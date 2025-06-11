@@ -46,5 +46,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     Game::WINDOW_WIDTH = width;
     Game::WINDOW_HEIGHT = height;
+
+    Game::level.update();
+    
     glViewport(0, 0, Game::WINDOW_WIDTH, Game::WINDOW_HEIGHT);
 }

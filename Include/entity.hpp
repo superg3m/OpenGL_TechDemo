@@ -26,6 +26,7 @@ struct Entity {
     Mesh mesh;
 
     int health;
+    bool dead;
 
     Entity(EntityType type, Mesh mesh);
 

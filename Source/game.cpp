@@ -3,6 +3,7 @@
 GM_Matrix4 Game::projection;
 unsigned int Game::WINDOW_WIDTH;
 unsigned int Game::WINDOW_HEIGHT;
+GameLevel Game::level;
 
 Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     this->state = GAME_ACTIVE;
@@ -66,15 +67,7 @@ u64 Game::getReferenceID() {
     return referenceID++;
 }
 
-float grid_cells_per_row = 6.0f;
-float grid_cells_per_column = 6.0f;
-float grid_cell_width = 800.0f / grid_cells_per_row;
-float grid_cell_hieght = 600.0f/ grid_cells_per_column;
-
-float x_offset = (grid_cell_width / 2.0f);
-float y_offset = (grid_cell_hieght / 2.0f);
-
-void create_brick(int brick_type) {
+void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hieght, float &x_offset, float &y_offset, int brick_type) {
     Shader brickShader = Shader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
     Material brickMaterial = Material(brickShader);
     Mesh brickMesh = Mesh(brickMaterial, Geometry::Quad());
@@ -89,13 +82,15 @@ void create_brick(int brick_type) {
         y_offset += grid_cell_hieght;
     }
 
+    TextureAtlas* breaking_atlas = ResourceLoader::getTextureAtlas("breaking");
     switch (brick_type) {
         case 0: {
-            return;
+
         } break;
 
         case 1: {
             brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("SolidBrick");
+            brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_4");
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
         } break;
 
@@ -119,27 +114,69 @@ void create_brick(int brick_type) {
     }
     
     ResourceLoader::setEntityReference("brick_" + std::to_string(brick_index), brick);
+    level->brick_entity_references.push_back(brick);
     brick_index++;
 }
 
+
+GameLevel::GameLevel(int cells_per_row, int cells_per_column, std::vector<int> level_data) {
+    this->cells_per_row = cells_per_row;
+    this->cells_per_column = cells_per_column;
+
+    float cell_width = Game::WINDOW_WIDTH / (float)this->cells_per_row;
+    float cell_height =  Game::WINDOW_HEIGHT / (float)this->cells_per_column;
+
+    float x_offset = (cell_width / 2.0f);
+    float y_offset = (cell_height / 2.0f);
+
+    for (int brick : level_data) {
+        create_brick(this, cell_width, cell_height, x_offset, y_offset, brick);
+    }
+}
+
+void GameLevel::update() {
+    float cell_width = Game::WINDOW_WIDTH / (float)this->cells_per_row;
+    float cell_height =  Game::WINDOW_HEIGHT / (float)this->cells_per_column;
+    float x_offset = (cell_width / 2.0f);
+    float y_offset = (cell_height / 2.0f);
+
+    for (Entity* brick : this->brick_entity_references) {
+        brick->setPosition(GM_Vec3(x_offset, y_offset, 0));
+        brick->setScale(GM_Vec3(cell_width, cell_height, 1));
+
+        x_offset += cell_width;
+        if (x_offset >= Game::WINDOW_WIDTH) {
+            x_offset = cell_width / 2;
+            y_offset += cell_height;
+        }
+    }
+}
+
+
 void Game::initalizeResources() {
+    TextureAtlas* atlas = ResourceLoader::loadTextureAtlas("breaking", "../../assets/block_breaking_atlas.png");
+    atlas->bindPartitionedTexture("break_4", 0, 0, 396, 408, TEXTURE_PIXEL_PERFECT);
+    atlas->freeAtlas();
+    // atlas->bindPartitionedTexture("break_1");
+    // atlas->bindPartitionedTexture("break_2");
+    // atlas->bindPartitionedTexture("break_3");
+
     ResourceLoader::loadTexture("container", "../../assets/container.jpg");
     ResourceLoader::loadTexture("Brick", "../../assets/block.png");
     ResourceLoader::loadTexture("SolidBrick", "../../assets/block_solid.png");
 
-    int brick_layout[] = {
+    std::vector<int> brick_layout = {
         1, 1, 1, 1, 1, 1, 
         2, 2, 0, 0, 2, 2,
         3, 3, 4, 4, 3, 3
     };
 
-    for (int i = 0; i < ArrayCount(brick_layout); i++) {
-        create_brick(brick_layout[i]);
-    }
+    Game::level = GameLevel(6, 6, brick_layout);
 }
 
+static float currentTime = 0;
 void Game::update(float dt) {
-    local_persist float currentTime = 0; currentTime += dt;
+    currentTime += dt;
 }
 
 void Game::render() {

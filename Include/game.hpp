@@ -18,8 +18,20 @@ enum GameState {
     GAME_WIN
 }; 
 
+struct GameLevel {
+    int cells_per_row;
+    int cells_per_column;
+    std::vector<int> level_data;
+    std::vector<Entity*> brick_entity_references;
+
+    GameLevel() = default;
+    GameLevel(int cells_per_row, int cells_per_column, std::vector<int> level_data);
+    void update();
+};
+
 struct Game {
     GameState state;
+    static GameLevel level;
   
     bool Keys[1024];
     static GM_Matrix4 projection;

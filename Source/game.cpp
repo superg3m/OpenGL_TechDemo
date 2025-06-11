@@ -45,7 +45,7 @@ GLFWwindow* Game::initalizeWindow() {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
 
     return window;
 }
@@ -87,7 +87,7 @@ void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hiegh
     TextureAtlas* breaking_atlas = ResourceLoader::getTextureAtlas("breaking");
     switch (brick_type) {
         case 0: {
-
+            brick->dead = true;
         } break;
 
         case 1: {
@@ -119,6 +119,12 @@ void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hiegh
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 0, 0));
             brick->health = 5;
         } break;
+
+        case 5: {
+            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 0, 1));
+            brick->health = 10;
+        } break;
     }
     
     ResourceLoader::setEntityReference("brick_" + std::to_string(brick_index), brick);
@@ -132,7 +138,7 @@ GameLevel::GameLevel(int cells_per_row, int cells_per_column, std::vector<int> l
     this->cells_per_column = cells_per_column;
 
     float cell_width = Game::WINDOW_WIDTH / (float)this->cells_per_row;
-    float cell_height = Game::WINDOW_HEIGHT / (float)this->cells_per_column;
+    float cell_height = (Game::WINDOW_HEIGHT / 2.0f) / (float)this->cells_per_column;
 
     float x_offset = (cell_width / 2.0f);
     float y_offset = (cell_height / 2.0f);
@@ -144,7 +150,7 @@ GameLevel::GameLevel(int cells_per_row, int cells_per_column, std::vector<int> l
 
 void GameLevel::update() {
     float cell_width = Game::WINDOW_WIDTH / (float)this->cells_per_row;
-    float cell_height = Game::WINDOW_HEIGHT / (float)this->cells_per_column;
+    float cell_height = (Game::WINDOW_HEIGHT / 2.0f) / (float)this->cells_per_column;
     float x_offset = (cell_width / 2.0f);
     float y_offset = (cell_height / 2.0f);
 
@@ -177,17 +183,31 @@ void Game::initalizeResources() {
     atlas->bindPartitionedTexture("break_0", 396, 816, 396, 408, TEXTURE_PIXEL_PERFECT);
     atlas->freeAtlas();
 
+    ResourceLoader::loadTexture("background", "../../assets/background.jpg");
     ResourceLoader::loadTexture("container", "../../assets/container.jpg");
     ResourceLoader::loadTexture("Brick", "../../assets/block.png");
     ResourceLoader::loadTexture("SolidBrick", "../../assets/block_solid.png");
 
     std::vector<int> brick_layout = {
-        1, 1, 1, 1, 1, 1, 
-        2, 2, 0, 0, 2, 2,
-        3, 3, 4, 4, 3, 3
+        1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 1, 3, 1, 4, 1, 5, 1, 4, 1, 3, 1, 2,
+        2, 3, 3, 4, 4, 5, 5, 5, 4, 4, 3, 3, 2,
+        2, 1, 3, 1, 4, 1, 5, 1, 4, 1, 3, 1, 2,
+        2, 2, 3, 3, 4, 4, 5, 4, 4, 3, 3, 2, 2,
     };
 
-    Game::level = GameLevel(6, 6, brick_layout);
+    Shader backgroundShader = Shader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
+    Material backgroundMaterial = Material(backgroundShader);
+    Mesh backgroundMesh = Mesh(backgroundMaterial, Geometry::Quad());
+    Entity* background = new Entity(ENTITY_TYPE_BACKGROUND, backgroundMesh);
+    background->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, Game::WINDOW_HEIGHT / 2.0f, 0));
+    background->setScale((float)Game::WINDOW_WIDTH, (float)Game::WINDOW_HEIGHT, 1);
+    background->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("background");
+    background->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
+    ResourceLoader::setEntityReference("background", background);
+
+    Game::level = GameLevel(13, 6, brick_layout);
 }
 
 static float currentTime = 0;
@@ -200,8 +220,8 @@ void Game::render() {
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     GM_Matrix4 projection = this->getProjectionMatrix();
-    for (const auto& pair : ResourceLoader::entities) {
-        Entity* entity = pair.second;
+    for (const auto& key : ResourceLoader::entity_keys) {
+        Entity* entity = ResourceLoader::getEntityReference(key);
         entity->mesh.material.shader.setMat4("projection", projection);
         entity->draw();
     }

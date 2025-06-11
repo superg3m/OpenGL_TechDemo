@@ -29,7 +29,9 @@ using GLTextureID = int;
 struct ResourceLoader {
     static std::map<std::string, GLTextureID> textures;
     static std::map<std::string, TextureAtlas*> atlas;
-    static std::map<std::string, Entity*> entities;
+
+    static std::vector<std::string> entity_keys;
+    static std::map<std::string, Entity*> entity_map;
 
     static void loadTexture(std::string key, const char *file, int texture_flags = TEXTURE_DEFAULT);
     static GLTextureID getTexture(std::string key);

@@ -9,6 +9,7 @@ enum EntityType {
     ENTITY_TYPE_BALL,
     ENTITY_TYPE_BRICK,
     ENTITY_TYPE_POWERUP,
+    ENTITY_TYPE_BACKGROUND,
 };
 
 // Date: June 03, 2025
@@ -20,6 +21,7 @@ struct Entity {
     EntityType type;
 
     GM_Vec3 position;
+    GM_Vec3 velocity;
     GM_Quaternion orientation;
     GM_Vec3 scale;
 

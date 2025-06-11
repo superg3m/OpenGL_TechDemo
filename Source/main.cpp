@@ -47,6 +47,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     Game::WINDOW_WIDTH = width;
     Game::WINDOW_HEIGHT = height;
 
+    Entity* background = ResourceLoader::getEntityReference("background");
+    background->setScale((float)Game::WINDOW_WIDTH, (float)Game::WINDOW_HEIGHT, 1);
+
     Game::level.update();
     
     glViewport(0, 0, Game::WINDOW_WIDTH, Game::WINDOW_HEIGHT);

@@ -4,7 +4,9 @@
 
 std::map<std::string, GLTextureID> ResourceLoader::textures;
 std::map<std::string, TextureAtlas*> ResourceLoader::atlas;
-std::map<std::string, Entity*> ResourceLoader::entities;
+
+std::vector<std::string> ResourceLoader::entity_keys;
+std::map<std::string, Entity*> ResourceLoader::entity_map;
 
 
 void ResourceLoader::loadTexture(std::string key, const char *file, int texture_flags) {
@@ -76,20 +78,21 @@ TextureAtlas* ResourceLoader::getTextureAtlas(std::string key) {
 }
 
 void ResourceLoader::setEntityReference(std::string key, Entity* entity) {
-    if (ResourceLoader::entities.count(key)) {
+    if (ResourceLoader::entity_map.count(key)) {
         CKG_LOG_WARN("ResourceLoader | Key: '%s' already exists overwriting entity\n", key.c_str());
     }
 
-    ResourceLoader::entities[key] = entity;
+    ResourceLoader::entity_keys.push_back(key);
+    ResourceLoader::entity_map[key] = entity;
 }
 
 Entity* ResourceLoader::getEntityReference(std::string key) {
-    if (!ResourceLoader::entities.count(key)) {
+    if (!ResourceLoader::entity_map.count(key)) {
         CKG_LOG_ERROR("ResourceLoader | Key: '%s' doesn't exist for entity\n", key.c_str());
         return nullptr;
     }
 
-    return ResourceLoader::entities[key];
+    return ResourceLoader::entity_map[key];
 }
 
 TextureAtlas::TextureAtlas(std::string key, const char *file, int texture_flags) {

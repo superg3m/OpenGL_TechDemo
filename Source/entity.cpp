@@ -9,6 +9,7 @@ Entity::Entity(EntityType type, Mesh mesh) {
     this->scale = GM_Vec3(1, 1, 1);
 
     this->mesh = mesh;
+    this->dead = false;
 }
 
 void Entity::setPosition(GM_Vec3 position) {
@@ -54,5 +55,7 @@ GM_Matrix4 Entity::getTransform() {
 }
 
 void Entity::draw() {
+    if (this->dead) return;
+
     this->mesh.draw(this->getTransform());
 }

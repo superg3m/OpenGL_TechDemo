@@ -171,6 +171,12 @@ static float currentTime = 0;
 void Game::update(GLFWwindow* window, float dt) {
     currentTime += dt;
 
+    // Date: June 12, 2025
+    // TODO(Jovanni): Get the mouse delta to get calculate the velocity in the x direction
+    // so i can move the ball in the x direction
+
+    // gm_move_towards 1 velocity
+
     double mouse_x = 0;
     glfwGetCursorPos(window, &mouse_x, nullptr);
     Entity* player_paddle = ResourceLoader::getEntityReference(PLAYER_PADDLE);

@@ -197,6 +197,8 @@ void Game::initalizeResources() {
         2, 2, 3, 3, 4, 4, 5, 4, 4, 3, 3, 2, 2,
     };
 
+    // Date: June 11, 2025
+    // TODO(Jovanni): Maybe make the notion of just a sprite becuase its pretty annoying to do this all...
     Shader backgroundShader = Shader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
     Material backgroundMaterial = Material(backgroundShader);
     Mesh backgroundMesh = Mesh(backgroundMaterial, Geometry::Quad());

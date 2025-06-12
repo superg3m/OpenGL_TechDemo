@@ -18,6 +18,12 @@ enum GameState {
     GAME_WIN
 }; 
 
+#define PLAYER_PADDLE "PlayerPaddle"
+#define SOLID_BRICK "SolidBrick"
+#define NORMAL_BRICK "Brick"
+#define BACKGROUND "Background"
+#define CRATE "Crate"
+
 struct GameLevel {
     int cells_per_row;
     int cells_per_column;

@@ -81,42 +81,48 @@ void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hiegh
         y_offset += grid_cell_hieght;
     }
 
-    TextureAtlas* breaking_atlas = ResourceLoader::getTextureAtlas("breaking");
+    TextureAtlas* breaking_atlas = ResourceLoader::getTextureAtlas("Breaking");
     switch (brick_type) {
         case 0: {
             brick->dead = true;
         } break;
 
         case 1: {
-            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("SolidBrick");
+            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(SOLID_BRICK);
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
         } break;
 
         case 2: {
-            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
+            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(NORMAL_BRICK);
             brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_5");
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(0, 0, 1));
             brick->health = 1;
         } break;
 
         case 3: {
-            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
+            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(NORMAL_BRICK);
             brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_2");
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(0, 1, 0));
             brick->health = 2;
         } break;
     
         case 4: {
-            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
+            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(NORMAL_BRICK);
             brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_0");
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 0, 0));
             brick->health = 5;
         } break;
 
         case 5: {
-            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("Brick");
+            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(NORMAL_BRICK);
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 0, 1));
             brick->health = 10;
+        } break;
+
+        case 6: {
+            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(CRATE);
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
+            brick->health = 1;
         } break;
     }
     
@@ -161,7 +167,7 @@ void GameLevel::update() {
 
 
 void Game::initalizeResources() {
-    TextureAtlas* atlas = ResourceLoader::loadTextureAtlas("breaking", "../../assets/block_breaking_atlas.png");
+    TextureAtlas* atlas = ResourceLoader::loadTextureAtlas("Breaking", "../../assets/block_breaking_atlas.png");
     atlas->bindPartitionedTexture("break_5", 0,   0,   396, 408, TEXTURE_PIXEL_PERFECT);
     atlas->bindPartitionedTexture("break_4", 396, 0,   396, 408, TEXTURE_PIXEL_PERFECT);
     atlas->bindPartitionedTexture("break_3", 0,   408, 396, 408, TEXTURE_PIXEL_PERFECT);
@@ -170,16 +176,17 @@ void Game::initalizeResources() {
     atlas->bindPartitionedTexture("break_0", 396, 816, 396, 408, TEXTURE_PIXEL_PERFECT);
     atlas->freeAtlas();
 
-    ResourceLoader::loadTexture("background", "../../assets/background.jpg");
-    ResourceLoader::loadTexture("container", "../../assets/container.jpg");
-    ResourceLoader::loadTexture("Brick", "../../assets/block.png");
-    ResourceLoader::loadTexture("SolidBrick", "../../assets/block_solid.png");
+    ResourceLoader::loadTexture(BACKGROUND, "../../assets/background.jpg");
+    ResourceLoader::loadTexture(PLAYER_PADDLE, "../../assets/paddle.png");
+    ResourceLoader::loadTexture(CRATE, "../../assets/container.jpg");
+    ResourceLoader::loadTexture(NORMAL_BRICK, "../../assets/block.png");
+    ResourceLoader::loadTexture(SOLID_BRICK, "../../assets/block_solid.png");
 
     std::vector<int> brick_layout = {
         1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         2, 1, 3, 1, 4, 1, 5, 1, 4, 1, 3, 1, 2,
-        2, 3, 3, 4, 4, 5, 5, 5, 4, 4, 3, 3, 2,
+        2, 3, 3, 4, 4, 5, 6, 5, 4, 4, 3, 3, 2,
         2, 1, 3, 1, 4, 1, 5, 1, 4, 1, 3, 1, 2,
         2, 2, 3, 3, 4, 4, 5, 4, 4, 3, 3, 2, 2,
     };
@@ -189,9 +196,9 @@ void Game::initalizeResources() {
     Entity* background = Entity::Sprite(ENTITY_TYPE_BACKGROUND);
     background->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, Game::WINDOW_HEIGHT / 2.0f, 0));
     background->setScale((float)Game::WINDOW_WIDTH, (float)Game::WINDOW_HEIGHT, 1);
-    background->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("background");
+    background->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(BACKGROUND);
     background->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
-    ResourceLoader::setEntityReference("background", background);
+    ResourceLoader::setEntityReference(BACKGROUND, background);
 
     Game::level = GameLevel(13, 6, brick_layout);
 }

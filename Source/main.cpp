@@ -48,7 +48,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     Game::WINDOW_HEIGHT = height;
 
     Entity* background = ResourceLoader::getEntityReference(BACKGROUND);
+    background->setPosition((float)Game::WINDOW_WIDTH / 2.0f, (float)Game::WINDOW_HEIGHT / 2.0f, 1);
     background->setScale((float)Game::WINDOW_WIDTH, (float)Game::WINDOW_HEIGHT, 1);
+
+    Entity* paddle = ResourceLoader::getEntityReference(PLAYER_PADDLE);
+    paddle->setScale((float)Game::WINDOW_WIDTH / 6.0f, (float)Game::WINDOW_HEIGHT / 32.0f, 1);
 
     Game::level.update();
     

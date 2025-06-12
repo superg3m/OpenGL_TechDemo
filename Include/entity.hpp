@@ -31,6 +31,7 @@ struct Entity {
     bool dead;
 
     Entity(EntityType type, Mesh mesh);
+    static Entity* Sprite(EntityType type);
 
     void setPosition(GM_Vec3 position);
     void setPosition(float x, float y, float z);
@@ -45,4 +46,5 @@ struct Entity {
 
     GM_Matrix4 getTransform();
     void draw();
+
 };

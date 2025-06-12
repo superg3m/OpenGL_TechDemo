@@ -70,11 +70,8 @@ u64 Game::getReferenceID() {
 void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hieght, float &x_offset, float &y_offset, int brick_type) {
     // Date: June 11, 2025
     // TODO(Jovanni): I hate the fact that you have to declare all of this
-    Shader brickShader = Shader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
-    Material brickMaterial = Material(brickShader);
-    Mesh brickMesh = Mesh(brickMaterial, Geometry::Quad());
-    Entity* brick = new Entity(ENTITY_TYPE_BRICK, brickMesh);
-
+    Entity* brick = Entity::Sprite(ENTITY_TYPE_BRICK);
+    
     local_persist int brick_index = 0;
     brick->setPosition(GM_Vec3(x_offset, y_offset, 0));
     brick->setScale(GM_Vec3(grid_cell_width, grid_cell_hieght, 1));
@@ -91,10 +88,6 @@ void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hiegh
         } break;
 
         case 1: {
-            // Date: June 11, 2025
-            // TODO(Jovanni): I hate that you have to do brick->mesh.material
-            // should just be brick->setTexture(ResourceLoader::getTexture("SolidBrick"), TEXTURE_COLOR);
-            // should just be brick->setVec3("spriteColor", GM_Vec3(1, 1, 1));
             brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("SolidBrick");
             brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
         } break;
@@ -169,12 +162,6 @@ void GameLevel::update() {
 
 void Game::initalizeResources() {
     TextureAtlas* atlas = ResourceLoader::loadTextureAtlas("breaking", "../../assets/block_breaking_atlas.png");
-    int textures_per_row = 2; 
-    int textures_per_column = 3;
-
-    int x_offset = atlas->m_width / textures_per_row;
-    int y_offset = atlas->m_height / textures_per_column;
-
     atlas->bindPartitionedTexture("break_5", 0,   0,   396, 408, TEXTURE_PIXEL_PERFECT);
     atlas->bindPartitionedTexture("break_4", 396, 0,   396, 408, TEXTURE_PIXEL_PERFECT);
     atlas->bindPartitionedTexture("break_3", 0,   408, 396, 408, TEXTURE_PIXEL_PERFECT);
@@ -199,10 +186,7 @@ void Game::initalizeResources() {
 
     // Date: June 11, 2025
     // TODO(Jovanni): Maybe make the notion of just a sprite becuase its pretty annoying to do this all...
-    Shader backgroundShader = Shader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
-    Material backgroundMaterial = Material(backgroundShader);
-    Mesh backgroundMesh = Mesh(backgroundMaterial, Geometry::Quad());
-    Entity* background = new Entity(ENTITY_TYPE_BACKGROUND, backgroundMesh);
+    Entity* background = Entity::Sprite(ENTITY_TYPE_BACKGROUND);
     background->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, Game::WINDOW_HEIGHT / 2.0f, 0));
     background->setScale((float)Game::WINDOW_WIDTH, (float)Game::WINDOW_HEIGHT, 1);
     background->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture("background");

@@ -12,6 +12,14 @@ Entity::Entity(EntityType type, Mesh mesh) {
     this->dead = false;
 }
 
+Entity* Entity::Sprite(EntityType type) {
+    Shader spirteShader = Shader({"../../shader_source/test.vert", "../../shader_source/test.frag"});
+    Material spirteMaterial = Material(spirteShader);
+    Mesh spirteMesh = Mesh(spirteMaterial, Geometry::Quad());
+
+    return new Entity(type, spirteMesh);
+}
+
 void Entity::setPosition(GM_Vec3 position) {
     this->position = position;
 }

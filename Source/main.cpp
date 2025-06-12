@@ -20,7 +20,7 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        application.update(deltaTime);
+        application.update(window, deltaTime);
         application.render();
 
         glfwSwapBuffers(window);

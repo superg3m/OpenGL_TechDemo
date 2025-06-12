@@ -7,6 +7,7 @@
 #include <resource_loader.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <ctime>
 
 // #include <glm/glm.hpp>
 // #include <glm/gtc/matrix_transform.hpp>
@@ -50,7 +51,7 @@ struct Game {
 
     static u64 getReferenceID();
 
-    void update(float dt);
+    void update(GLFWwindow* window, float dt);
     void render();
 private:
     GM_Matrix4 getProjectionMatrix();

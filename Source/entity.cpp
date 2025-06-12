@@ -20,6 +20,56 @@ Entity* Entity::Sprite(EntityType type) {
     return new Entity(type, spirteMesh);
 }
 
+Entity* Entity::Brick(int brick_type) {
+    Entity* brick = Entity::Sprite(ENTITY_TYPE_BRICK);
+    TextureAtlas* breaking_atlas = ResourceLoader::getTextureAtlas("Breaking");
+    switch (brick_type) {
+        case 0: {
+            brick->dead = true;
+        } break;
+
+        case 1: {
+            brick->setTexture(ResourceLoader::getTexture(SOLID_BRICK), TEXTURE_COLOR);
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
+            brick->maxHealth = -1;
+        } break;
+
+        case 2: {
+            brick->setTexture(ResourceLoader::getTexture(NORMAL_BRICK), TEXTURE_COLOR);
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(0, 0, 1));
+            brick->maxHealth = 1;
+        } break;
+
+        case 3: {
+            brick->setTexture(ResourceLoader::getTexture(NORMAL_BRICK), TEXTURE_COLOR);
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(0, 1, 0));
+            brick->maxHealth = 2;
+        } break;
+    
+        case 4: {
+            brick->setTexture(ResourceLoader::getTexture(NORMAL_BRICK), TEXTURE_COLOR);
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 0, 0));
+            brick->maxHealth = 5;
+        } break;
+
+        case 5: {
+            brick->setTexture(ResourceLoader::getTexture(NORMAL_BRICK), TEXTURE_COLOR);
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 0, 1));
+            brick->maxHealth = 10;
+        } break;
+
+        case 6: {
+            brick->setTexture(ResourceLoader::getTexture(CRATE), TEXTURE_COLOR);
+            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
+            brick->maxHealth = 1;
+        } break;
+    }
+
+    brick->health = brick->maxHealth;
+
+    return brick;
+}
+
 void Entity::setPosition(GM_Vec3 position) {
     this->position = position;
 }
@@ -53,6 +103,10 @@ void Entity::setScale(float scale_x, float scale_y, float scale_z) {
     this->scale = GM_Vec3(scale_x, scale_y, scale_z);
 }
 
+void Entity::setTexture(GLTextureID id, TextureType type) {
+    this->mesh.material.textures[type] = id;
+}
+
 GM_Matrix4 Entity::getTransform() {
     GM_Matrix4 transform = GM_Matrix4::identity();
     transform = GM_Matrix4::scale(transform, this->scale);
@@ -60,6 +114,32 @@ GM_Matrix4 Entity::getTransform() {
     transform = GM_Matrix4::translate(transform, this->position);
 
     return transform;
+}
+
+void Entity::updateBrick() {
+    if (this->maxHealth == this->health) {
+        return;
+    }
+
+    if (this->health == 0) {
+        this->dead = true;
+    }
+    
+    float health_percentage = (float)this->health / (float)this->maxHealth;
+    TextureAtlas* breaking_atlas = ResourceLoader::getTextureAtlas("Breaking");
+    if (health_percentage <= 0.20f) {
+        this->setTexture(breaking_atlas->getTexture("break_5"), TEXTURE_DECAL);
+    } else if(health_percentage <= 0.30f) {
+        this->setTexture(breaking_atlas->getTexture("break_4"), TEXTURE_DECAL);
+    } else if(health_percentage <= 0.40f) {
+        this->setTexture(breaking_atlas->getTexture("break_3"), TEXTURE_DECAL);
+    } else if(health_percentage <= 0.50f) {
+        this->setTexture(breaking_atlas->getTexture("break_2"), TEXTURE_DECAL);
+    } else if(health_percentage <= 0.60f) {
+        this->setTexture(breaking_atlas->getTexture("break_1"), TEXTURE_DECAL);
+    } else if(health_percentage <= 0.70f) {
+        this->setTexture(breaking_atlas->getTexture("break_0"), TEXTURE_DECAL);
+    }
 }
 
 void Entity::draw() {

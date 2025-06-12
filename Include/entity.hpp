@@ -28,10 +28,12 @@ struct Entity {
     Mesh mesh;
 
     int health;
+    int maxHealth;
     bool dead;
 
     Entity(EntityType type, Mesh mesh);
     static Entity* Sprite(EntityType type);
+    static Entity* Brick(int brick_type);
 
     void setPosition(GM_Vec3 position);
     void setPosition(float x, float y, float z);
@@ -44,7 +46,9 @@ struct Entity {
     void setScale(GM_Vec3 scale);
     void setScale(float scale_x, float scale_y, float scale_z);
 
+    void setTexture(GLTextureID id, TextureType type);
+    void updateBrick();
+
     GM_Matrix4 getTransform();
     void draw();
-
 };

@@ -70,7 +70,7 @@ u64 Game::getReferenceID() {
 void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hieght, float &x_offset, float &y_offset, int brick_type) {
     // Date: June 11, 2025
     // TODO(Jovanni): I hate the fact that you have to declare all of this
-    Entity* brick = Entity::Sprite(ENTITY_TYPE_BRICK);
+    Entity* brick = Entity::Brick(brick_type);
     
     local_persist int brick_index = 0;
     brick->setPosition(GM_Vec3(x_offset, y_offset, 0));
@@ -81,51 +81,6 @@ void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hiegh
         y_offset += grid_cell_hieght;
     }
 
-    TextureAtlas* breaking_atlas = ResourceLoader::getTextureAtlas("Breaking");
-    switch (brick_type) {
-        case 0: {
-            brick->dead = true;
-        } break;
-
-        case 1: {
-            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(SOLID_BRICK);
-            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
-        } break;
-
-        case 2: {
-            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(NORMAL_BRICK);
-            brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_5");
-            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(0, 0, 1));
-            brick->health = 1;
-        } break;
-
-        case 3: {
-            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(NORMAL_BRICK);
-            brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_2");
-            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(0, 1, 0));
-            brick->health = 2;
-        } break;
-    
-        case 4: {
-            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(NORMAL_BRICK);
-            brick->mesh.material.textures[TEXTURE_DECAL] = breaking_atlas->getTexture("break_0");
-            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 0, 0));
-            brick->health = 5;
-        } break;
-
-        case 5: {
-            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(NORMAL_BRICK);
-            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 0, 1));
-            brick->health = 10;
-        } break;
-
-        case 6: {
-            brick->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(CRATE);
-            brick->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
-            brick->health = 1;
-        } break;
-    }
-    
     ResourceLoader::setEntityReference("brick_" + std::to_string(brick_index), brick);
     level->brick_entity_references.push_back(brick);
     brick_index++;
@@ -167,6 +122,8 @@ void GameLevel::update() {
 
 
 void Game::initalizeResources() {
+    srand(time(0));
+
     TextureAtlas* atlas = ResourceLoader::loadTextureAtlas("Breaking", "../../assets/block_breaking_atlas.png");
     atlas->bindPartitionedTexture("break_5", 0,   0,   396, 408, TEXTURE_PIXEL_PERFECT);
     atlas->bindPartitionedTexture("break_4", 396, 0,   396, 408, TEXTURE_PIXEL_PERFECT);
@@ -196,16 +153,40 @@ void Game::initalizeResources() {
     Entity* background = Entity::Sprite(ENTITY_TYPE_BACKGROUND);
     background->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, Game::WINDOW_HEIGHT / 2.0f, 0));
     background->setScale((float)Game::WINDOW_WIDTH, (float)Game::WINDOW_HEIGHT, 1);
-    background->mesh.material.textures[TEXTURE_COLOR] = ResourceLoader::getTexture(BACKGROUND);
+    background->setTexture(ResourceLoader::getTexture(BACKGROUND), TEXTURE_COLOR);
     background->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
     ResourceLoader::setEntityReference(BACKGROUND, background);
+
+    Entity* player = Entity::Sprite(ENTITY_TYPE_BACKGROUND);
+    player->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, Game::WINDOW_HEIGHT / 1.15f, 0));
+    player->setScale((float)Game::WINDOW_WIDTH / 6.0f, (float)Game::WINDOW_HEIGHT / 32.0f, 1);
+    player->setTexture(ResourceLoader::getTexture(PLAYER_PADDLE), TEXTURE_COLOR);
+    player->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
+    ResourceLoader::setEntityReference(PLAYER_PADDLE, player);
 
     Game::level = GameLevel(13, 6, brick_layout);
 }
 
 static float currentTime = 0;
-void Game::update(float dt) {
+void Game::update(GLFWwindow* window, float dt) {
     currentTime += dt;
+
+    double mouse_x = 0;
+    glfwGetCursorPos(window, &mouse_x, nullptr);
+    Entity* player_paddle = ResourceLoader::getEntityReference(PLAYER_PADDLE);
+    player_paddle->setPosition(mouse_x, Game::WINDOW_HEIGHT / 1.15f, 0);
+    
+    int special_break_index = rand() % Game::level.brick_entity_references.size();
+    for (int i = 0; i < Game::level.brick_entity_references.size(); i++) {
+        Entity* entity = Game::level.brick_entity_references[i];
+        if (entity->maxHealth == -1 || entity->dead) continue;
+
+        if (special_break_index == i) {
+            entity->health -= 1;
+        }
+
+        entity->updateBrick();
+    }
 }
 
 void Game::render() {

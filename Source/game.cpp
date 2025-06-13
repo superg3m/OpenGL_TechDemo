@@ -157,17 +157,25 @@ void Game::initalizeResources() {
     background->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
     ResourceLoader::setEntityReference(BACKGROUND, background);
 
-    Entity* player = Entity::Sprite(ENTITY_TYPE_BACKGROUND);
+    Entity* player = Entity::Sprite(ENTITY_TYPE_PLAYER);
     player->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, Game::WINDOW_HEIGHT / 1.15f, 0));
     player->setScale((float)Game::WINDOW_WIDTH / 6.0f, (float)Game::WINDOW_HEIGHT / 32.0f, 1);
     player->setTexture(ResourceLoader::getTexture(PLAYER_PADDLE), TEXTURE_COLOR);
     player->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
     ResourceLoader::setEntityReference(PLAYER_PADDLE, player);
 
+    Entity* ball = Entity::Sprite(ENTITY_TYPE_BALL);
+    ball->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, (Game::WINDOW_HEIGHT / 1.15f) - (Game::WINDOW_WIDTH / 40.0f), 0));
+    ball->setScale(Game::WINDOW_WIDTH / 40.0f, Game::WINDOW_WIDTH / 40.0f, 1);
+    ball->setTexture(ResourceLoader::getTexture(NORMAL_BRICK), TEXTURE_COLOR);
+    ball->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
+    ResourceLoader::setEntityReference(BALL, ball);
+
     Game::level = GameLevel(13, 6, brick_layout);
 }
 
-static float currentTime = 0;
+float currentTime = 0;
+bool ball_is_in_play = false;
 void Game::update(GLFWwindow* window, float dt) {
     currentTime += dt;
 
@@ -179,8 +187,16 @@ void Game::update(GLFWwindow* window, float dt) {
 
     double mouse_x = 0;
     glfwGetCursorPos(window, &mouse_x, nullptr);
+    mouse_x = CLAMP(mouse_x, 0, Game::WINDOW_WIDTH);
     Entity* player_paddle = ResourceLoader::getEntityReference(PLAYER_PADDLE);
     player_paddle->setPosition(mouse_x, Game::WINDOW_HEIGHT / 1.15f, 0);
+
+    Entity* ball = ResourceLoader::getEntityReference(BALL);
+    if (!ball_is_in_play) {
+        ball->setPosition(mouse_x, (Game::WINDOW_HEIGHT / 1.15f) - ball->scale.x, 0);
+    }
+    //ball->updateBall(dt);
+    // collisionDetectionHere
     
     int special_break_index = rand() % Game::level.brick_entity_references.size();
     for (int i = 0; i < Game::level.brick_entity_references.size(); i++) {

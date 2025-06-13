@@ -20,7 +20,12 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        application.update(window, deltaTime);
+
+        int substeps = 8;
+        float substep_dt = deltaTime / (float)substeps;
+        for (int step = 0; step < substeps; step++) {
+            application.update(window, substep_dt);
+        }
         application.render();
 
         glfwSwapBuffers(window);

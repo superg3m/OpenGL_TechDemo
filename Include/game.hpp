@@ -24,6 +24,7 @@ enum GameState {
 #define NORMAL_BRICK "Brick"
 #define BACKGROUND "Background"
 #define CRATE "Crate"
+#define BALL "Ball"
 
 struct GameLevel {
     int cells_per_row;

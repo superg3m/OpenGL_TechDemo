@@ -166,7 +166,7 @@ void Game::initalizeResources() {
     ResourceLoader::setEntityReference(PLAYER_PADDLE, player);
 
     Entity* ball = Entity::Sprite(ENTITY_TYPE_BALL);
-    ball->velocity = GM_Vec3(0, -256, 0);
+    ball->velocity = GM_Vec3(0, -300, 0);
     ball->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, (Game::WINDOW_HEIGHT / 1.15f) - (Game::WINDOW_WIDTH / 50.0f), 0));
     ball->setScale(Game::WINDOW_WIDTH / 50.0f, Game::WINDOW_WIDTH / 50.0f, 1);
     ball->setTexture(ResourceLoader::getTexture(NORMAL_BRICK), TEXTURE_COLOR);

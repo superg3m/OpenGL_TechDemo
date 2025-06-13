@@ -48,6 +48,7 @@ struct Entity {
 
     void setTexture(GLTextureID id, TextureType type);
     void updateBrick();
+    void updateBall(float dt);
 
     GM_Matrix4 getTransform();
     void draw();

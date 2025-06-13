@@ -4,9 +4,10 @@ GM_Matrix4 Game::projection;
 unsigned int Game::WINDOW_WIDTH;
 unsigned int Game::WINDOW_HEIGHT;
 GameLevel Game::level;
+GameState Game::state;
 
 Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
-    this->state = GAME_ACTIVE;
+    Game::state = GAME_INACTIVE;
     Game::WINDOW_WIDTH = WINDOW_WIDTH;
     Game::WINDOW_HEIGHT = WINDOW_HEIGHT;
 }
@@ -165,8 +166,9 @@ void Game::initalizeResources() {
     ResourceLoader::setEntityReference(PLAYER_PADDLE, player);
 
     Entity* ball = Entity::Sprite(ENTITY_TYPE_BALL);
-    ball->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, (Game::WINDOW_HEIGHT / 1.15f) - (Game::WINDOW_WIDTH / 40.0f), 0));
-    ball->setScale(Game::WINDOW_WIDTH / 40.0f, Game::WINDOW_WIDTH / 40.0f, 1);
+    ball->velocity = GM_Vec3(0, -256, 0);
+    ball->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, (Game::WINDOW_HEIGHT / 1.15f) - (Game::WINDOW_WIDTH / 50.0f), 0));
+    ball->setScale(Game::WINDOW_WIDTH / 50.0f, Game::WINDOW_WIDTH / 50.0f, 1);
     ball->setTexture(ResourceLoader::getTexture(NORMAL_BRICK), TEXTURE_COLOR);
     ball->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
     ResourceLoader::setEntityReference(BALL, ball);
@@ -175,7 +177,6 @@ void Game::initalizeResources() {
 }
 
 float currentTime = 0;
-bool ball_is_in_play = false;
 void Game::update(GLFWwindow* window, float dt) {
     currentTime += dt;
 
@@ -192,10 +193,12 @@ void Game::update(GLFWwindow* window, float dt) {
     player_paddle->setPosition(mouse_x, Game::WINDOW_HEIGHT / 1.15f, 0);
 
     Entity* ball = ResourceLoader::getEntityReference(BALL);
-    if (!ball_is_in_play) {
+    if (Game::state == GAME_INACTIVE) {
         ball->setPosition(mouse_x, (Game::WINDOW_HEIGHT / 1.15f) - ball->scale.x, 0);
+    } else if (Game::state == GAME_ACTIVE) {
+        ball->updateBall(dt);
     }
-    //ball->updateBall(dt);
+
     // collisionDetectionHere
     
     int special_break_index = rand() % Game::level.brick_entity_references.size();

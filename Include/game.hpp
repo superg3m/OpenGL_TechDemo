@@ -15,6 +15,7 @@
 
 enum GameState {
     GAME_ACTIVE,
+    GAME_INACTIVE,
     GAME_MENU,
     GAME_WIN
 }; 
@@ -38,7 +39,7 @@ struct GameLevel {
 };
 
 struct Game {
-    GameState state;
+    static GameState state;
     static GameLevel level;
   
     bool Keys[1024];

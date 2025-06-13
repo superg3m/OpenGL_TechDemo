@@ -116,6 +116,10 @@ GM_Matrix4 Entity::getTransform() {
     return transform;
 }
 
+void Entity::updateBall(float dt) {
+    this->position = this->position + this->velocity.scale(dt);
+}
+
 void Entity::updateBrick() {
     if (this->maxHealth == this->health) {
         return;

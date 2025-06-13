@@ -8,6 +8,8 @@ float lastFrame = 0.0f;
 // you can resuse a VAO instead of having to make an bind new ones all the time
 // this would be especially good with Geometry::Cube() or Geometry::Sphere becuaes I don't have to regenerate the vertex data
 
+void processInput(GLFWwindow* window);
+
 int main() {
     Game application(800, 600);
     GLFWwindow* window = application.initalizeWindow();
@@ -20,6 +22,7 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        processInput(window);
 
         int substeps = 8;
         float substep_dt = deltaTime / (float)substeps;
@@ -34,6 +37,12 @@ int main() {
 
     glfwTerminate();
     return 0;
+}
+
+void processInput(GLFWwindow* window) {
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        Game::state = GAME_ACTIVE;
+    }
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {

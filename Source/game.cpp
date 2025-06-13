@@ -176,28 +176,35 @@ void Game::initalizeResources() {
     Game::level = GameLevel(13, 6, brick_layout);
 }
 
+static double previous_mouse_x = 0;
+static double mouse_x = 0;
+
 float currentTime = 0;
+static GameState previousState = GAME_INACTIVE;
 void Game::update(GLFWwindow* window, float dt) {
     currentTime += dt;
 
-    // Date: June 12, 2025
-    // TODO(Jovanni): Get the mouse delta to get calculate the velocity in the x direction
-    // so i can move the ball in the x direction
-
-    // gm_move_towards 1 velocity
-
-    double mouse_x = 0;
     glfwGetCursorPos(window, &mouse_x, nullptr);
     mouse_x = CLAMP(mouse_x, 0, Game::WINDOW_WIDTH);
+    float paddle_velocity_x = (mouse_x - previous_mouse_x) / (dt * 50);
+    previous_mouse_x = mouse_x;
+
     Entity* player_paddle = ResourceLoader::getEntityReference(PLAYER_PADDLE);
     player_paddle->setPosition(mouse_x, Game::WINDOW_HEIGHT / 1.15f, 0);
 
     Entity* ball = ResourceLoader::getEntityReference(BALL);
+
     if (Game::state == GAME_INACTIVE) {
         ball->setPosition(mouse_x, (Game::WINDOW_HEIGHT / 1.15f) - ball->scale.x, 0);
     } else if (Game::state == GAME_ACTIVE) {
+        if (previousState == GAME_INACTIVE) {
+            ball->velocity.x = paddle_velocity_x;
+        }
+
         ball->updateBall(dt);
     }
+
+    previousState = Game::state;
 
     // collisionDetectionHere
     

@@ -9,10 +9,9 @@
 struct Mesh {
     Geometry geometry;
     Material material;
-    GLenum draw_type = GL_TRIANGLES; // GL_TRIANGLES, GL_LINES, ...
 
     Mesh() = default;
-    Mesh(Material material, Geometry geometry, GLenum draw_type = GL_TRIANGLES);
+    Mesh(Material material, Geometry geometry);
 
     void draw(GM_Matrix4 transform);
     void setVertices(const std::vector<Vertex>& vertices);

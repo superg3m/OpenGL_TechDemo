@@ -121,28 +121,29 @@ void Entity::updateBall(float dt) {
 }
 
 void Entity::updateBrick() {
-    if (this->maxHealth == this->health) {
+    if (this->maxHealth == -1 || this->maxHealth == this->health) {
+        return;
+    }
+    
+    if (this->health == 0) {
+        this->dead = true;
         return;
     }
 
-    if (this->health == 0) {
-        this->dead = true;
-    }
+    TextureAtlas* breaking_atlas = ResourceLoader::getTextureAtlas("Breaking");
+    this->setTexture(breaking_atlas->getTexture("break_0"), TEXTURE_DECAL);
     
     float health_percentage = (float)this->health / (float)this->maxHealth;
-    TextureAtlas* breaking_atlas = ResourceLoader::getTextureAtlas("Breaking");
     if (health_percentage <= 0.20f) {
         this->setTexture(breaking_atlas->getTexture("break_5"), TEXTURE_DECAL);
-    } else if(health_percentage <= 0.30f) {
+    } else if(health_percentage <= 0.20f) {
         this->setTexture(breaking_atlas->getTexture("break_4"), TEXTURE_DECAL);
     } else if(health_percentage <= 0.40f) {
         this->setTexture(breaking_atlas->getTexture("break_3"), TEXTURE_DECAL);
-    } else if(health_percentage <= 0.50f) {
-        this->setTexture(breaking_atlas->getTexture("break_2"), TEXTURE_DECAL);
     } else if(health_percentage <= 0.60f) {
+        this->setTexture(breaking_atlas->getTexture("break_2"), TEXTURE_DECAL);
+    } else if(health_percentage <= 0.80f) {
         this->setTexture(breaking_atlas->getTexture("break_1"), TEXTURE_DECAL);
-    } else if(health_percentage <= 0.70f) {
-        this->setTexture(breaking_atlas->getTexture("break_0"), TEXTURE_DECAL);
     }
 }
 

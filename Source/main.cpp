@@ -19,7 +19,7 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = (float)glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
+        deltaTime = (currentFrame - lastFrame) * Game::timeScale;
         lastFrame = currentFrame;
 
         processInput(window);
@@ -50,10 +50,25 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         glfwSetWindowShouldClose(window, true);
     }
 
-    local_persist bool mouse_captured = true;
     if (key == GLFW_KEY_C && action == GLFW_PRESS) {
-        mouse_captured = !mouse_captured;
-        glfwSetInputMode(window, GLFW_CURSOR, mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        Game::mouse_captured = !Game::mouse_captured;
+        glfwSetInputMode(window, GLFW_CURSOR, Game::mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    }
+
+    if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+        Game::timeScale = 0.0f;
+    } else if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+        Game::timeScale = 1.0f;
+    }
+
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+        Game::timeScale += 0.1f;
+        CKG_LOG_DEBUG("%f\n", Game::timeScale);
+    }
+    
+    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+        Game::timeScale -= 0.1f;
+        CKG_LOG_DEBUG("%f\n", Game::timeScale);
     }
 }
 
@@ -66,7 +81,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     background->setScale((float)Game::WINDOW_WIDTH, (float)Game::WINDOW_HEIGHT, 1);
 
     Entity* paddle = ResourceLoader::getEntityReference(PLAYER_PADDLE);
-    paddle->setScale((float)Game::WINDOW_WIDTH / 6.0f, (float)Game::WINDOW_HEIGHT / 32.0f, 1);
+    paddle->setScale((float)Game::WINDOW_WIDTH / 6.0f, (float)Game::WINDOW_HEIGHT / 20.0f, 1);
 
     Game::level.update();
     

@@ -5,6 +5,8 @@ unsigned int Game::WINDOW_WIDTH;
 unsigned int Game::WINDOW_HEIGHT;
 GameLevel Game::level;
 GameState Game::state;
+bool Game::mouse_captured = true;
+float Game::timeScale = 1.0f;
 
 Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     Game::state = GAME_INACTIVE;
@@ -160,8 +162,8 @@ void Game::initalizeResources() {
 
     Entity* player = Entity::Sprite(ENTITY_TYPE_PLAYER);
     player->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, Game::WINDOW_HEIGHT / 1.15f, 0));
-    player->setScale((float)Game::WINDOW_WIDTH / 6.0f, (float)Game::WINDOW_HEIGHT / 32.0f, 1);
-    player->setTexture(ResourceLoader::getTexture(PLAYER_PADDLE), TEXTURE_COLOR);
+    player->setScale((float)Game::WINDOW_WIDTH / 6.0f, (float)Game::WINDOW_HEIGHT / 20.0f, 1);
+    player->setTexture(ResourceLoader::getTexture(NORMAL_BRICK), TEXTURE_COLOR);
     player->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
     ResourceLoader::setEntityReference(PLAYER_PADDLE, player);
 
@@ -181,12 +183,82 @@ static double mouse_x = 0;
 
 float currentTime = 0;
 static GameState previousState = GAME_INACTIVE;
+
+enum CompassDirection : int {
+    NORTH = 0,
+    EAST = 1,
+    SOUTH = 2,
+    WEST = 3,
+    INVALID = -1
+};
+
+bool checkAABBCollision(GM_Vec3 a_pos, GM_Vec3 a_scale, GM_Vec3 b_pos, GM_Vec3 b_scale) {
+    GM_Vec3 a_half = a_scale.scale(0.5f);
+    GM_Vec3 b_half = b_scale.scale(0.5f);
+
+    GM_Vec3 a_min = a_pos - a_half;
+    GM_Vec3 a_max = a_pos + a_half;
+
+    GM_Vec3 b_min = b_pos - b_half;
+    GM_Vec3 b_max = b_pos + b_half;
+
+    return (a_min.x <= b_max.x && a_max.x >= b_min.x) && (a_min.y <= b_max.y && a_max.y >= b_min.y);
+}
+
+bool checkAABBCollision(GM_Vec3 a_pos, GM_Vec3 a_scale, GM_Vec3 b_pos, GM_Vec3 b_scale, CompassDirection& out_direction) {
+    GM_Vec3 a_half = a_scale.scale(0.5f);
+    GM_Vec3 b_half = b_scale.scale(0.5f);
+
+    GM_Vec3 a_min = a_pos - a_half;
+    GM_Vec3 a_max = a_pos + a_half;
+
+    GM_Vec3 b_min = b_pos - b_half;
+    GM_Vec3 b_max = b_pos + b_half;
+
+    if (checkAABBCollision(a_pos, a_scale, b_pos, b_scale)) {
+        GM_Vec3 compass[] = {
+            GM_Vec3(0.0f,  1.0f, 0.0f), // NORTH
+            GM_Vec3(1.0f,  0.0f, 0.0f), // EAST
+            GM_Vec3(0.0f, -1.0f, 0.0f), // SOUTH
+            GM_Vec3(-1.0f, 0.0f, 0.0f)  // WEST
+        };
+
+        GM_Vec3 direction = (b_pos - a_pos).normalize();
+
+        float maxDot = -1;
+        int bestMatch = -1;
+
+        for (int i = 0; i < 4; ++i) {
+            float dot = GM_Vec3::dot(direction, compass[i]);
+            if (dot > maxDot) {
+                maxDot = dot;
+                bestMatch = i;
+            }
+        }
+
+        out_direction = (CompassDirection)bestMatch;
+
+        return true;
+    }
+
+    return false;
+}
+
+// Date: June 15, 2025
+// TODO(Jovanni): This is not frame independent...
 void Game::update(GLFWwindow* window, float dt) {
     currentTime += dt;
 
-    glfwGetCursorPos(window, &mouse_x, nullptr);
+    if (Game::mouse_captured) {
+        glfwGetCursorPos(window, &mouse_x, nullptr);
+    }
+
     mouse_x = CLAMP(mouse_x, 0, Game::WINDOW_WIDTH);
-    float paddle_velocity_x = (mouse_x - previous_mouse_x) / (dt * 50);
+    float paddle_velocity_x = 0.0f;
+    if (dt) {
+        paddle_velocity_x = (mouse_x - previous_mouse_x) / (dt * 50);
+    }
+
     previous_mouse_x = mouse_x;
 
     Entity* player_paddle = ResourceLoader::getEntityReference(PLAYER_PADDLE);
@@ -195,7 +267,7 @@ void Game::update(GLFWwindow* window, float dt) {
     Entity* ball = ResourceLoader::getEntityReference(BALL);
 
     if (Game::state == GAME_INACTIVE) {
-        ball->setPosition(mouse_x, (Game::WINDOW_HEIGHT / 1.15f) - ball->scale.x, 0);
+        ball->setPosition(mouse_x, (Game::WINDOW_HEIGHT / 1.20f) - ball->scale.x, 0);
     } else if (Game::state == GAME_ACTIVE) {
         if (previousState == GAME_INACTIVE) {
             ball->velocity.x = paddle_velocity_x;
@@ -206,18 +278,60 @@ void Game::update(GLFWwindow* window, float dt) {
 
     previousState = Game::state;
 
-    // collisionDetectionHere
-    
+    GM_Vec3 half_ball_size = ball->scale.scale(1.0f / 2.0f);
+    if (ball->position.x < 0.0f + half_ball_size.x) {
+        ball->velocity.x = -ball->velocity.x;
+        ball->position.x = 0.0f + half_ball_size.x;
+    } else if (ball->position.x > Game::WINDOW_WIDTH - half_ball_size.x){
+        ball->velocity.x = -ball->velocity.x;
+        ball->position.x = Game::WINDOW_WIDTH - half_ball_size.x;
+    }
+
+    if (ball->position.y <= 0.0f + half_ball_size.y) {
+        ball->velocity.y = -ball->velocity.y;
+        ball->position.y = 0.0f + half_ball_size.y;
+    } else if (ball->position.y >= Game::WINDOW_HEIGHT - half_ball_size.y){
+        ball->velocity.y = -ball->velocity.y;
+        ball->position.y = Game::WINDOW_HEIGHT - half_ball_size.y;
+    }
+
+    if (checkAABBCollision(ball->position, ball->scale, player_paddle->position, player_paddle->scale)) {
+        ball->velocity.y = -1 * fabs(ball->velocity.y);
+    }
+
     int special_break_index = rand() % Game::level.brick_entity_references.size();
     for (int i = 0; i < Game::level.brick_entity_references.size(); i++) {
-        Entity* entity = Game::level.brick_entity_references[i];
-        if (entity->maxHealth == -1 || entity->dead) continue;
+        Entity* brick = Game::level.brick_entity_references[i];
+        if (brick->dead) continue;
 
-        if (special_break_index == i) {
-            entity->health -= 1;
+        CompassDirection out_direction = INVALID;
+        if (checkAABBCollision(ball->position, ball->scale, brick->position, brick->scale, out_direction)) {
+            brick->health -= 1;
+            switch (out_direction) {
+                case NORTH: {
+                    ball->velocity.y = -ball->velocity.y;
+                    ball->position.y -= 2;
+                }
+
+                case EAST: {
+                    ball->velocity.x = -ball->velocity.x;
+                    ball->position.x += 2;
+                }
+                
+                case SOUTH: {
+                    ball->velocity.y = -ball->velocity.y;
+                    ball->position.y += 2;
+                } break;
+
+        
+                case WEST: {
+                    ball->velocity.x = -ball->velocity.x;
+                    ball->position.x -= 2;
+                } break;
+            };
         }
 
-        entity->updateBrick();
+        brick->updateBrick();
     }
 }
 

@@ -17,7 +17,7 @@ Geometry Geometry::Quad() {
     Geometry ret;
     ret.vertices = quad_vertices;
     ret.indices = quad_indices;
-    ret.usage = GL_STATIC_DRAW;
+    ret.draw_type = GL_TRIANGLES;
     ret.setup();
 
     return ret;
@@ -75,7 +75,7 @@ Geometry Geometry::Cube() {
     Geometry ret;
     ret.vertices = cube_vertices;
     ret.indices = cube_indices;
-    ret.usage = GL_STATIC_DRAW;
+    ret.draw_type = GL_TRIANGLES;
     ret.setup();
 
     return ret;
@@ -129,7 +129,7 @@ Geometry Geometry::Sphere(int segments) {
     Geometry ret;
     ret.vertices = sphere_vertices;
     ret.indices = sphere_indices;
-    ret.usage = GL_STATIC_DRAW;
+    ret.draw_type = GL_TRIANGLE_FAN;
     ret.setup();
 
     return ret;
@@ -141,12 +141,12 @@ void Geometry::setup() {
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), usage);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
     if (!indices.empty()) {
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usage);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
     }
 
     // position
@@ -166,10 +166,10 @@ void Geometry::setup() {
     glBindVertexArray(0);
 }
 
-Geometry::Geometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, GLenum usage) {
+Geometry::Geometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, GLenum draw_type) {
     this->vertices = vertices;
     this->indices = indices;
-    this->usage = usage;
+    this->draw_type = draw_type;
     
     this->setup();
 }

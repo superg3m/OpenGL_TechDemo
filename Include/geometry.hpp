@@ -22,10 +22,13 @@ struct Vertex {
 };
 
 struct Geometry {
+    // Date: June 15, 2025
+    // TODO(Jovanni): I should move out the VAO and stuff becuae I should be able to cache the mesh vertex data just using the VAO as a "GeometryID"
+    // The tricky part here is figuring out to request this Geometry I think its just gonna be another Key lookup
     unsigned int VBO = 0, VAO = 0, EBO = 0;
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    GLenum usage;
+    GLenum draw_type; // GL_TRIANGLES, GL_LINES, ...
 
     Geometry() = default;
 
@@ -36,7 +39,7 @@ struct Geometry {
      * @param indices 
      * @param usage 
      */
-    Geometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, GLenum usage = GL_STATIC_DRAW);
+    Geometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, GLenum draw_type = GL_TRIANGLES);
 
     static Geometry Quad();
     static Geometry Cube();

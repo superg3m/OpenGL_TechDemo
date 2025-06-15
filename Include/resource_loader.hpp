@@ -25,10 +25,16 @@ struct TextureAtlas {
     void freeAtlas();
 };
 
+/**
+ * @brief One natural Pattern that is being exhibited is the bundling of resources
+ * For example I have a "BRICK" Texture and a "BRICK" Entity.
+ */
+
 using GLTextureID = int;
 struct ResourceLoader {
     static std::map<std::string, GLTextureID> textures;
     static std::map<std::string, TextureAtlas*> atlas;
+    static std::map<std::string, Geometry*> geometry;
 
     static std::vector<std::string> entity_keys;
     static std::map<std::string, Entity*> entity_map;

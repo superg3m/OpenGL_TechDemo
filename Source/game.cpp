@@ -185,10 +185,15 @@ float currentTime = 0;
 static GameState previousState = GAME_INACTIVE;
 
 enum CompassDirection : int {
-    NORTH = 0,
-    EAST = 1,
-    SOUTH = 2,
-    WEST = 3,
+    NORTH,
+    NORTH_EAST,
+    EAST,
+    SOUTH_EAST,
+    SOUTH,
+    SOUTH_WEST,
+    WEST,
+    NORTH_WEST,
+    DIRECTION_COUNT,
     INVALID = -1
 };
 
@@ -216,11 +221,15 @@ bool checkAABBCollision(GM_Vec3 a_pos, GM_Vec3 a_scale, GM_Vec3 b_pos, GM_Vec3 b
     GM_Vec3 b_max = b_pos + b_half;
 
     if (checkAABBCollision(a_pos, a_scale, b_pos, b_scale)) {
-        GM_Vec3 compass[] = {
-            GM_Vec3(0.0f,  1.0f, 0.0f), // NORTH
-            GM_Vec3(1.0f,  0.0f, 0.0f), // EAST
-            GM_Vec3(0.0f, -1.0f, 0.0f), // SOUTH
-            GM_Vec3(-1.0f, 0.0f, 0.0f)  // WEST
+        const GM_Vec3 compass_vectors[] = {
+            GM_Vec3( 0.0f,    1.0f, 0.0f),      // NORTH
+            GM_Vec3( 0.7071f, 0.7071f, 0.0f),   // NORTH_EAST
+            GM_Vec3( 1.0f,    0.0f, 0.0f),      // EAST
+            GM_Vec3( 0.7071f, -0.7071f, 0.0f),  // SOUTH_EAST
+            GM_Vec3( 0.0f,   -1.0f, 0.0f),      // SOUTH
+            GM_Vec3(-0.7071f,-0.7071f, 0.0f),   // SOUTH_WEST
+            GM_Vec3(-1.0f,    0.0f, 0.0f),      // WEST
+            GM_Vec3(-0.7071f, 0.7071f, 0.0f)    // NORTH_WEST
         };
 
         GM_Vec3 direction = (b_pos - a_pos).normalize();
@@ -228,8 +237,8 @@ bool checkAABBCollision(GM_Vec3 a_pos, GM_Vec3 a_scale, GM_Vec3 b_pos, GM_Vec3 b
         float maxDot = -1;
         int bestMatch = -1;
 
-        for (int i = 0; i < 4; ++i) {
-            float dot = GM_Vec3::dot(direction, compass[i]);
+        for (int i = 0; i < DIRECTION_COUNT; i++) {
+            float dot = GM_Vec3::dot(direction, compass_vectors[i]);
             if (dot > maxDot) {
                 maxDot = dot;
                 bestMatch = i;
@@ -309,21 +318,24 @@ void Game::update(GLFWwindow* window, float dt) {
         if (checkAABBCollision(ball->position, ball->scale, brick->position, brick->scale, out_direction)) {
             brick->health -= 1;
             switch (out_direction) {
+                case NORTH_EAST:
+                case NORTH_WEST:
                 case NORTH: {
                     ball->velocity.y = -ball->velocity.y;
                     ball->position.y -= 4;
-                }
+                } break;
 
                 case EAST: {
                     ball->velocity.x = -ball->velocity.x;
                     ball->position.x += 4;
-                }
+                } break;
                 
+                case SOUTH_EAST:
+                case SOUTH_WEST:
                 case SOUTH: {
                     ball->velocity.y = -ball->velocity.y;
                     ball->position.y += 4;
                 } break;
-
         
                 case WEST: {
                     ball->velocity.x = -ball->velocity.x;

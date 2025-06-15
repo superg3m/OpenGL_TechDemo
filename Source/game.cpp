@@ -162,7 +162,7 @@ void Game::initalizeResources() {
 
     Entity* player = Entity::Sprite(ENTITY_TYPE_PLAYER);
     player->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, Game::WINDOW_HEIGHT / 1.15f, 0));
-    player->setScale((float)Game::WINDOW_WIDTH / 6.0f, (float)Game::WINDOW_HEIGHT / 20.0f, 1);
+    player->setScale((float)Game::WINDOW_WIDTH / 6.0f, (float)Game::WINDOW_HEIGHT / 32.0f, 1);
     player->setTexture(ResourceLoader::getTexture(NORMAL_BRICK), TEXTURE_COLOR);
     player->mesh.material.shader.setVec3("spriteColor", GM_Vec3(1, 1, 1));
     ResourceLoader::setEntityReference(PLAYER_PADDLE, player);
@@ -267,7 +267,7 @@ void Game::update(GLFWwindow* window, float dt) {
     Entity* ball = ResourceLoader::getEntityReference(BALL);
 
     if (Game::state == GAME_INACTIVE) {
-        ball->setPosition(mouse_x, (Game::WINDOW_HEIGHT / 1.20f) - ball->scale.x, 0);
+        ball->setPosition(mouse_x, (Game::WINDOW_HEIGHT / 1.16f) - ball->scale.x, 0);
     } else if (Game::state == GAME_ACTIVE) {
         if (previousState == GAME_INACTIVE) {
             ball->velocity.x = paddle_velocity_x;
@@ -297,6 +297,7 @@ void Game::update(GLFWwindow* window, float dt) {
 
     if (checkAABBCollision(ball->position, ball->scale, player_paddle->position, player_paddle->scale)) {
         ball->velocity.y = -1 * fabs(ball->velocity.y);
+        ball->velocity.x += paddle_velocity_x;
     }
 
     int special_break_index = rand() % Game::level.brick_entity_references.size();

@@ -43,6 +43,20 @@ void processInput(GLFWwindow* window) {
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
         Game::state = GAME_ACTIVE;
     }
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        Game::timeScale += 0.1f;
+        CKG_LOG_DEBUG("%f\n", Game::timeScale);
+    }
+    
+    if (glfwGetKey(window, GLFW_KEY_DOWN)== GLFW_PRESS) {
+        Game::timeScale -= 0.1f;
+        if (Game::timeScale < 0.0f) {
+            Game::timeScale = 0.0f;
+        }
+
+        CKG_LOG_DEBUG("%f\n", Game::timeScale);
+    }
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -59,16 +73,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         Game::timeScale = 0.0f;
     } else if (key == GLFW_KEY_G && action == GLFW_PRESS) {
         Game::timeScale = 1.0f;
-    }
-
-    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-        Game::timeScale += 0.1f;
-        CKG_LOG_DEBUG("%f\n", Game::timeScale);
-    }
-    
-    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-        Game::timeScale -= 0.1f;
-        CKG_LOG_DEBUG("%f\n", Game::timeScale);
     }
 }
 

@@ -2,6 +2,7 @@
 #include <ckg.h>
 #include <vector>
 #include <mesh.hpp>
+#include <command.hpp>
 
 enum EntityType {
     ENTITY_TYPE_NONE,
@@ -27,6 +28,7 @@ struct Entity {
 
     Mesh mesh;
 
+    float speed;
     int health;
     int maxHealth;
     bool dead;
@@ -52,4 +54,41 @@ struct Entity {
 
     GM_Matrix4 getTransform();
     void draw();
+};
+
+enum class EntityCommandType { 
+    JUMP,
+    MOVE_LEFT,
+    MOVE_RIGHT,
+    MOVE_UP,
+    MOVE_DOWN,
+};
+
+struct EntityCommand : public BaseCommand {
+    EntityCommand(Entity* entity, EntityCommandType type) {
+        this->entity = entity;
+        this->type = type;
+    };
+    ~EntityCommand() = default;
+    void execute() override {
+        switch (this->type) {
+            case EntityCommandType::MOVE_LEFT: {
+                this->entity.moveLeft();
+            } break;
+
+            case EntityCommandType::MOVE_LEFT: {
+                this->entity.moveRight();
+            } break;
+
+            case EntityCommandType::JUMP: {
+                this->entity.jump();
+            } break;
+        }
+        this->entity
+    };
+
+    void undo() override {};
+private:
+    Entity* entity;
+    EntityCommandType type;
 };

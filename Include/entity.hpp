@@ -2,7 +2,6 @@
 #include <ckg.h>
 #include <vector>
 #include <mesh.hpp>
-#include <command.hpp>
 
 enum EntityType {
     ENTITY_TYPE_NONE,

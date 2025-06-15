@@ -311,23 +311,23 @@ void Game::update(GLFWwindow* window, float dt) {
             switch (out_direction) {
                 case NORTH: {
                     ball->velocity.y = -ball->velocity.y;
-                    ball->position.y -= 2;
+                    ball->position.y -= 4;
                 }
 
                 case EAST: {
                     ball->velocity.x = -ball->velocity.x;
-                    ball->position.x += 2;
+                    ball->position.x += 4;
                 }
                 
                 case SOUTH: {
                     ball->velocity.y = -ball->velocity.y;
-                    ball->position.y += 2;
+                    ball->position.y += 4;
                 } break;
 
         
                 case WEST: {
                     ball->velocity.x = -ball->velocity.x;
-                    ball->position.x -= 2;
+                    ball->position.x -= 4;
                 } break;
             };
         }

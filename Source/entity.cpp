@@ -119,15 +119,15 @@ GM_Matrix4 Entity::getTransform() {
 void Entity::updateBall(float dt) {
     this->position = this->position + this->velocity.scale(dt);
     if (this->velocity.x > 300.0f) {
-        this->velocity.x = gm_move_toward(this->velocity.x, -this->velocity.x, dt * 100);
+        this->velocity.x = gm_move_toward(this->velocity.x, -this->velocity.x, dt * 200);
     } else if (this->velocity.x < -300.0f) {
-        this->velocity.x = gm_move_toward(this->velocity.x, 300.0f, dt * 100);
+        this->velocity.x = gm_move_toward(this->velocity.x, 300.0f, dt * 200);
     }
 
     if (this->velocity.y > 300.0f) {
-        this->velocity.y = gm_move_toward(this->velocity.y, -300.0f, dt * 100);
+        this->velocity.y = gm_move_toward(this->velocity.y, -300.0f, dt * 200);
     } else if (this->velocity.y < -300.0f) {
-        this->velocity.y = gm_move_toward(this->velocity.y, 300.0f, dt * 100);
+        this->velocity.y = gm_move_toward(this->velocity.y, 300.0f, dt * 200);
     }
 }
 

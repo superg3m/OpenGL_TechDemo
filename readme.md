@@ -39,4 +39,6 @@ This is on pause until I switch to c++
 Revisit this when I have SPL and also
 fragment shader can be used to do different textures based on the face using the frag.pos
 
+finish this breakout game then move onto a more sophisiticed engine.
+
 // https://www.youtube.com/watch?v=8yo4JfC-Qtw

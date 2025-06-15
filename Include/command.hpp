@@ -11,7 +11,7 @@ enum class CommandType { INPUT };
  */
 struct BaseCommand {
     virtual ~BaseCommand() = default;
-    virtual void execute();
+    virtual void execute(float dt);
     virtual void undo();
 };
 

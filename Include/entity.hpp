@@ -70,18 +70,22 @@ struct EntityCommand : public BaseCommand {
         this->type = type;
     };
     ~EntityCommand() = default;
-    void execute() override {
+    void execute(float dt) override {
         switch (this->type) {
             case EntityCommandType::MOVE_LEFT: {
-                this->entity.moveLeft();
+                this->entity->moveLeft(dt); // This modifies the velocity or force
+                // This has to have dt becuase you need to move towards your desired velocity
+                // Then in the gameLoop have some function that is:
+                // updateEntity() // this will modify the position by solving for it using some integration method like verlet integration for example.
+                // then the entity controls how its animations are and such
             } break;
 
-            case EntityCommandType::MOVE_LEFT: {
-                this->entity.moveRight();
+            case EntityCommandType::MOVE_RIGHT: {
+                this->entity->moveRight(dt);
             } break;
 
             case EntityCommandType::JUMP: {
-                this->entity.jump();
+                this->entity->jump(dt);
             } break;
         }
         this->entity

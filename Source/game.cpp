@@ -253,6 +253,10 @@ bool checkAABBCollision(GM_Vec3 a_pos, GM_Vec3 a_scale, GM_Vec3 b_pos, GM_Vec3 b
     return false;
 }
 
+const int VELOCITY_HISTORY_SIZE = 3;
+float velocity_history[VELOCITY_HISTORY_SIZE] = {};
+int velocity_index = 0;
+
 // Date: June 15, 2025
 // TODO(Jovanni): This is not frame independent...
 void Game::update(GLFWwindow* window, float dt) {
@@ -263,13 +267,25 @@ void Game::update(GLFWwindow* window, float dt) {
     }
 
     mouse_x = CLAMP(mouse_x, 0, Game::WINDOW_WIDTH);
-    float paddle_velocity_x = 0.0f;
-    if (dt) {
-        paddle_velocity_x = (mouse_x - previous_mouse_x) / (dt * 50);
-    }
-
+    float dx = mouse_x - previous_mouse_x;
     previous_mouse_x = mouse_x;
+    float instant_velocity = 0.0f;
+    if (dt) {
+       instant_velocity = dx / dt;
+       instant_velocity = CLAMP(instant_velocity, -300, 300);
+    } 
+    
+    velocity_history[velocity_index] = instant_velocity;
+    velocity_index = (velocity_index + 1) % VELOCITY_HISTORY_SIZE;
 
+    float smoothed_velocity = 0.0f;
+    for (int i = 0; i < VELOCITY_HISTORY_SIZE; i++) {
+        smoothed_velocity += velocity_history[i];
+    }
+    smoothed_velocity /= VELOCITY_HISTORY_SIZE;
+
+    float paddle_velocity_x = smoothed_velocity;
+    
     Entity* player_paddle = ResourceLoader::getEntityReference(PLAYER_PADDLE);
     player_paddle->setPosition(mouse_x, Game::WINDOW_HEIGHT / 1.15f, 0);
 
@@ -304,9 +320,30 @@ void Game::update(GLFWwindow* window, float dt) {
         ball->position.y = Game::WINDOW_HEIGHT - half_ball_size.y;
     }
 
-    if (checkAABBCollision(ball->position, ball->scale, player_paddle->position, player_paddle->scale)) {
-        ball->velocity.y = -1 * fabs(ball->velocity.y);
-        ball->velocity.x += paddle_velocity_x;
+    
+    CompassDirection out_direction = INVALID;
+    if (checkAABBCollision(ball->position, ball->scale, player_paddle->position, player_paddle->scale, out_direction)) {
+        switch (out_direction) {
+            case NORTH: {
+                ball->velocity.y = -1 * fabs(ball->velocity.y);
+                ball->velocity.x += paddle_velocity_x;
+                ball->position.y -= 2;
+            } break;
+
+            case NORTH_EAST:
+            case EAST: {
+                ball->velocity.y = -1 * fabs(ball->velocity.y);
+                ball->velocity.x += paddle_velocity_x;
+                ball->position.x -= 2;
+            } break;
+    
+            case NORTH_WEST:
+            case WEST: {
+                ball->velocity.y = -1 * fabs(ball->velocity.y);
+                ball->velocity.x += paddle_velocity_x;
+                ball->position.x += 2;
+            } break;
+        };
     }
 
     int special_break_index = rand() % Game::level.brick_entity_references.size();
@@ -322,24 +359,24 @@ void Game::update(GLFWwindow* window, float dt) {
                 case NORTH_WEST:
                 case NORTH: {
                     ball->velocity.y = -ball->velocity.y;
-                    ball->position.y -= 4;
+                    ball->position.y -= 2;
                 } break;
 
                 case EAST: {
                     ball->velocity.x = -ball->velocity.x;
-                    ball->position.x += 4;
+                    ball->position.x += 2;
                 } break;
                 
                 case SOUTH_EAST:
                 case SOUTH_WEST:
                 case SOUTH: {
                     ball->velocity.y = -ball->velocity.y;
-                    ball->position.y += 4;
+                    ball->position.y += 2;
                 } break;
         
                 case WEST: {
                     ball->velocity.x = -ball->velocity.x;
-                    ball->position.x -= 4;
+                    ball->position.x -= 2;
                 } break;
             };
         }

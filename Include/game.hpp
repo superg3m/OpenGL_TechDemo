@@ -43,6 +43,7 @@ struct Game {
     static GameLevel level;
     static bool mouse_captured;
     static float timeScale;
+    static float ball_speed;
   
     bool Keys[1024];
     static GM_Matrix4 projection;

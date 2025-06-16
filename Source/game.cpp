@@ -7,6 +7,7 @@ GameLevel Game::level;
 GameState Game::state;
 bool Game::mouse_captured = true;
 float Game::timeScale = 1.0f;
+float Game::ball_speed = 400.0f;
 
 Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     Game::state = GAME_INACTIVE;
@@ -168,7 +169,7 @@ void Game::initalizeResources() {
     ResourceLoader::setEntityReference(PLAYER_PADDLE, player);
 
     Entity* ball = Entity::Sprite(ENTITY_TYPE_BALL);
-    ball->velocity = GM_Vec3(0, -300, 0);
+    ball->velocity = GM_Vec3(0, -Game::ball_speed, 0);
     ball->setPosition(GM_Vec3(Game::WINDOW_WIDTH / 2.0f, (Game::WINDOW_HEIGHT / 1.15f) - (Game::WINDOW_WIDTH / 50.0f), 0));
     ball->setScale(Game::WINDOW_WIDTH / 50.0f, Game::WINDOW_WIDTH / 50.0f, 1);
     ball->setTexture(ResourceLoader::getTexture(NORMAL_BRICK), TEXTURE_COLOR);
@@ -253,7 +254,7 @@ bool checkAABBCollision(GM_Vec3 a_pos, GM_Vec3 a_scale, GM_Vec3 b_pos, GM_Vec3 b
     return false;
 }
 
-const int VELOCITY_HISTORY_SIZE = 3;
+const int VELOCITY_HISTORY_SIZE = 5;
 float velocity_history[VELOCITY_HISTORY_SIZE] = {};
 int velocity_index = 0;
 
@@ -271,8 +272,7 @@ void Game::update(GLFWwindow* window, float dt) {
     previous_mouse_x = mouse_x;
     float instant_velocity = 0.0f;
     if (dt) {
-       instant_velocity = dx / dt;
-       instant_velocity = CLAMP(instant_velocity, -300, 300);
+       instant_velocity = (100 * dx) / dt;
     } 
     
     velocity_history[velocity_index] = instant_velocity;
@@ -284,8 +284,8 @@ void Game::update(GLFWwindow* window, float dt) {
     }
     smoothed_velocity /= VELOCITY_HISTORY_SIZE;
 
-    float paddle_velocity_x = smoothed_velocity;
-    
+    float paddle_velocity_x = CLAMP(smoothed_velocity, -500, 500);
+
     Entity* player_paddle = ResourceLoader::getEntityReference(PLAYER_PADDLE);
     player_paddle->setPosition(mouse_x, Game::WINDOW_HEIGHT / 1.15f, 0);
 
@@ -327,21 +327,18 @@ void Game::update(GLFWwindow* window, float dt) {
             case NORTH: {
                 ball->velocity.y = -1 * fabs(ball->velocity.y);
                 ball->velocity.x += paddle_velocity_x;
-                ball->position.y -= 2;
             } break;
 
             case NORTH_EAST:
             case EAST: {
                 ball->velocity.y = -1 * fabs(ball->velocity.y);
                 ball->velocity.x += paddle_velocity_x;
-                ball->position.x -= 2;
             } break;
     
             case NORTH_WEST:
             case WEST: {
                 ball->velocity.y = -1 * fabs(ball->velocity.y);
                 ball->velocity.x += paddle_velocity_x;
-                ball->position.x += 2;
             } break;
         };
     }

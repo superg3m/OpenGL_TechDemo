@@ -8,8 +8,6 @@ float lastFrame = 0.0f;
 // you can resuse a VAO instead of having to make an bind new ones all the time
 // this would be especially good with Geometry::Cube() or Geometry::Sphere becuaes I don't have to regenerate the vertex data
 
-void processInput(GLFWwindow* window);
-
 int main() {
     Game application(800, 600);
     GLFWwindow* window = application.initalizeWindow();
@@ -18,7 +16,7 @@ int main() {
     application.initalizeResources();
     IOD_GLFW_Setup(window);
 
-    IOD_Profile* profile = IOD::createProfile("default");
+    IOD_Profile* profile = IOD::createProfile("player");
     profile->bind(IOD_MOUSE_BUTTON_LEFT, IOD_InputState::RELEASED,
         []() {
             Game::state = GAME_ACTIVE;
@@ -51,7 +49,6 @@ int main() {
         lastFrame = currentFrame;
 
         IOD::poll();
-        processInput(window);
 
         int substeps = 8;
         float substep_dt = deltaTime / (float)substeps;
@@ -66,30 +63,6 @@ int main() {
 
     glfwTerminate();
     return 0;
-}
-
-// Date: June 16, 2025
-// TODO(Jovanni): Polling has the chance to miss input if frames are low.
-// probably switch to some event-based system in the future.
-void processInput(GLFWwindow* window) {
-
-}
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if ((key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)) {
-        glfwSetWindowShouldClose(window, true);
-    }
-
-    if (key == GLFW_KEY_C && action == GLFW_PRESS) {
-        Game::mouse_captured = !Game::mouse_captured;
-        glfwSetInputMode(window, GLFW_CURSOR, Game::mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-    }
-
-    if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-        Game::timeScale = 0.0f;
-    } else if (key == GLFW_KEY_G && action == GLFW_PRESS) {
-        Game::timeScale = 1.0f;
-    }
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {

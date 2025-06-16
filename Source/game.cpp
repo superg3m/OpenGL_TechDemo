@@ -15,7 +15,6 @@ Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) {
     Game::WINDOW_HEIGHT = WINDOW_HEIGHT;
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 GLFWwindow* Game::initalizeWindow() {
@@ -36,7 +35,6 @@ GLFWwindow* Game::initalizeWindow() {
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetKeyCallback(window, key_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {

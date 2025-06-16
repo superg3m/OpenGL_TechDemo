@@ -26,9 +26,12 @@ pc: ProjectConfig = ProjectConfig(
         Dependency(
             name="GameMath",
             branch_name="Rework",
+        ), 
+        Dependency(
+            name="IOD"
         )
     ],
-    project_debug_with_visual_studio = False,
+    project_debug_with_visual_studio = True,
     project_rebuild_project_dependencies = False,
     project_executable_names  = ["OpenGL_TechDemo.exe"]
 )
@@ -84,6 +87,7 @@ procedures_config = {
             "../../Source/*.cpp",
             "../../ckg/*.c",
             "../../GameMath/*.cpp",
+            "../../IOD/*.cpp",
             "../../Libraries/glad/src/glad.c"
         ],
         additional_libs = libs,
@@ -91,6 +95,7 @@ procedures_config = {
             "../../Include", 
             "../../ckg",
             "../../GameMath",
+            "../../IOD",
             "../../Libraries",
             "../../Libraries/stb",
             "../../Libraries/glad/include", 

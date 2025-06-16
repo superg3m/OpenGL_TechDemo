@@ -1,3 +1,4 @@
+/*
 #include <command.hpp>
 
 std::map<InputCode, std::pair<InputState, BaseCommand*>> Input::input_behaviour;
@@ -122,3 +123,4 @@ void Input::handleInput(GLFWwindow* window) {
         }
     }
 }
+*/

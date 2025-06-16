@@ -16,33 +16,42 @@ int main() {
     ckg_assert_msg(window, "failed to initalize glfw or glad\n");
 
     application.initalizeResources();
+    IOD_GLFW_Setup(window);
 
-    Input::bind(MOUSE_BUTTON_LEFT, InputState::PRESSED, new LambdaCommand(
+    IOD_Profile* profile = IOD::createProfile("default");
+    profile->bind(IOD_MOUSE_BUTTON_LEFT, IOD_InputState::RELEASED,
         []() {
             Game::state = GAME_ACTIVE;
         }
-    ));
+    );
 
-    Input::bind(KEY_UP, InputState::PRESSED|InputState::DOWN, new LambdaCommand(
+    profile->bind(IOD_KEY_ESCAPE, IOD_InputState::PRESSED,
+        [&]() {
+            glfwSetWindowShouldClose(window, true);
+        }
+    );
+
+    profile->bind(IOD_KEY_UP, IOD_InputState::PRESSED|IOD_InputState::DOWN,
         []() {
             Game::timeScale += 0.1f;
             CKG_LOG_DEBUG("%f\n", Game::timeScale);
         }
-    ));
+    );
 
-    Input::bind(KEY_DOWN, InputState::PRESSED|InputState::DOWN, new LambdaCommand(
+    profile->bind(IOD_KEY_DOWN, IOD_InputState::PRESSED|IOD_InputState::DOWN, 
         []() {
             Game::timeScale = MAX(Game::timeScale - 0.1f, 0.0f);
             CKG_LOG_DEBUG("%f\n", Game::timeScale);
         }
-    ));
+    );
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = (float)glfwGetTime();
         deltaTime = (currentFrame - lastFrame) * Game::timeScale;
         lastFrame = currentFrame;
 
-        Input::handleInput(window);
+        IOD::poll();
+        processInput(window);
 
         int substeps = 8;
         float substep_dt = deltaTime / (float)substeps;
@@ -63,19 +72,7 @@ int main() {
 // TODO(Jovanni): Polling has the chance to miss input if frames are low.
 // probably switch to some event-based system in the future.
 void processInput(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        Game::timeScale += 0.1f;
-        CKG_LOG_DEBUG("%f\n", Game::timeScale);
-    }
-    
-    if (glfwGetKey(window, GLFW_KEY_DOWN)== GLFW_PRESS) {
-        Game::timeScale -= 0.1f;
-        if (Game::timeScale < 0.0f) {
-            Game::timeScale = 0.0f;
-        }
 
-        CKG_LOG_DEBUG("%f\n", Game::timeScale);
-    }
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {

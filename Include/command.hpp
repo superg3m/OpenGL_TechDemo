@@ -1,11 +1,10 @@
-
+/*
 #pragma once
 #include <map>
 #include <utility>
 #include <functional>
 #include <GLFW/glfw3.h>
 
-/*
 enum class EntityCommandType { 
     JUMP,
     MOVE_LEFT,
@@ -42,7 +41,6 @@ private:
     Entity* entity;
     EntityCommandType type;
 };
-*/
 
 struct BaseCommand {
     virtual ~BaseCommand() = default;
@@ -180,3 +178,4 @@ private:
 
 };
 
+*/

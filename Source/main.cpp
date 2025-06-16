@@ -17,12 +17,32 @@ int main() {
 
     application.initalizeResources();
 
+    Input::bind(MOUSE_BUTTON_LEFT, InputState::PRESSED, new LambdaCommand(
+        []() {
+            Game::state = GAME_ACTIVE;
+        }
+    ));
+
+    Input::bind(KEY_UP, InputState::PRESSED|InputState::DOWN, new LambdaCommand(
+        []() {
+            Game::timeScale += 0.1f;
+            CKG_LOG_DEBUG("%f\n", Game::timeScale);
+        }
+    ));
+
+    Input::bind(KEY_DOWN, InputState::PRESSED|InputState::DOWN, new LambdaCommand(
+        []() {
+            Game::timeScale = MAX(Game::timeScale - 0.1f, 0.0f);
+            CKG_LOG_DEBUG("%f\n", Game::timeScale);
+        }
+    ));
+
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = (float)glfwGetTime();
         deltaTime = (currentFrame - lastFrame) * Game::timeScale;
         lastFrame = currentFrame;
 
-        processInput(window);
+        Input::handleInput(window);
 
         int substeps = 8;
         float substep_dt = deltaTime / (float)substeps;
@@ -39,11 +59,10 @@ int main() {
     return 0;
 }
 
+// Date: June 16, 2025
+// TODO(Jovanni): Polling has the chance to miss input if frames are low.
+// probably switch to some event-based system in the future.
 void processInput(GLFWwindow* window) {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-        Game::state = GAME_ACTIVE;
-    }
-
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
         Game::timeScale += 0.1f;
         CKG_LOG_DEBUG("%f\n", Game::timeScale);

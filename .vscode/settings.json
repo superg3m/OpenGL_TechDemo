@@ -67,6 +67,7 @@
         "xtr1common": "cpp",
         "map": "cpp",
         "xtree": "cpp",
-        "array": "cpp"
+        "array": "cpp",
+        "set": "cpp"
     }
 }

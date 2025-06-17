@@ -58,6 +58,54 @@ void ResourceLoader::loadTexture(std::string key, const char *file, int texture_
     ResourceLoader::textures[key] = texture;
 }
 
+// {right, left,  top, bottom, front, back}
+void ResourceLoader::loadCubemapTexture(std::string key, std::array<const char*, 6> cubeMapTextures) {
+    if (ResourceLoader::textures.count(key)) {
+        CKG_LOG_WARN("ResourceLoader | Key: '%s' already exists\n", key.c_str());
+        return;
+    }
+
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture); 
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    unsigned char *data;  
+    for(unsigned int i = 0; i < cubeMapTextures.size(); i++) {
+        ckg_assert_msg(ckg_io_path_exists(cubeMapTextures[i]), "Texture path: '%s' doesn't exist!\n", cubeMapTextures[i]);
+        int width, height, nrChannels;
+        data = stbi_load(cubeMapTextures[i], &width, &height, &nrChannels, 0);
+        
+        GLenum format = 0;
+        if (nrChannels == 1) {
+            format = GL_RED;
+        } else if (nrChannels == 3) {
+            format = GL_RGB;
+        } else if (nrChannels == 4) {
+            format = GL_RGBA;
+        } else {
+            CKG_LOG_ERROR("ResourceLoader | Failed to pick a stb format, most likely related to assimp, try to link your libraries in a different order\n");
+        }
+
+        if (data) {
+            glTexImage2D(
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+                0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data
+            );
+        } else {
+            CKG_LOG_ERROR("ResourceLoader | Failed to load texture\n");
+        }
+
+        stbi_image_free(data);
+    }
+
+    ResourceLoader::textures[key] = texture;
+}
+
 GLTextureID ResourceLoader::getTexture(std::string key) {
     if (!ResourceLoader::textures.count(key)) {
         CKG_LOG_ERROR("ResourceLoader | Key: '%s' doesn't exists\n", key.c_str());

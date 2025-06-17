@@ -3,22 +3,12 @@
 #include <vector>
 #include <mesh.hpp>
 
-enum EntityType {
-    ENTITY_TYPE_NONE,
-    ENTITY_TYPE_PLAYER,
-    ENTITY_TYPE_BALL,
-    ENTITY_TYPE_BRICK,
-    ENTITY_TYPE_POWERUP,
-    ENTITY_TYPE_BACKGROUND,
-};
-
 // Date: June 03, 2025
 // TODO(Jovanni): I think the reference ID is a unique ID for serialization?
 // The reference_id is for pointing another entity at this reference in a stable way
 // think of like a puzzle where you reference some type of trigger entity you would use the reference_id
 struct Entity {
     u64 reference_identifer;
-    EntityType type;
 
     GM_Vec3 position;
     GM_Vec3 velocity;
@@ -32,9 +22,7 @@ struct Entity {
     int maxHealth;
     bool dead;
 
-    Entity(EntityType type, Mesh mesh);
-    static Entity* Sprite(EntityType type);
-    static Entity* Brick(int brick_type);
+    Entity(Mesh mesh);
 
     void setPosition(GM_Vec3 position);
     void setPosition(float x, float y, float z);
@@ -48,8 +36,6 @@ struct Entity {
     void setScale(float scale_x, float scale_y, float scale_z);
 
     void setTexture(GLTextureID id, TextureType type);
-    void updateBrick();
-    void updateBall(float dt);
 
     GM_Matrix4 getTransform();
     void draw();

@@ -2,7 +2,6 @@
 
 #include <map>
 #include <string>
-#include <glad/glad.h>
 #include <entity.hpp>
 
 enum TextureFlag {
@@ -40,6 +39,7 @@ struct ResourceLoader {
     static std::map<std::string, Entity*> entity_map;
 
     static void loadTexture(std::string key, const char *file, int texture_flags = TEXTURE_DEFAULT);
+    static void loadCubemapTexture(std::string key, std::array<const char*, 6> cubeMapTextures);
     static GLTextureID getTexture(std::string key);
 
     static TextureAtlas* loadTextureAtlas(std::string key, const char *file, int texture_flags = TEXTURE_DEFAULT);

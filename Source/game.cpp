@@ -34,7 +34,7 @@ GLFWwindow* Game::initalizeWindow() {
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetScrollCallback(window, scroll_callback); 
+    glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     IOD_GLFW_BIND_MOUSE_MOVE_CALLBACK([](GLFWwindow *window, double xpos, double ypos) {
@@ -51,6 +51,13 @@ GLFWwindow* Game::initalizeWindow() {
 
         if (Game::mouse_captured) {
             Game::camera.process_mouse_movements(xoffset, yoffset);
+        }
+    });
+
+    IOD_GLFW_BIND_KEY_CALLBACK([](GLFWwindow* window, int key, int scancode, int action, int mods) {
+        if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+            Game::mouse_captured = !Game::mouse_captured;
+            glfwSetInputMode(window, GLFW_CURSOR, Game::mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
         }
     });
     
@@ -101,17 +108,16 @@ void Game::initalizeResources() {
     // Date: June 11, 2025
     // TODO(Jovanni): Maybe make the notion of just a sprite becuase its pretty annoying to do this all...
 
-    // Shader skyboxShader = Shader({"../../shader_source/basic/basic_material.vert", "../../shader_source/basic/basic_material.frag"});
-    // Material skyboxMaterial = Material(skyboxShader);
-    // Entity* skybox = new Entity(Mesh(skyboxMaterial, Geometry::Cube()));
-    // skybox->setTexture(ResourceLoader::getTexture(SKYBOX), TEXTURE_CUBEMAP);
-    // ResourceLoader::setEntityReference(SKYBOX, skybox);
+    Shader skyboxShader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
+    Material skyboxMaterial = Material(skyboxShader);
+    Entity* skybox = new Entity(Mesh(skyboxMaterial, Geometry::Cube()));
+    skybox->setTexture(ResourceLoader::getTexture(SKYBOX), TEXTURE_CUBEMAP);
+    ResourceLoader::setEntityReference(SKYBOX, skybox);
 
     Shader cubeShader = Shader({"../../shader_source/basic/basic_material.vert", "../../shader_source/basic/basic_material.frag"});
-
     Material cubeMaterial = Material(cubeShader);
     Entity* cube = new Entity(Mesh(cubeMaterial, Geometry::Cube()));
-    cube->setPosition(0.0f, 0.5f, -2.0f);
+    cube->setPosition(0.0f, 0.0f, -3.0f);
     cube->setTexture(ResourceLoader::getTexture(CRATE), TEXTURE_COLOR);
     ResourceLoader::setEntityReference(CRATE, cube);
 }
@@ -132,8 +138,17 @@ void Game::initalizeInputBindings() {
         }
     );
 
+    // Date: June 17, 2025
+    // TODO(Jovanni): Investigate why glfwSetInputMode is failing in the lambda?
+    profile->bind(IOD_KEY_C, IOD_InputState::PRESSED,
+        []() {
+            // Game::mouse_captured = !Game::mouse_captured;
+            // glfwSetInputMode((GLFWwindow*)IOD::glfw_window_instance, GLFW_CURSOR, Game::mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        }
+    );
+
     profile->bind(IOD_KEY_ESCAPE, IOD_InputState::PRESSED,
-        [&]() {
+        [window]() {
             glfwSetWindowShouldClose(window, true);
         }
     );
@@ -197,7 +212,16 @@ void Game::render() {
     for (const auto& key : ResourceLoader::entity_keys) {
         Entity* entity = ResourceLoader::getEntityReference(key);
         entity->mesh.material.shader.setMat4("projection", projection);
-        entity->mesh.material.shader.setMat4("view", view);
+        if (entity->mesh.material.textures[TEXTURE_CUBEMAP] != TEXTURE_INVALID) {
+            GM_Matrix4 withoutTranslation = view;
+            withoutTranslation.v[0].w = 0.0f;
+            withoutTranslation.v[1].w = 0.0f;
+            withoutTranslation.v[2].w = 0.0f;
+            entity->mesh.material.shader.setMat4("view", withoutTranslation);
+        } else {
+            entity->mesh.material.shader.setMat4("view", view);
+        }
+
         entity->draw();
     }
 }

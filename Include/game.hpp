@@ -28,14 +28,15 @@ struct Game {
 
     Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
 
+
     GLFWwindow* initalizeWindow();
     void initalizeResources();
     void initalizeInputBindings();
-
-    static u64 getReferenceID();
-
+    GM_Matrix4 getProjectionMatrix();
     void update(GLFWwindow* window, float dt);
     void render();
+
+    static u64 getReferenceID();
 private:
-    GM_Matrix4 getProjectionMatrix();
+
 };

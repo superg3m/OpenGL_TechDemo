@@ -21,6 +21,7 @@ struct Entity {
     int health;
     int maxHealth;
     bool dead;
+    GM_Vec4 color;
 
     Entity(Mesh mesh);
 

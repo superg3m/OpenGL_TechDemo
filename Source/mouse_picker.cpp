@@ -37,8 +37,7 @@ GM_Vec4 MousePicker::toViewSpace(GM_Vec4 clipSpace) {
         CKG_LOG_ERROR("Failed to invert projection matrix\n");
         return GM_Vec4(0, 0, 0, 0);
     }
-
-    // Transform from clip space to view space
+    
     GM_Vec4 viewSpace = inverseProjection * clipSpace;
     viewSpace.x /= viewSpace.w;
     viewSpace.y /= viewSpace.w;

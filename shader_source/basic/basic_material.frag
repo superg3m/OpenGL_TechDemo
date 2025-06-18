@@ -28,6 +28,9 @@ uniform sampler2D hasTexture4; // TEXTURE_HEIGHT
 uniform sampler2D hasTexture5; // TEXTURE_ALPHA
 uniform sampler2D hasTexture6; // TEXTURE_CUBEMAP
 
+uniform vec4 color;
+
 void main() {
     FragColor = texture(texture0, TexCoords);
+    FragColor *= color;
 }

@@ -25,6 +25,7 @@ int main() {
 
         IOD::poll();
 
+    
         int substeps = 8;
         float substep_dt = Game::deltaTime / (float)substeps;
         for (int step = 0; step < substeps; step++) {

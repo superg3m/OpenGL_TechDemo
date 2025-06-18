@@ -203,6 +203,8 @@ void Game::update(GLFWwindow* window, float dt) {
     currentTime += dt;
 }
 
+intersection_entity_aabb
+
 void Game::render() {
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -211,7 +213,16 @@ void Game::render() {
     GM_Matrix4 view = camera.get_view_matrix();
     for (const auto& key : ResourceLoader::entity_keys) {
         Entity* entity = ResourceLoader::getEntityReference(key);
+
+        // intersection_entity_aabb(picker.ray, entity)
+        if (!Game::mouse_captured) {
+            entity->color = GM_Vec4(1, 0, 0, 1);
+        } else {
+            entity->color = GM_Vec4(1, 1, 1, 1);
+        }
+
         entity->mesh.material.shader.setMat4("projection", projection);
+        entity->mesh.material.shader.setVec4("color", entity->color);
         if (entity->mesh.material.textures[TEXTURE_CUBEMAP] != TEXTURE_INVALID) {
             GM_Matrix4 withoutTranslation = view;
             withoutTranslation.v[0].w = 0.0f;

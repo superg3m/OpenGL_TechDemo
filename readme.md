@@ -3,7 +3,6 @@ Then I want to replace GLFW and glad with my own CKIT_GFW (CKIT_Graphics FrameWo
 
 Probably will want to do batching to reduce the number of VAOs I need and 
 
-
 // There is instancing which typically is rendering a bunch of the same mesh but wanting to have different transforms. This is useful because with the same mesh you can
 offload pretty much all of the commpute to the gpu with instanceID which is perferable. This is all one draw call and typically you would use a specially designed shader for instancing. Something like particles is a really good candidate for instancing.
 
@@ -13,32 +12,13 @@ offload pretty much all of the commpute to the gpu with instanceID which is perf
 
 void glMultiDrawArrays(GLenum mode, const GLint * first, const GLsizei * count, GLsizei drawcount);
 
-const char* rectShaderPaths[] = {
-    "../shader_source/basic.frag",
-    "../shader_source/basic.vert"
-};
-
-Shader primative_shader(rectShaderPaths);
-RenderGroup primativeGroup = render_group_create(GL_TRIANGLES, GL_STATIC_DRAW);
-Mesh rect({0, 0, 0}, &rectShader, getSquareGeometry(side_length));
-Mesh circle(&rect_shader, getCircleGeometry(radius));
-primativeGroup->add({rect, circle}); // ensures that that every single shader in the mesh has the same attributes
-
-
-// Vector<Mesh> getModelGeometry(path)
-RenderGroup modelGroup(GL_TRIANGLES, GL_STATIC_DRAW);
-Model backpack_model({1, 10, 5}, &model_shader, getModelGeometry(backpack_path));
-Model skull_model({1, 10, 5}, &model_shader, getModelGeometry(skull_path));
-modelGroup->add({backpack_model, skull_model});
-
-primativeGroup->draw();
-modelGroup->draw();
-
-This is on pause until I switch to c++
-
-Revisit this when I have SPL and also
-fragment shader can be used to do different textures based on the face using the frag.pos
-
-finish this breakout game then move onto a more sophisiticed engine.
-
 // https://www.youtube.com/watch?v=8yo4JfC-Qtw
+
+
+So what I will say is that for whatever reason when i'm in c++ I just don't care about performance - like at all...
+When i'm in C I have much more attention to detail so i'm sorry for whoever reads this code and has a heart attack.
+Things that I should probably improve but won't is:
+- const correctness
+- custom allocator
+- references to avoid copies
+- rule of 5 (I don't agree with this but I know its dogma)

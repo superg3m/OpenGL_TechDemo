@@ -7,6 +7,7 @@ bool Game::mouse_captured = true;
 float Game::timeScale = 1.0f;
 Camera Game::camera = Camera(0, 0, 0);
 float Game::deltaTime = 0.0f;
+MousePicker Game::picker = MousePicker();
 
 Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     Game::WINDOW_WIDTH = WINDOW_WIDTH;
@@ -117,7 +118,7 @@ void Game::initalizeResources() {
     Shader cubeShader = Shader({"../../shader_source/basic/basic_material.vert", "../../shader_source/basic/basic_material.frag"});
     Material cubeMaterial = Material(cubeShader);
     Entity* cube = new Entity(Mesh(cubeMaterial, Geometry::Sphere(32)));
-    cube->setPosition(0.0f, 0.0f, -3.0f);
+    cube->setPosition(0.0f, 0.0f, -9.0f);
     cube->setTexture(ResourceLoader::getTexture(CRATE), TEXTURE_COLOR);
     ResourceLoader::setEntityReference(CRATE, cube);
 }
@@ -201,6 +202,11 @@ void Game::initalizeInputBindings() {
 float currentTime = 0;
 void Game::update(GLFWwindow* window, float dt) {
     currentTime += dt;
+
+    if (!Game::mouse_captured) {
+        Game::picker.update(this->getProjectionMatrix(), Game::camera.get_view_matrix());
+        CKG_LOG_DEBUG("(%f, %f, %f)\n", Game::picker.ray.x, Game::picker.ray.y, Game::picker.ray.z);
+    }
 }
 
 void Game::render() {
@@ -211,15 +217,6 @@ void Game::render() {
     GM_Matrix4 view = camera.get_view_matrix();
     for (const auto& key : ResourceLoader::entity_keys) {
         Entity* entity = ResourceLoader::getEntityReference(key);
-
-        // intersection_entity_aabb(picker.ray, entity)
-        if (!Game::mouse_captured) {
-            entity->mesh.material.color = GM_Vec4(1, 0, 0, 1);
-            // entity->should_render_aabb = true;
-        } else {
-            entity->mesh.material.color = GM_Vec4(1, 1, 1, 1);
-            // entity->should_render_aabb = false;
-        }
 
         entity->aabb_mesh.material.shader.setMat4("projection", projection);
         entity->mesh.material.shader.setMat4("projection", projection);
@@ -234,6 +231,20 @@ void Game::render() {
         } else {
             entity->aabb_mesh.material.shader.setMat4("view", view);
             entity->mesh.material.shader.setMat4("view", view);
+
+            if (!Game::mouse_captured) {
+                bool intersecting = GM_AABB::intersection(entity->getAABB(), Game::picker.ray, Game::picker.ray.scale(100));
+                if (intersecting) {
+                    entity->mesh.material.color = GM_Vec4(1, 0, 0, 1);
+                    entity->should_render_aabb = true;
+                } else {
+                    entity->mesh.material.color = GM_Vec4(1, 1, 1, 1);
+                    entity->should_render_aabb = false;
+                }
+            } else {
+                entity->mesh.material.color = GM_Vec4(1, 1, 1, 1);
+                entity->should_render_aabb = false;
+            }
         }
 
         entity->draw();

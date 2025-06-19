@@ -16,8 +16,6 @@ int main() {
     application.initalizeResources();
     application.initalizeInputBindings();
 
-    MousePicker picker = MousePicker();
-
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = (float)glfwGetTime();
         Game::deltaTime = (currentFrame - lastFrame) * Game::timeScale;
@@ -25,16 +23,10 @@ int main() {
 
         IOD::poll();
 
-    
         int substeps = 8;
         float substep_dt = Game::deltaTime / (float)substeps;
         for (int step = 0; step < substeps; step++) {
             application.update(window, substep_dt);
-        }
-
-        if (!Game::mouse_captured) {
-            picker.update(application.getProjectionMatrix(), Game::camera.get_view_matrix());
-            CKG_LOG_SUCCESS("(%f, %f, %f)\n", picker.ray.x, picker.ray.y, picker.ray.z);
         }
 
         application.render();

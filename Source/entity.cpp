@@ -12,7 +12,7 @@ Entity::Entity(Mesh mesh) {
     Shader aabbShader = Shader({"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"});
     this->aabb_mesh = Mesh(Material(aabbShader), Geometry::AABB());
     this->aabb_mesh.material.color = GM_Vec4(0, 1, 0, 1);
-    this->should_render_aabb = true;
+    this->should_render_aabb = false;
 
     this->dead = false;
 }

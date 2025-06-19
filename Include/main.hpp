@@ -6,4 +6,3 @@
 #include <game.hpp>
 #include <stb_image.h>
 #include <GLFW_IOD.hpp>
-#include <mouse_picker.hpp>

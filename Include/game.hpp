@@ -6,6 +6,7 @@
 #include <gm.hpp>
 #include <GLFW_IOD.hpp>
 #include <mesh.hpp>
+#include <mouse_picker.hpp>
 
 #include <camera.hpp>
 #include <ctime>
@@ -25,6 +26,7 @@ struct Game {
     static unsigned int WINDOW_HEIGHT;
     static Camera camera;
     static float deltaTime;
+    static MousePicker picker;
 
     Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
 

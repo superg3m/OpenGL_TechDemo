@@ -102,7 +102,19 @@ void Shader::use() {
 
 // Date: June 19, 2025
 // TODO(Jovanni): Re-enable this in time
-GLint Shader::getLocation(const char* name) const {
+GLint Shader::getAttributeLocation(const char* name) const {
+    GLint location = glGetAttribLocation(this->id, name);
+    if (location == -1) {
+        CKG_LOG_ERROR("Shader Attribute: '%s' does not exists\n", name);
+    }
+
+    return location;
+}
+
+
+// Date: June 19, 2025
+// TODO(Jovanni): Re-enable this in time
+GLint Shader::getUniformLocation(const char* name) const {
     GLint location = glGetUniformLocation(this->id, name);
     if (location == -1) {
         // CKG_LOG_ERROR("Shader Uniform: '%s' does not exists\n", name);
@@ -113,45 +125,45 @@ GLint Shader::getLocation(const char* name) const {
 
 void Shader::setBool(const char* name, bool value) {   
     this->use();      
-    glUniform1i(this->getLocation(name), (int)value); 
+    glUniform1i(this->getUniformLocation(name), (int)value); 
 }
 
 void Shader::setInt(const char* name, int value) { 
     this->use();
-    glUniform1i(this->getLocation(name), value); 
+    glUniform1i(this->getUniformLocation(name), value); 
 }
 
 void Shader::setFloat(const char* name, float value) { 
     this->use();
-    glUniform1f(this->getLocation(name), value); 
+    glUniform1f(this->getUniformLocation(name), value); 
 }
 
 void Shader::setVec2(const char* name, const GM_Vec2 &value) {
     this->use();
-    glUniform2fv(this->getLocation(name), 1, &value.x);
+    glUniform2fv(this->getUniformLocation(name), 1, &value.x);
 }
 
 void Shader::setVec3(const char* name, const GM_Vec3 &value) {
     this->use();
-    glUniform3fv(this->getLocation(name), 1, &value.x);
+    glUniform3fv(this->getUniformLocation(name), 1, &value.x);
 }
 
 void Shader::setVec3(const char* name, float x, float y, float z) {
     this->use();
     GM_Vec3 temp = GM_Vec3(x, y, z);
-    glUniform3fv(this->getLocation(name), 1, &temp.x);
+    glUniform3fv(this->getUniformLocation(name), 1, &temp.x);
 }
 
 void Shader::setVec4(const char* name, const GM_Vec4 &value) {
     this->use();
-    glUniform4fv(this->getLocation(name), 1, &value.x);
+    glUniform4fv(this->getUniformLocation(name), 1, &value.x);
 }
 
 void Shader::setMat4(const char* name, const GM_Matrix4 &mat) {
     this->use();
-    glUniformMatrix4fv(this->getLocation(name), 1, GL_TRUE, &mat.v[0].x);
+    glUniformMatrix4fv(this->getUniformLocation(name), 1, GL_TRUE, &mat.v[0].x);
 }
 
 void Shader::setMat4(const char* name, const glm::mat4 &mat) const {
-    glUniformMatrix4fv(this->getLocation(name), 1, GL_FALSE, &mat[0][0]);
+    glUniformMatrix4fv(this->getUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
 }

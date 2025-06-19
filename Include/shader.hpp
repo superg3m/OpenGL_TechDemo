@@ -23,6 +23,6 @@ struct Shader {
     void setMat4(const char*name, const GM_Matrix4 &mat);
     void setMat4(const char* name, const glm::mat4 &mat) const;
 private:
-    GLint getLocation(const char* name) const;
-    
+    GLint getAttributeLocation(const char* name) const;
+    GLint getUniformLocation(const char* name) const;
 };

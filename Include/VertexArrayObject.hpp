@@ -46,4 +46,17 @@ Shader shader = Shader(paths, attributes, uniforms);
 Mesh mesh = Mesh(shader, shaderUnfiforms, attributes)
 
 draw_commands.push(Mesh::Cube(), Mesh::OBJ())
+
+bindable attributes?
+bindable shader?
+VertexAttributes attributes;
+Shader shader;
+struct DrawCommand {
+    PrimitiveType primitive_type;
+    VertexData data;
+}
+
+
+you want push DrawCommands for 
+instancing as well.
 */

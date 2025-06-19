@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glad/glad.h>
 
 struct Shader {
     unsigned int id;
@@ -21,4 +22,7 @@ struct Shader {
     void setVec4(const char*name, const GM_Vec4 &value);
     void setMat4(const char*name, const GM_Matrix4 &mat);
     void setMat4(const char* name, const glm::mat4 &mat) const;
+private:
+    GLint getLocation(const char* name) const;
+    
 };

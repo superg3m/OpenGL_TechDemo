@@ -106,8 +106,19 @@ void Game::initalizeResources() {
     ResourceLoader::loadCubemapTexture(SKYBOX, cubemap_faces);
     ResourceLoader::loadTexture(CRATE, "../../assets/container.jpg");
 
-    // Date: June 11, 2025
-    // TODO(Jovanni): Maybe make the notion of just a sprite becuase its pretty annoying to do this all...
+    /*
+    VertexAttributeFormat vbf = {
+        {FD::Vec3,  "aPosition"},
+        {FD::Vec3,  "aNormal"  },
+        {FD::Vec2,  "aTexCoord"}
+    }
+
+    FragmentUniformFormat vbf = {
+        {FD::Vec3, "uColor"}
+        {FD::Vec2,  "aPosition"}
+    }
+    Shader testShader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
+    */
 
     Shader skyboxShader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
     Material skyboxMaterial = Material(skyboxShader);
@@ -260,8 +271,7 @@ void Game::render() {
             }
         }
 
-        //GM_Matrix4 mvp = projection * view * model;
-        entity->draw(model, view, projection);
+        entity->draw(projection * view * model);
     }
 }
 

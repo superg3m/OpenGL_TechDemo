@@ -13,5 +13,5 @@ struct Mesh {
     Mesh() = default;
     Mesh(Material material, Geometry geometry);
 
-    void draw(GM_Matrix4 model, GM_Matrix4 view, GM_Matrix4 projection);
+    void draw(GM_Matrix4 mvp);
 };

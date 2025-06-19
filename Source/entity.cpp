@@ -66,14 +66,16 @@ GM_Matrix4 Entity::getTransform() {
     return transform;
 }
 
-void Entity::draw(GM_Matrix4 model, GM_Matrix4 view, GM_Matrix4 projection) {
+void Entity::draw(GM_Matrix4 mvp) {
     if (this->dead) return;
 
     this->mesh.material.shader.setVec4("color", this->mesh.material.color);
     this->aabb_mesh.material.shader.setVec4("color", this->aabb_mesh.material.color);
 
-    this->mesh.draw(model, view, projection);
+    // materialShaderBind() sets up like setVec4("color and stuff")
+
+    this->mesh.draw(mvp);
     if (this->should_render_aabb) {
-        this->aabb_mesh.draw(model, view, projection);
+        this->aabb_mesh.draw(mvp);
     }
 }

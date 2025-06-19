@@ -45,5 +45,5 @@ struct Entity {
     void setTexture(GLTextureID id, TextureType type);
 
     GM_Matrix4 getTransform();
-    void draw(GM_Matrix4 model, GM_Matrix4 view, GM_Matrix4 projection);
+    void draw(GM_Matrix4 mvp);
 };

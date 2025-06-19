@@ -221,25 +221,23 @@ void Game::render() {
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+
+    GM_Matrix4 sourceView = camera.get_view_matrix();
     GM_Matrix4 projection = this->getProjectionMatrix();
-    GM_Matrix4 view = camera.get_view_matrix();
+
     for (const auto& key : ResourceLoader::entity_keys) {
         Entity* entity = ResourceLoader::getEntityReference(key);
+        GM_Matrix4 model = entity->getTransform();
+        GM_Matrix4 view = sourceView;
 
-        entity->aabb_mesh.material.shader.setMat4("projection", projection);
-        entity->mesh.material.shader.setMat4("projection", projection);
-        entity->mesh.material.shader.setVec4("color", entity->mesh.material.color);
-        entity->aabb_mesh.material.shader.setVec4("color", entity->aabb_mesh.material.color);
         if (entity->mesh.material.textures[TEXTURE_CUBEMAP] != TEXTURE_INVALID) {
             GM_Matrix4 withoutTranslation = view;
             withoutTranslation.v[0].w = 0.0f;
             withoutTranslation.v[1].w = 0.0f;
             withoutTranslation.v[2].w = 0.0f;
-            entity->mesh.material.shader.setMat4("view", withoutTranslation);
+            view = withoutTranslation;
+            model = GM_Matrix4::identity();
         } else {
-            entity->aabb_mesh.material.shader.setMat4("view", view);
-            entity->mesh.material.shader.setMat4("view", view);
-
             if (!Game::mouse_captured) {
                 GM_Vec3 ray_origin    = Game::picker.rayOrigin;
                 GM_Vec3 ray_direction = Game::picker.rayDirection;
@@ -262,7 +260,8 @@ void Game::render() {
             }
         }
 
-        entity->draw();
+        //GM_Matrix4 mvp = projection * view * model;
+        entity->draw(model, view, projection);
     }
 }
 

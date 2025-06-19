@@ -7,10 +7,12 @@ Mesh::Mesh(Material material, Geometry geometry) {
     this->geometry = geometry;
 }
 
-void Mesh::draw(GM_Matrix4 transform) {
-    this->material.shader.setMat4("model", transform);
+void Mesh::draw(GM_Matrix4 model, GM_Matrix4 view, GM_Matrix4 projection) {
+    this->material.shader.setMat4("model", model);
+    this->material.shader.setMat4("view", view);
+    this->material.shader.setMat4("projection", projection);
+    
     this->material.bindTextures();
-
     if (this->material.textures[TEXTURE_CUBEMAP] != TEXTURE_INVALID) {
         glDepthFunc(GL_LEQUAL);
     }
@@ -26,7 +28,6 @@ void Mesh::draw(GM_Matrix4 transform) {
     if (this->material.textures[TEXTURE_CUBEMAP] != TEXTURE_INVALID) {
         glDepthFunc(GL_LESS);
     }
-
     this->material.unbindTextures();
     glBindVertexArray(0);
 }

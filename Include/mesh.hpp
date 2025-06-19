@@ -13,7 +13,5 @@ struct Mesh {
     Mesh() = default;
     Mesh(Material material, Geometry geometry);
 
-    void draw(GM_Matrix4 transform);
-    void setVertices(const std::vector<Vertex>& vertices);
-    void setIndices(const std::vector<unsigned int>& indices);
+    void draw(GM_Matrix4 model, GM_Matrix4 view, GM_Matrix4 projection);
 };

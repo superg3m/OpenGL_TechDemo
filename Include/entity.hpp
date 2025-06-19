@@ -7,6 +7,9 @@
 // TODO(Jovanni): I think the reference ID is a unique ID for serialization?
 // The reference_id is for pointing another entity at this reference in a stable way
 // think of like a puzzle where you reference some type of trigger entity you would use the reference_id
+
+// Date: June 19, 2025
+// TODO(Jovanni): aabb_mesh needs to be calculated by sorting vertrices and finding the min/max x, y, z
 struct Entity {
     u64 reference_identifer;
 
@@ -42,5 +45,5 @@ struct Entity {
     void setTexture(GLTextureID id, TextureType type);
 
     GM_Matrix4 getTransform();
-    void draw();
+    void draw(GM_Matrix4 model, GM_Matrix4 view, GM_Matrix4 projection);
 };

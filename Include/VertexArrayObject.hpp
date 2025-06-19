@@ -11,14 +11,39 @@ struct VertexArrayObject {
 // Date: June 19, 2025
 // NOTE(Jovanni): VAO has the attributes to interpret the VBO which has the float data
 
-typedef struct {
-    GLuint count;           // Number of indices to draw for this command
-    GLuint instanceCount;   // Number of instances to draw for this command
-    GLuint firstIndex;      // Index of the first index in the EBO for this command
-    GLint  baseVertex;      // Value added to each index to get the final vertex index
-    GLuint baseInstance;    // Value for gl_BaseInstance in the shader for this command
-} DrawCommand;   
+struct DrawArraysIndirectCommand { 
+    GLuint count;
+    GLuint primitiveCount;
+    GLuint first;
+    GLuint baseInstance;
+};
+
+struct DrawElementsIndirectCommand { 
+    GLuint count;
+    GLuint primitiveCount;
+    GLuint firstIndex;
+    GLuint baseVertex;
+    GLuint baseInstance;
+};
  
 // approaching zero driver overhead
 glMuliDrawArraysIndirect()
+
+std::Vector<VertexAttribute> attributes = {
+    VertexAttribute{TD::VEC3, "aPosition"},
+    VertexAttribute{TD::VEC3, "aNormal"},
+    VertexAttribute{TD::VEC2, "aUV"}
+}
+
+std::vector<std::string> shaderUniforms = {
+    "uColor",
+    "uTexture"
+    "uTextureMask"
+    "uCubeMap"
+}
+
+Shader shader = Shader(paths, attributes, uniforms);
+Mesh mesh = Mesh(shader, shaderUnfiforms, attributes)
+
+draw_commands.push(Mesh::Cube(), Mesh::OBJ())
 */

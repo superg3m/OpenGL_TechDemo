@@ -205,7 +205,6 @@ void Game::update(GLFWwindow* window, float dt) {
 
     if (!Game::mouse_captured) {
         Game::picker.update(this->getProjectionMatrix(), Game::camera.get_view_matrix());
-        CKG_LOG_DEBUG("(%f, %f, %f)\n", Game::picker.ray.x, Game::picker.ray.y, Game::picker.ray.z);
     }
 }
 
@@ -233,7 +232,11 @@ void Game::render() {
             entity->mesh.material.shader.setMat4("view", view);
 
             if (!Game::mouse_captured) {
-                bool intersecting = GM_AABB::intersection(entity->getAABB(), Game::picker.ray, Game::picker.ray.scale(100));
+                GM_Vec3 p0 = Game::picker.ray + Game::camera.position;
+                GM_Vec3 p1 = p1.scale(100);
+
+                CKG_LOG_DEBUG("(%f, %f, %f)\n", p0.x, p0.y, p0.z);
+                bool intersecting = GM_AABB::intersection(entity->getAABB(), p0, p1);
                 if (intersecting) {
                     entity->mesh.material.color = GM_Vec4(1, 0, 0, 1);
                     entity->should_render_aabb = true;

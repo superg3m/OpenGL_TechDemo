@@ -115,12 +115,21 @@ void Game::initalizeResources() {
     skybox->setTexture(ResourceLoader::getTexture(SKYBOX), TEXTURE_CUBEMAP);
     ResourceLoader::setEntityReference(SKYBOX, skybox);
 
-    Shader cubeShader = Shader({"../../shader_source/basic/basic_material.vert", "../../shader_source/basic/basic_material.frag"});
-    Material cubeMaterial = Material(cubeShader);
-    Entity* cube = new Entity(Mesh(cubeMaterial, Geometry::Sphere(32)));
-    cube->setPosition(0.0f, 0.0f, 0.0f);
-    cube->setTexture(ResourceLoader::getTexture(CRATE), TEXTURE_COLOR);
-    ResourceLoader::setEntityReference(CRATE, cube);
+    Shader sphereShader = Shader({"../../shader_source/basic/basic_material.vert", "../../shader_source/basic/basic_material.frag"});
+    Material sphereMaterial = Material(sphereShader);
+    Entity* sphere = new Entity(Mesh(sphereMaterial, Geometry::Sphere(32)));
+    sphere->setPosition(0.0f, 0.0f, 0.0f);
+    sphere->setTexture(ResourceLoader::getTexture(CRATE), TEXTURE_COLOR);
+    
+
+    Shader sphere2Shader = Shader({"../../shader_source/basic/basic_material.vert", "../../shader_source/basic/basic_material.frag"});
+    Material sphere2Material = Material(sphere2Shader);
+    Entity* sphere2 = new Entity(Mesh(sphere2Material, Geometry::Sphere(32)));
+    sphere2->setPosition(-2.0f, -1.0f, 0.0f);
+    sphere2->setTexture(ResourceLoader::getTexture(CRATE), TEXTURE_COLOR);
+
+    ResourceLoader::setEntityReference("sphere", sphere);
+    ResourceLoader::setEntityReference("sphere2", sphere2);
 }
 
 void Game::initalizeInputBindings() {
@@ -239,11 +248,7 @@ void Game::render() {
                 GM_Vec3 p0 = ray_origin;
                 GM_Vec3 p1 = ray_origin + (ray_direction.scale(ray_length));
 
-                GM_AABB aabb = entity->getAABB();
-                aabb.min = GM_Vec3(-0.5, -0.5, -0.5);
-                aabb.max = GM_Vec3(0.5, 0.5, 0.5);
-
-                bool intersecting = GM_AABB::intersection(aabb, p0, p1);
+                bool intersecting = GM_AABB::intersection(entity->getAABB(), p0, p1);
                 if (intersecting) {
                     entity->mesh.material.color = GM_Vec4(1, 0, 0, 1);
                     entity->should_render_aabb = true;

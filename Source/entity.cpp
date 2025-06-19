@@ -18,7 +18,7 @@ Entity::Entity(Mesh mesh) {
 }
 
 GM_AABB Entity::getAABB() {
-    return GM_AABB::fromCenterExtents(this->position, this->scale);
+    return GM_AABB::fromCenterExtents(this->position, this->scale.scale(0.5));
 }
 
 void Entity::setPosition(GM_Vec3 position) {

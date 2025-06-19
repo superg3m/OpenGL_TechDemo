@@ -116,7 +116,7 @@ void Game::initalizeResources() {
 
     Shader cubeShader = Shader({"../../shader_source/basic/basic_material.vert", "../../shader_source/basic/basic_material.frag"});
     Material cubeMaterial = Material(cubeShader);
-    Entity* cube = new Entity(Mesh(cubeMaterial, Geometry::Cube()));
+    Entity* cube = new Entity(Mesh(cubeMaterial, Geometry::Sphere(32)));
     cube->setPosition(0.0f, 0.0f, -3.0f);
     cube->setTexture(ResourceLoader::getTexture(CRATE), TEXTURE_COLOR);
     ResourceLoader::setEntityReference(CRATE, cube);
@@ -203,8 +203,6 @@ void Game::update(GLFWwindow* window, float dt) {
     currentTime += dt;
 }
 
-intersection_entity_aabb
-
 void Game::render() {
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -216,13 +214,17 @@ void Game::render() {
 
         // intersection_entity_aabb(picker.ray, entity)
         if (!Game::mouse_captured) {
-            entity->color = GM_Vec4(1, 0, 0, 1);
+            entity->mesh.material.color = GM_Vec4(1, 0, 0, 1);
+            // entity->should_render_aabb = true;
         } else {
-            entity->color = GM_Vec4(1, 1, 1, 1);
+            entity->mesh.material.color = GM_Vec4(1, 1, 1, 1);
+            // entity->should_render_aabb = false;
         }
 
+        entity->aabb_mesh.material.shader.setMat4("projection", projection);
         entity->mesh.material.shader.setMat4("projection", projection);
-        entity->mesh.material.shader.setVec4("color", entity->color);
+        entity->mesh.material.shader.setVec4("color", entity->mesh.material.color);
+        entity->aabb_mesh.material.shader.setVec4("color", entity->aabb_mesh.material.color);
         if (entity->mesh.material.textures[TEXTURE_CUBEMAP] != TEXTURE_INVALID) {
             GM_Matrix4 withoutTranslation = view;
             withoutTranslation.v[0].w = 0.0f;
@@ -230,6 +232,7 @@ void Game::render() {
             withoutTranslation.v[2].w = 0.0f;
             entity->mesh.material.shader.setMat4("view", withoutTranslation);
         } else {
+            entity->aabb_mesh.material.shader.setMat4("view", view);
             entity->mesh.material.shader.setMat4("view", view);
         }
 

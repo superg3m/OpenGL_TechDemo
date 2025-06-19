@@ -23,6 +23,36 @@ Geometry Geometry::Quad() {
     return ret;
 }
 
+Geometry Geometry::AABB() {
+    std::vector<Vertex> quad_vertices = {
+        // Bottom face
+        Vertex{-0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0},
+        Vertex{0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0},
+        Vertex{0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0},
+        Vertex{-0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0},
+
+        // Top face
+        Vertex{-0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0},
+        Vertex{0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0},
+        Vertex{0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0},
+        Vertex{-0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0},
+
+        // Vertical edges
+        Vertex{-0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0},
+        Vertex{0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0},
+        Vertex{0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0},
+        Vertex{-0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0},
+    };
+
+    Geometry ret;
+    ret.vertices = quad_vertices;
+    ret.indices = {};
+    ret.draw_type = GL_LINES;
+    ret.setup();
+
+    return ret;
+}
+
 
 Geometry Geometry::Cube() {
     std::vector<Vertex> cube_vertices = {
@@ -87,7 +117,7 @@ Geometry Geometry::Sphere(int segments) {
 
     int rings = segments;
     int sectors = segments;
-    float TWO_PI = 2.0f * PI; // Assuming PI is defined
+    float TWO_PI = 2.0f * PI;
 
     for (int r = 0; r <= rings; ++r) {
         float phi = PI * r / rings;
@@ -102,10 +132,11 @@ Geometry Geometry::Sphere(int segments) {
             float u = static_cast<float>(s) / sectors;
             float v = static_cast<float>(r) / rings;
 
-            // Create a Vertex object and push it back
-            sphere_vertices.push_back(Vertex{x * 0.5f, y * 0.5f, z * 0.5f, // Position
-                                             x, y, z,                   // Normal
-                                             u, v});                    // UV
+            sphere_vertices.push_back(Vertex{
+                x * 0.5f, y * 0.5f, z * 0.5f, // Position (radius = 0.5)
+                x, y, z,                     // Normal (unit direction)
+                u, v                         // UV
+            });
         }
     }
 
@@ -113,13 +144,15 @@ Geometry Geometry::Sphere(int segments) {
         for (int s = 0; s < sectors; ++s) {
             int i0 = r * (sectors + 1) + s;
             int i1 = i0 + 1;
-            int i2 = i0 + sectors + 1;
+            int i2 = i0 + (sectors + 1);
             int i3 = i2 + 1;
 
+            // Triangle 1
             sphere_indices.push_back(i0);
             sphere_indices.push_back(i2);
             sphere_indices.push_back(i1);
 
+            // Triangle 2
             sphere_indices.push_back(i1);
             sphere_indices.push_back(i2);
             sphere_indices.push_back(i3);
@@ -129,7 +162,7 @@ Geometry Geometry::Sphere(int segments) {
     Geometry ret;
     ret.vertices = sphere_vertices;
     ret.indices = sphere_indices;
-    ret.draw_type = GL_TRIANGLE_FAN;
+    ret.draw_type = GL_TRIANGLES;
     ret.setup();
 
     return ret;

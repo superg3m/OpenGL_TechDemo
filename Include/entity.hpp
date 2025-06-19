@@ -16,14 +16,17 @@ struct Entity {
     GM_Vec3 scale;
 
     Mesh mesh;
+    Mesh aabb_mesh;
+    bool should_render_aabb;
 
     float speed;
     int health;
     int maxHealth;
     bool dead;
-    GM_Vec4 color;
 
     Entity(Mesh mesh);
+
+    GM_AABB getAABB();
 
     void setPosition(GM_Vec3 position);
     void setPosition(float x, float y, float z);

@@ -42,6 +42,7 @@ struct Geometry {
     Geometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, GLenum draw_type = GL_TRIANGLES);
 
     static Geometry Quad();
+    static Geometry AABB();
     static Geometry Cube();
     static Geometry Sphere(int segments);
 

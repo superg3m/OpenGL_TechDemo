@@ -20,7 +20,7 @@ void Mesh::draw(GM_Matrix4 transform) {
     if (index_count > 0) {
         glDrawElements(this->geometry.draw_type, index_count, GL_UNSIGNED_INT, 0);
     } else {
-        glDrawArrays(this->geometry.draw_type, 0, (geometry.vertices.size() / sizeof(Vertex)));
+        glDrawArrays(this->geometry.draw_type, 0, geometry.vertices.size());
     }
 
     if (this->material.textures[TEXTURE_CUBEMAP] != TEXTURE_INVALID) {

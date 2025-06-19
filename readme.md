@@ -14,6 +14,7 @@ void glMultiDrawArrays(GLenum mode, const GLint * first, const GLsizei * count, 
 
 // https://www.youtube.com/watch?v=8yo4JfC-Qtw
 
+// So I need a engine refactor adding aabbs really caused a lot of structural issues.
 
 So what I will say is that for whatever reason when i'm in c++ I just don't care about performance - like at all...
 When i'm in C I have much more attention to detail so i'm sorry for whoever reads this code and has a heart attack.

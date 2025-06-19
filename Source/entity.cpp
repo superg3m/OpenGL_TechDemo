@@ -8,7 +8,17 @@ Entity::Entity(Mesh mesh) {
     this->scale = GM_Vec3(1, 1, 1);
 
     this->mesh = mesh;
+
+    Shader aabbShader = Shader({"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"});
+    this->aabb_mesh = Mesh(Material(aabbShader), Geometry::AABB());
+    this->aabb_mesh.material.color = GM_Vec4(0, 1, 0, 1);
+    this->should_render_aabb = true;
+
     this->dead = false;
+}
+
+GM_AABB Entity::getAABB() {
+    return GM_AABB::fromCenterExtents(this->position, this->scale);
 }
 
 void Entity::setPosition(GM_Vec3 position) {
@@ -60,4 +70,7 @@ void Entity::draw() {
     if (this->dead) return;
 
     this->mesh.draw(this->getTransform());
+    if (this->should_render_aabb) {
+        this->aabb_mesh.draw(this->getTransform());
+    }
 }

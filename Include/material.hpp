@@ -22,6 +22,7 @@ using GLTextureID = int;
 struct Material {
     Shader shader;
     GLTextureID textures[TEXTURE_MAX];
+    GM_Vec4 color;
 
     Material() = default;
     Material(Shader shader);

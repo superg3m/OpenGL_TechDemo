@@ -5,7 +5,7 @@ unsigned int Game::WINDOW_WIDTH;
 unsigned int Game::WINDOW_HEIGHT;
 bool Game::mouse_captured = true;
 float Game::timeScale = 1.0f;
-Camera Game::camera = Camera(0, 0, 0);
+Camera Game::camera = Camera(0, 0, 5);
 float Game::deltaTime = 0.0f;
 MousePicker Game::picker = MousePicker();
 
@@ -118,7 +118,7 @@ void Game::initalizeResources() {
     Shader cubeShader = Shader({"../../shader_source/basic/basic_material.vert", "../../shader_source/basic/basic_material.frag"});
     Material cubeMaterial = Material(cubeShader);
     Entity* cube = new Entity(Mesh(cubeMaterial, Geometry::Sphere(32)));
-    cube->setPosition(0.0f, 0.0f, -9.0f);
+    cube->setPosition(0.0f, 0.0f, 0.0f);
     cube->setTexture(ResourceLoader::getTexture(CRATE), TEXTURE_COLOR);
     ResourceLoader::setEntityReference(CRATE, cube);
 }
@@ -232,11 +232,18 @@ void Game::render() {
             entity->mesh.material.shader.setMat4("view", view);
 
             if (!Game::mouse_captured) {
-                GM_Vec3 p0 = Game::picker.ray + Game::camera.position;
-                GM_Vec3 p1 = p1.scale(100);
+                GM_Vec3 ray_origin    = Game::picker.rayOrigin;
+                GM_Vec3 ray_direction = Game::picker.rayDirection;
 
-                CKG_LOG_DEBUG("(%f, %f, %f)\n", p0.x, p0.y, p0.z);
-                bool intersecting = GM_AABB::intersection(entity->getAABB(), p0, p1);
+                float ray_length = 1000.0f;
+                GM_Vec3 p0 = ray_origin;
+                GM_Vec3 p1 = ray_origin + (ray_direction.scale(ray_length));
+
+                GM_AABB aabb = entity->getAABB();
+                aabb.min = GM_Vec3(-0.5, -0.5, -0.5);
+                aabb.max = GM_Vec3(0.5, 0.5, 0.5);
+
+                bool intersecting = GM_AABB::intersection(aabb, p0, p1);
                 if (intersecting) {
                     entity->mesh.material.color = GM_Vec4(1, 0, 0, 1);
                     entity->should_render_aabb = true;

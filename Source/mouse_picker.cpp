@@ -2,58 +2,35 @@
 #include <IOD.hpp>
 #include <game.hpp>
 
+// study this tomorrow!
 void MousePicker::update(GM_Matrix4 projection, GM_Matrix4 view) {
-    this->projection = projection;
-    this->view = view;
-
-    // Date: June 18, 2025
-    // NOTE(Jovanni): NDC are from -1 to 1
-    // also ndc y might have to be negated: -ndc_y
-
     float mouse_x = IOD::getMouseX();
     float mouse_y = IOD::getMouseY();
 
-    GM_Vec2 ndc = this->toNormalizedDeviceSpace(mouse_x, mouse_y);
-    GM_Vec4 clipSpace = this->toClipSpace(ndc);
-    GM_Vec4 viewSpace = this->toViewSpace(clipSpace);
+    GM_Vec2 ndc = GM_Vec2(
+        ((2.0 * mouse_x) / Game::WINDOW_WIDTH) - 1, 
+        ((2.0 * mouse_y) / Game::WINDOW_HEIGHT) - 1
+    );
 
-    this->ray = this->toWorldSpace(viewSpace).normalize();
-}
+    GM_Vec4 clipCoordsNear = GM_Vec4(ndc.x, -ndc.y, -1.0f, 1.0f); // Z = -1 for near plane
+    GM_Vec4 clipCoordsFar  = GM_Vec4(ndc.x, -ndc.y,  1.0f, 1.0f); // Z =  1 for far plane
 
-GM_Vec2 MousePicker::toNormalizedDeviceSpace(float screen_space_mouse_x, float screen_space_mouse_y) {
-    float ndc_x = ((2.0f * screen_space_mouse_x) / Game::WINDOW_WIDTH) - 1.0f;
-    float ndc_y = ((2.0f * screen_space_mouse_y) / Game::WINDOW_HEIGHT) - 1.0f;
+    // 3. Calculate the Inverse View-Projection Matrix
+    GM_Matrix4 ProjectView = projection * view;
+    GM_Matrix4 viewProjectionInverse = GM_Matrix4::inverse(ProjectView, nullptr); // Ensure nullptr is appropriate for your inverse function
 
-    return GM_Vec2(ndc_x, ndc_y);
-}
-GM_Vec4 MousePicker::toClipSpace(GM_Vec2 ndc) {
-    return GM_Vec4(ndc.x, ndc.y, -1, 1);
-}
+    // 4. Unproject the two points to World Space
+    GM_Vec4 worldPosNear = viewProjectionInverse * clipCoordsNear;
+    GM_Vec4 worldPosFar  = viewProjectionInverse * clipCoordsFar;
 
-GM_Vec4 MousePicker::toViewSpace(GM_Vec4 clipSpace) {
-    bool success = false;
-    GM_Matrix4 inverseProjection = GM_Matrix4::inverse(this->projection, &success);
-    if (!success) {
-        CKG_LOG_ERROR("Failed to invert projection matrix\n");
-        return GM_Vec4(0, 0, 0, 0);
-    }
-    
-    GM_Vec4 viewSpace = inverseProjection * clipSpace;
-    viewSpace.x /= viewSpace.w;
-    viewSpace.y /= viewSpace.w;
-    viewSpace.z /= viewSpace.w;
+    // 5. Perform Perspective Divide for both points
+    this->rayOrigin = GM_Vec3(worldPosNear.x / worldPosNear.w,
+                              worldPosNear.y / worldPosNear.w,
+                              worldPosNear.z / worldPosNear.w);
 
-    return GM_Vec4(viewSpace.x, viewSpace.y, -1, 0);
-}
+    GM_Vec3 rayDirectionRaw = GM_Vec3(worldPosFar.x / worldPosFar.w,
+                                      worldPosFar.y / worldPosFar.w,
+                                      worldPosFar.z / worldPosFar.w);
 
-GM_Vec3 MousePicker::toWorldSpace(GM_Vec4 viewSpace) {
-    bool success = false;
-    GM_Matrix4 inverseView = GM_Matrix4::inverse(this->view, &success);
-    if (!success) {
-        CKG_LOG_ERROR("Failed to invert view matrix\n");
-        return GM_Vec3(0, 0, 0);
-    }
-
-    GM_Vec4 worldSpace = inverseView * viewSpace;
-    return GM_Vec3(worldSpace.x, worldSpace.y, worldSpace.z);
+    this->rayDirection = (rayDirectionRaw - this->rayOrigin).normalize();
 }

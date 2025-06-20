@@ -13,21 +13,21 @@ typedef struct ShaderDescriptor {
     const char* path;
 } ShaderDescriptor;
 
-internal void checkCompileError(unsigned int shaderID, const char* type) {
+void Shader::checkCompileError(unsigned int shaderID, const char* type) {
     int success;
     char info_log[1024];
     if (type != "PROGRAM") {
         glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(shaderID, 1024, NULL, info_log);
-            CKG_LOG_ERROR("ERROR::SHADER_COMPILATION_ERROR of type: %s\n", type);
+            CKG_LOG_ERROR("ERROR::SHADER_COMPILATION_ERROR {%s} of type: %s\n", this->path, type);
             CKG_LOG_ERROR("%s -- --------------------------------------------------- --\n", info_log);
         }
     } else {
         glGetProgramiv(shaderID, GL_LINK_STATUS, &success);
         if (!success) {
             glGetProgramInfoLog(shaderID, 1024, NULL, info_log);
-            CKG_LOG_ERROR("ERROR::PROGRAM_LINKING_ERROR of type: %s\n", type);
+            CKG_LOG_ERROR("ERROR::PROGRAM_LINKING_ERROR {%s}  of type: %s\n", this->path, type);
             CKG_LOG_ERROR("%s -- --------------------------------------------------- --\n", info_log);
         }
     }
@@ -53,6 +53,7 @@ Shader::Shader(std::vector<const char*> shader_paths, std::vector<std::string> u
     this->id = glCreateProgram();
     this->uniforms = uniforms;
     this->textures = textures;
+    this->path = shader_paths[0];
 
     std::vector<unsigned int> shaderIDs; 
     for (int i = 0; i < shader_paths.size(); i++) {
@@ -107,7 +108,7 @@ void Shader::use() const {
 GLint Shader::getUniformLocation(const char* name) const {
     GLint location = glGetUniformLocation(this->id, name);
     if (location == -1) {
-        CKG_LOG_ERROR("Shader Uniform: '%s' does not exists\n", name);
+        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
     }
 
     return location;

@@ -17,6 +17,7 @@ enum class TextureType {
 using GLTextureID = int;
 struct Shader {
     unsigned int id;
+    const char* path;
     std::vector<std::string> uniforms;
     std::map<std::string, TextureType> textures;
     int activeTextureCount;
@@ -43,4 +44,5 @@ struct Shader {
 private:
     GLint getAttributeLocation(const char* name) const;
     GLint getUniformLocation(const char* name) const;
+    void checkCompileError(unsigned int shaderID, const char* type);
 };

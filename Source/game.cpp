@@ -12,36 +12,6 @@ MousePicker Game::picker = MousePicker();
 Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     Game::WINDOW_WIDTH = WINDOW_WIDTH;
     Game::WINDOW_HEIGHT = WINDOW_HEIGHT;
-
-    std::vector<std::string> uniforms = {
-        {"uColor"}
-    };
-
-    std::map<std::string, TextureType> textures = {
-        {"uColorTexture", TextureType::SAMPLER2D}
-    };
-
-    Geometry::Cube();
-
-    this->basic_shader = Shader(
-        {"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"},
-        uniforms,
-        textures
-    );
-
-    this->skybox_shader = Shader(
-        {"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"},
-        uniforms,
-        textures
-    );
-
-    this->aabb_shader = Shader(
-        {"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"}
-        uniforms,
-        textures
-    );
-    // this->particle_shader = Shader();
-    // this->pbr_shader = Shader();
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -124,6 +94,38 @@ u64 Game::getReferenceID() {
 void Game::initalizeResources() {
     srand(time(0));
 
+    std::vector<std::string> uniforms = {
+        {"uColor"}
+    };
+
+    std::map<std::string, TextureType> textures = {
+        {"uColorTexture", TextureType::SAMPLER2D}
+    };
+
+    this->basic_shader = Shader(
+        {"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"},
+        uniforms,
+        textures
+    );
+
+    textures = {
+        {"uSkyboxTexture", TextureType::CUBEMAP}
+    };
+
+    this->skybox_shader = Shader(
+        {"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"},
+        uniforms,
+        textures
+    );
+
+    this->aabb_shader = Shader(
+        {"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"},
+        uniforms,
+        {}
+    );
+    // this->particle_shader = Shader();
+    // this->pbr_shader = Shader();
+
     std::array<const char*, 6> cubemap_faces = {
         "../../assets/skybox/right.jpg",
         "../../assets/skybox/left.jpg",
@@ -136,22 +138,20 @@ void Game::initalizeResources() {
     ResourceLoader::loadCubemapTexture(SKYBOX, cubemap_faces);
     ResourceLoader::loadTexture(CRATE, "../../assets/container.jpg");
 
-
-    Material material;
-    Entity* skybox = new Entity(Mesh(material, Geometry::Cube()));
+    Entity* skybox = new Entity(Mesh(Geometry::Cube()));
     skybox->setTexture("uSkyboxTexture", ResourceLoader::getTexture(SKYBOX));
-    ResourceLoader::setEntityReference(SKYBOX, skybox);
+    ResourceLoader::setSkyboxReference(SKYBOX, skybox);
 
-    Entity* sphere = new Entity(Mesh(material, Geometry::Sphere(32)));
+    Entity* cube = new Entity(Mesh(Geometry::Cube()));
+    cube->setPosition(-2.0f, -1.0f, 0.0f);
+    // cube->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
+
+    Entity* sphere = new Entity(Mesh(Geometry::Sphere(32)));
     sphere->setPosition(0.0f, 0.0f, 0.0f);
-    sphere->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
-    
-    Entity* sphere2 = new Entity(Mesh(material, Geometry::Sphere(32)));
-    sphere2->setPosition(-2.0f, -1.0f, 0.0f);
-    sphere2->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
+    // sphere->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
 
+    ResourceLoader::setEntityReference("cube", cube);
     ResourceLoader::setEntityReference("sphere", sphere);
-    ResourceLoader::setEntityReference("sphere2", sphere2);
 }
 
 void Game::initalizeInputBindings() {
@@ -276,13 +276,14 @@ void Game::render() {
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-
     GM_Matrix4 sourceView = camera.get_view_matrix();
     GM_Matrix4 projection = this->getProjectionMatrix();
 
     // Render Skyboxes
     glDepthFunc(GL_LEQUAL);
-    for (const auto& skybox_entity : ResourceLoader::skyboxes) {
+    for (const auto& key : ResourceLoader::skybox_keys) {
+        Entity* skybox = ResourceLoader::getSkyboxReference(key);
+
         GM_Matrix4 model = GM_Matrix4::identity();
         GM_Matrix4 withoutTranslationView = sourceView;
         withoutTranslationView.v[0].w = 0.0f;
@@ -291,8 +292,7 @@ void Game::render() {
 
         this->skybox_shader.bindTexture("uSkyboxTexture", ResourceLoader::getTexture(SKYBOX));
         this->skybox_shader.setMat4("uMVP", projection * withoutTranslationView * model);
-
-        skybox_entity->draw(&this->basic_shader);
+        skybox->draw();
     }
     glDepthFunc(GL_LESS);
 
@@ -304,24 +304,19 @@ void Game::render() {
         this->basic_shader.use();
         this->basic_shader.setVec4("uColor", entity->mesh.material.color);
         this->basic_shader.setMat4("uMVP", projection * view * model);
-        this->basic_shader.bindTexture("uColorTexture", entity->mesh.material.textures["uColorTexture"]);
+        //this->basic_shader.bindTexture("uColorTexture", entity->mesh.material.textures["uColorTexture"]);
         entity->draw();
         this->basic_shader.unbindTextures();
 
         if (entity->should_render_aabb) {
-            Material material;
-            material.color = GM_Vec4(0, 1, 0, 1);
-
             model = entity->getAABBTransform();
-
-            Mesh aabb_mesh = Mesh(material, Geometry::AABB());
+            Mesh aabb_mesh = Mesh(Geometry::AABB());
             this->aabb_shader.use();
             this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
-
-            this->basic_shader.setVec4("uColor", aabb_mesh.material.color);
-            this->basic_shader.setMat4("uMVP", projection * view * model);
-            Mesh aabb_mesh;
+            this->aabb_shader.setMat4("uMVP", projection * view * model);
+            aabb_mesh.draw();
         }
     }
+
 }
 

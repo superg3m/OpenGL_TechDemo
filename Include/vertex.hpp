@@ -1,3 +1,5 @@
+#pragma once
+
 #include <gm.hpp>
 
 struct Vertex {
@@ -12,18 +14,18 @@ struct Vertex {
 
     // Default constructor to initialize, or use default member initializers if C++11+
     Vertex() {
-        GM_Vec3 aPosition    = GM_Vec3(0, 0, 0);
-        GM_Vec3 aNormal      = GM_Vec3(0, 1, 0);
-        GM_Vec2 aTexCoord    = GM_Vec2(0, 0);
-        GM_Vec3 aTangent     = GM_Vec3(1, 0, 0);
-        GM_Vec3 aBitangent   = GM_Vec3(0, 0, 1);
-        GM_Vec4 aColor       = GM_Vec4(1, 1, 1, 1);
-        GM_Vec4 aBoneIDs     = GM_Vec4(0, 0, 0, 0);
-        GM_Vec4 aBoneWeights = GM_Vec4(0, 0, 0, 0);
+        this->aPosition    = GM_Vec3(0, 0, 0);
+        this->aNormal      = GM_Vec3(0, 1, 0);
+        this->aTexCoord    = GM_Vec2(0, 0);
+        this->aTangent     = GM_Vec3(1, 0, 0);
+        this->aBitangent   = GM_Vec3(0, 0, 1);
+        this->aColor       = GM_Vec4(1, 1, 1, 1);
+        this->aBoneIDs     = GM_Vec4(0, 0, 0, 0);
+        this->aBoneWeights = GM_Vec4(0, 0, 0, 0);
     }
 
     Vertex(GM_Vec3 pos) : Vertex() { 
-        this->aPosition = pos; 
+        this->aPosition = pos;
     }
 
     Vertex(GM_Vec3 pos, GM_Vec3 norm, GM_Vec2 uv) : Vertex(pos) {
@@ -89,14 +91,3 @@ static const std::vector<AttributeDescriptor> ALL_ATTRIBUTE_DESCRIPTORS = {
     {VertexAttributeFlag::aBoneIDs,     6, 4, GL_INT,   GL_FALSE, true,  sizeof(int)   * 4}, // Use GL_INT and isInteger=true
     {VertexAttributeFlag::aBoneWeights, 7, 4, GL_FLOAT, GL_FALSE, false, sizeof(float) * 4}
 };
-
-inline size_t getStride(VertexAttributeFlag flags) {
-    int stride = 0;
-    for (const auto& desc : ALL_ATTRIBUTE_DESCRIPTORS) {
-        if (hasVertexAttributeFlag(flags, desc.flag)) {
-            stride += desc.byteSize;
-        }
-    }
-
-    return stride;
-}

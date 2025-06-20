@@ -190,17 +190,15 @@ void Geometry::setup(VertexAttributeFlag flags) {
     bool hasColor      = hasVertexAttributeFlag(flags, VertexAttributeFlag::aColor);
     bool hasBoneID     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneIDs);
     bool hasBoneWeight = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneWeights);
-    size_t stride = getStride(flags);
     size_t offset = 0;
-    
 
     for (const auto& desc : ALL_ATTRIBUTE_DESCRIPTORS) {
         if (hasVertexAttributeFlag(flags, desc.flag)) {
             glEnableVertexAttribArray(desc.location);
             if (desc.isInteger) {
-                glVertexAttribIPointer(desc.location, desc.componentCount, desc.glType, stride, (void*)offset);
+                glVertexAttribIPointer(desc.location, desc.componentCount, desc.glType, sizeof(Vertex), (void*)offset);
             } else {
-                glVertexAttribPointer(desc.location, desc.componentCount, desc.glType, desc.normalized, stride, (void*)offset);
+                glVertexAttribPointer(desc.location, desc.componentCount, desc.glType, desc.normalized, sizeof(Vertex), (void*)offset);
             }
 
             offset += desc.byteSize;

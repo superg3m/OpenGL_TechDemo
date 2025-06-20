@@ -5,7 +5,7 @@ layout(location = 1) in vec2 aTexCoords;
 
 out vec2 TexCoords;
 
-uniform mat4 mvp;
+uniform mat4 uMVP;
 
 void main() {
     mat4 billboardModel = model;
@@ -21,5 +21,5 @@ void main() {
     billboardModel[2][2] = 1.0;
 
     TexCoords = aTexCoords;
-    gl_Position = mvp * billboardModel * vec4(aPos, 1.0);
+    gl_Position = uMVP * billboardModel * vec4(aPos, 1.0);
 }

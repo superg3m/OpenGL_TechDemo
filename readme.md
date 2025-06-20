@@ -23,3 +23,5 @@ Things that I should probably improve but won't is:
 - custom allocator
 - references to avoid copies
 - rule of 5 (I don't agree with this but I know its dogma)
+
+============================================================================================================

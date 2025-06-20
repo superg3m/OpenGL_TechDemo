@@ -68,3 +68,35 @@ inline VertexAttributeFlag operator|(VertexAttributeFlag a, VertexAttributeFlag 
 inline bool hasVertexAttributeFlag(VertexAttributeFlag value, VertexAttributeFlag flag) {
     return (static_cast<uint32_t>(value) & static_cast<uint32_t>(flag)) == static_cast<uint32_t>(flag);
 }
+
+struct AttributeDescriptor {
+    VertexAttributeFlag flag;
+    int location;
+    int componentCount;       // e.g., 3 for vec3, 4 for vec4
+    GLenum glType;            // e.g., GL_FLOAT, GL_INT
+    bool normalized;
+    bool isInteger;           // True if using glVertexAttribIPointer
+    size_t byteSize;
+};
+
+static const std::vector<AttributeDescriptor> ALL_ATTRIBUTE_DESCRIPTORS = {
+    {VertexAttributeFlag::aPosition,    0, 3, GL_FLOAT, GL_FALSE, false, sizeof(float) * 3},
+    {VertexAttributeFlag::aNormal,      1, 3, GL_FLOAT, GL_FALSE, false, sizeof(float) * 3},
+    {VertexAttributeFlag::aTexCoord,    2, 2, GL_FLOAT, GL_FALSE, false, sizeof(float) * 2},
+    {VertexAttributeFlag::aTangent,     3, 3, GL_FLOAT, GL_FALSE, false, sizeof(float) * 3},
+    {VertexAttributeFlag::aBitangent,   4, 3, GL_FLOAT, GL_FALSE, false, sizeof(float) * 3},
+    {VertexAttributeFlag::aColor,       5, 4, GL_FLOAT, GL_FALSE, false, sizeof(float) * 4}, // Or GL_UNSIGNED_BYTE, true, true
+    {VertexAttributeFlag::aBoneIDs,     6, 4, GL_INT,   GL_FALSE, true,  sizeof(int)   * 4}, // Use GL_INT and isInteger=true
+    {VertexAttributeFlag::aBoneWeights, 7, 4, GL_FLOAT, GL_FALSE, false, sizeof(float) * 4}
+};
+
+inline size_t getStride(VertexAttributeFlag flags) {
+    int stride = 0;
+    for (const auto& desc : ALL_ATTRIBUTE_DESCRIPTORS) {
+        if (hasVertexAttributeFlag(flags, desc.flag)) {
+            stride += desc.byteSize;
+        }
+    }
+
+    return stride;
+}

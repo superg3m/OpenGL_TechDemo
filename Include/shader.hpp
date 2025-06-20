@@ -21,7 +21,7 @@ struct Shader {
     std::map<std::string, TextureType> textures;
     int activeTextureCount;
     Shader() = default;
-    Shader(std::vector<const char*> shader_paths);
+    Shader(std::vector<const char*> shader_paths, std::vector<std::string> uniforms, std::map<std::string, TextureType> textures);
 
     void use() const;
     void setBool(const char* name, bool value);
@@ -31,6 +31,7 @@ struct Shader {
     void setVec3(const char*name, const GM_Vec3 &value);
     void setVec3(const char* name, float x, float y, float z);
     void setVec4(const char*name, const GM_Vec4 &value);
+    void setIVec4(const char*name, const GM_Vec4 &value);
     void setMat4(const char*name, const GM_Matrix4 &mat);
     void setMat4(const char* name, const glm::mat4 &mat) const;
 

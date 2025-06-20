@@ -49,8 +49,10 @@ internal ShaderType shaderTypeFromExtension(const char* shader_source_path) {
     return INVALID_SHADER;
 }
 
-Shader::Shader(std::vector<const char*> shader_paths) {
+Shader::Shader(std::vector<const char*> shader_paths, std::vector<std::string> uniforms, std::map<std::string, TextureType> textures) {
     this->id = glCreateProgram();
+    this->uniforms = uniforms;
+    this->textures = textures;
 
     std::vector<unsigned int> shaderIDs; 
     for (int i = 0; i < shader_paths.size(); i++) {
@@ -102,22 +104,10 @@ void Shader::use() const {
 
 // Date: June 19, 2025
 // TODO(Jovanni): Re-enable this in time
-GLint Shader::getAttributeLocation(const char* name) const {
-    GLint location = glGetAttribLocation(this->id, name);
-    if (location == -1) {
-        CKG_LOG_ERROR("Shader Attribute: '%s' does not exists\n", name);
-    }
-
-    return location;
-}
-
-
-// Date: June 19, 2025
-// TODO(Jovanni): Re-enable this in time
 GLint Shader::getUniformLocation(const char* name) const {
     GLint location = glGetUniformLocation(this->id, name);
     if (location == -1) {
-        // CKG_LOG_ERROR("Shader Uniform: '%s' does not exists\n", name);
+        CKG_LOG_ERROR("Shader Uniform: '%s' does not exists\n", name);
     }
 
     return location;
@@ -157,6 +147,13 @@ void Shader::setVec3(const char* name, float x, float y, float z) {
 void Shader::setVec4(const char* name, const GM_Vec4 &value) {
     this->use();
     glUniform4fv(this->getUniformLocation(name), 1, &value.x);
+}
+
+void Shader::setIVec4(const char* name, const GM_Vec4 &value) {
+    GLint data[4] = {(GLint)value.x, (GLint)value.y, (GLint)value.z, (GLint)value.w};
+
+    this->use();
+    glUniform4iv(this->getUniformLocation(name), 1, data);
 }
 
 void Shader::setMat4(const char* name, const GM_Matrix4 &mat) {

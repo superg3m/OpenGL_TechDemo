@@ -2,12 +2,12 @@
 
 Geometry Geometry::Quad() {
     std::vector<Vertex> quad_vertices = {
-        //         Position             Normal          UV
-        Vertex{ 0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1, 1}, // top right
-        Vertex{ 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1, 0}, // bottom right
-        Vertex{-0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0, 0}, // bottom left
-        Vertex{-0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0, 1}  // top left 
-    };
+        //         Posrtion             Normal          UV
+        Vertex{GM_Vec3( 0.5f,  0.5f, 0.0f),  GM_Vec3(1.0f, 0.0f, 0.0f),  GM_Vec2(1, 1)}, // top right
+        Vertex{GM_Vec3( 0.5f, -0.5f, 0.0f),  GM_Vec3(0.0f, 1.0f, 0.0f),  GM_Vec2(1, 0)}, // bottom right
+        Vertex{GM_Vec3(-0.5f, -0.5f, 0.0f),  GM_Vec3(0.0f, 0.0f, 1.0f),  GM_Vec2(0, 0)}, // bottom left
+        Vertex{GM_Vec3(-0.5f,  0.5f, 0.0f),  GM_Vec3(1.0f, 1.0f, 0.0f),  GM_Vec2(0, 1)}  // top left 
+    }; 
 
     std::vector<unsigned int> quad_indices = {
         0, 1, 3,
@@ -18,7 +18,7 @@ Geometry Geometry::Quad() {
     ret.vertices = quad_vertices;
     ret.indices = quad_indices;
     ret.draw_type = GL_TRIANGLES;
-    ret.setup();
+    ret.setup(VertexAttributeFlag::PNTBundle);
 
     return ret;
 }
@@ -26,29 +26,29 @@ Geometry Geometry::Quad() {
 Geometry Geometry::AABB() {
     std::vector<Vertex> quad_vertices = {
         // Bottom face
-        Vertex{-0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0},
-        Vertex{0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0},
-        Vertex{0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0},
-        Vertex{-0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0},
+        Vertex{GM_Vec3(-0.5f, -0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3( 0.5f, -0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3( 0.5f, -0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3( 0.5f, -0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3( 0.5f, -0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3(-0.5f, -0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3(-0.5f, -0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3(-0.5f, -0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
 
-        // Top face
-        Vertex{-0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0},
-        Vertex{0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0},
-        Vertex{0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0},
-        Vertex{-0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0},
+        // Top GM_Vec3(face
+        Vertex{GM_Vec3(-0.5f, 0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3( 0.5f, 0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3( 0.5f, 0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3( 0.5f, 0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3( 0.5f, 0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3(-0.5f, 0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3(-0.5f, 0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3(-0.5f, 0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
 
         // Vertical edges
-        Vertex{-0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0},
-        Vertex{0.5f, -0.5f, -0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, 0.5f, -0.5f, 0, 0, 0, 0, 0},
-        Vertex{0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0},
-        Vertex{-0.5f, -0.5f, 0.5f, 0, 0, 0, 0, 0}, Vertex{-0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0},
+        Vertex{GM_Vec3(-0.5f, -0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3(-0.5f, 0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3( 0.5f, -0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3( 0.5f, 0.5f, -0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3( 0.5f, -0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3( 0.5f, 0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3(-0.5f, -0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3(-0.5f, 0.5f,  0.5f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
     };
 
     Geometry ret;
     ret.vertices = quad_vertices;
     ret.indices = {};
     ret.draw_type = GL_LINES;
-    ret.setup();
+    ret.setup(VertexAttributeFlag::PNTBundle);
 
     return ret;
 }
@@ -57,40 +57,40 @@ Geometry Geometry::AABB() {
 Geometry Geometry::Cube() {
     std::vector<Vertex> cube_vertices = {
         // Front face
-        Vertex{-0.5f, -0.5f, -0.5f,  0, 0, -1,  0, 0}, // 0
-        Vertex{ 0.5f, -0.5f, -0.5f,  0, 0, -1,  1, 0}, // 1
-        Vertex{ 0.5f,  0.5f, -0.5f,  0, 0, -1,  1, 1}, // 2
-        Vertex{-0.5f,  0.5f, -0.5f,  0, 0, -1,  0, 1}, // 3
+        Vertex{GM_Vec3(-0.5f, -0.5f, -0.5f), GM_Vec3(0, 0, -1), GM_Vec2(0, 0)}, // 0
+        Vertex{GM_Vec3( 0.5f, -0.5f, -0.5f), GM_Vec3(0, 0, -1), GM_Vec2(1, 0)}, // 1
+        Vertex{GM_Vec3( 0.5f,  0.5f, -0.5f), GM_Vec3(0, 0, -1), GM_Vec2(1, 1)}, // 2
+        Vertex{GM_Vec3(-0.5f,  0.5f, -0.5f), GM_Vec3(0, 0, -1), GM_Vec2(0, 1)}, // 3
 
         // Back face
-        Vertex{-0.5f, -0.5f, 0.5f,   0, 0, 1,   0, 0}, // 4
-        Vertex{ 0.5f, -0.5f, 0.5f,   0, 0, 1,   1, 0}, // 5
-        Vertex{ 0.5f,  0.5f, 0.5f,   0, 0, 1,   1, 1}, // 6
-        Vertex{-0.5f,  0.5f, 0.5f,   0, 0, 1,   0, 1}, // 7
+        Vertex{GM_Vec3(-0.5f, -0.5f, 0.5f), GM_Vec3(0, 0, 1), GM_Vec2(0, 0)}, // 4
+        Vertex{GM_Vec3( 0.5f, -0.5f, 0.5f), GM_Vec3(0, 0, 1), GM_Vec2(1, 0)}, // 5
+        Vertex{GM_Vec3( 0.5f,  0.5f, 0.5f), GM_Vec3(0, 0, 1), GM_Vec2(1, 1)}, // 6
+        Vertex{GM_Vec3(-0.5f,  0.5f, 0.5f), GM_Vec3(0, 0, 1), GM_Vec2(0, 1)}, // 7
 
         // Left face
-        Vertex{-0.5f, -0.5f,  0.5f, -1, 0, 0,   0, 0}, // 8
-        Vertex{-0.5f, -0.5f, -0.5f, -1, 0, 0,   1, 0}, // 9
-        Vertex{-0.5f,  0.5f, -0.5f, -1, 0, 0,   1, 1}, // 10
-        Vertex{-0.5f,  0.5f,  0.5f, -1, 0, 0,   0, 1}, // 11
+        Vertex{GM_Vec3(-0.5f, -0.5f,  0.5f), GM_Vec3(-1, 0, 0), GM_Vec2(0, 0)}, // 8
+        Vertex{GM_Vec3(-0.5f, -0.5f, -0.5f), GM_Vec3(-1, 0, 0), GM_Vec2(1, 0)}, // 9
+        Vertex{GM_Vec3(-0.5f,  0.5f, -0.5f), GM_Vec3(-1, 0, 0), GM_Vec2(1, 1)}, // 10
+        Vertex{GM_Vec3(-0.5f,  0.5f,  0.5f), GM_Vec3(-1, 0, 0), GM_Vec2(0, 1)}, // 11
 
         // Right face
-        Vertex{ 0.5f, -0.5f, -0.5f,  1, 0, 0,   0, 0}, // 12
-        Vertex{ 0.5f, -0.5f,  0.5f,  1, 0, 0,   1, 0}, // 13
-        Vertex{ 0.5f,  0.5f,  0.5f,  1, 0, 0,   1, 1}, // 14
-        Vertex{ 0.5f,  0.5f, -0.5f,  1, 0, 0,   0, 1}, // 15
+        Vertex{GM_Vec3( 0.5f, -0.5f, -0.5f), GM_Vec3(1, 0, 0), GM_Vec2(0, 0)}, // 12
+        Vertex{GM_Vec3( 0.5f, -0.5f,  0.5f), GM_Vec3(1, 0, 0), GM_Vec2(1, 0)}, // 13
+        Vertex{GM_Vec3( 0.5f,  0.5f,  0.5f), GM_Vec3(1, 0, 0), GM_Vec2(1, 1)}, // 14
+        Vertex{GM_Vec3( 0.5f,  0.5f, -0.5f), GM_Vec3(1, 0, 0), GM_Vec2(0, 1)}, // 15
 
         // Bottom face
-        Vertex{-0.5f, -0.5f, -0.5f,  0, -1, 0,  0, 1}, // 16
-        Vertex{ 0.5f, -0.5f, -0.5f,  0, -1, 0,  1, 1}, // 17
-        Vertex{ 0.5f, -0.5f,  0.5f,  0, -1, 0,  1, 0}, // 18
-        Vertex{-0.5f, -0.5f,  0.5f,  0, -1, 0,  0, 0}, // 19
+        Vertex{GM_Vec3(-0.5f, -0.5f, -0.5f), GM_Vec3(0, -1, 0), GM_Vec2(0, 1)}, // 16
+        Vertex{GM_Vec3( 0.5f, -0.5f, -0.5f), GM_Vec3(0, -1, 0), GM_Vec2(1, 1)}, // 17
+        Vertex{GM_Vec3( 0.5f, -0.5f,  0.5f), GM_Vec3(0, -1, 0), GM_Vec2(1, 0)}, // 18
+        Vertex{GM_Vec3(-0.5f, -0.5f,  0.5f), GM_Vec3(0, -1, 0), GM_Vec2(0, 0)}, // 19
 
         // Top face
-        Vertex{-0.5f,  0.5f, -0.5f,  0, 1, 0,   0, 1}, // 20
-        Vertex{ 0.5f,  0.5f, -0.5f,  0, 1, 0,   1, 1}, // 21
-        Vertex{ 0.5f,  0.5f,  0.5f,  0, 1, 0,   1, 0}, // 22
-        Vertex{-0.5f,  0.5f,  0.5f,  0, 1, 0,   0, 0}, // 23
+        Vertex{GM_Vec3(-0.5f,  0.5f, -0.5f), GM_Vec3(0, 1, 0), GM_Vec2(0, 1)}, // 20
+        Vertex{GM_Vec3( 0.5f,  0.5f, -0.5f), GM_Vec3(0, 1, 0), GM_Vec2(1, 1)}, // 21
+        Vertex{GM_Vec3( 0.5f,  0.5f,  0.5f), GM_Vec3(0, 1, 0), GM_Vec2(1, 0)}, // 22
+        Vertex{GM_Vec3(-0.5f,  0.5f,  0.5f), GM_Vec3(0, 1, 0), GM_Vec2(0, 0)}, // 23
     };
 
     std::vector<unsigned int> cube_indices = {
@@ -106,7 +106,7 @@ Geometry Geometry::Cube() {
     ret.vertices = cube_vertices;
     ret.indices = cube_indices;
     ret.draw_type = GL_TRIANGLES;
-    ret.setup();
+    ret.setup(VertexAttributeFlag::PNTBundle);
 
     return ret;
 }
@@ -133,9 +133,9 @@ Geometry Geometry::Sphere(int segments) {
             float v = static_cast<float>(r) / rings;
 
             sphere_vertices.push_back(Vertex{
-                x * 0.5f, y * 0.5f, z * 0.5f, // Position (radius = 0.5)
-                x, y, z,                     // Normal (unit direction)
-                u, v                         // UV
+                GM_Vec3(x * 0.5f, y * 0.5f, z * 0.5f), // Position (radius = 0.5)
+                GM_Vec3(x, y, z),                      // Normal (unit direction)
+                GM_Vec2(u, v)                          // UV
             });
         }
     }
@@ -163,12 +163,12 @@ Geometry Geometry::Sphere(int segments) {
     ret.vertices = sphere_vertices;
     ret.indices = sphere_indices;
     ret.draw_type = GL_TRIANGLES;
-    ret.setup();
+    ret.setup(VertexAttributeFlag::PNTBundle);
 
     return ret;
 }
 
-void Geometry::setup() {
+void Geometry::setup(VertexAttributeFlag flags) {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
@@ -182,27 +182,41 @@ void Geometry::setup() {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
     }
 
-    // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(OFFSET_OF(Vertex, position)));
-    glEnableVertexAttribArray(0);
+    bool hasPosition   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aPosition);
+    bool hasNormal     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aNormal);
+    bool hasTexCoord   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aTexCoord);
+    bool hasTanget     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aTangent);
+    bool hasBitanget   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBitangent);
+    bool hasColor      = hasVertexAttributeFlag(flags, VertexAttributeFlag::aColor);
+    bool hasBoneID     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneIDs);
+    bool hasBoneWeight = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneWeights);
+    size_t stride = getStride(flags);
+    size_t offset = 0;
+    
 
-    // normal
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(OFFSET_OF(Vertex, normal)));
-    glEnableVertexAttribArray(1);
+    for (const auto& desc : ALL_ATTRIBUTE_DESCRIPTORS) {
+        if (hasVertexAttributeFlag(flags, desc.flag)) {
+            glEnableVertexAttribArray(desc.location);
+            if (desc.isInteger) {
+                glVertexAttribIPointer(desc.location, desc.componentCount, desc.glType, stride, (void*)offset);
+            } else {
+                glVertexAttribPointer(desc.location, desc.componentCount, desc.glType, desc.normalized, stride, (void*)offset);
+            }
 
-    // texture uv
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(OFFSET_OF(Vertex, uv)));
-    glEnableVertexAttribArray(2);
-
+            offset += desc.byteSize;
+        } else {
+            glDisableVertexAttribArray(desc.location);
+        }
+    }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
-Geometry::Geometry(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, GLenum draw_type) {
+Geometry::Geometry(VertexAttributeFlag flags, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, GLenum draw_type) {
     this->vertices = vertices;
     this->indices = indices;
     this->draw_type = draw_type;
     
-    this->setup();
+    this->setup(flags);
 }

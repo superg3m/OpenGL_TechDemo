@@ -13,23 +13,33 @@ Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) {
     Game::WINDOW_WIDTH = WINDOW_WIDTH;
     Game::WINDOW_HEIGHT = WINDOW_HEIGHT;
 
-    /*
-    VertexAttributeFormat vbf = {
-        {FD::Vec3,  "aPosition"},
-        {FD::Vec3,  "aNormal"  },
-        {FD::Vec2,  "aTexCoord"}
-    }
+    std::vector<std::string> uniforms = {
+        {"uColor"}
+    };
 
-    FragmentUniformFormat vbf = {
-        {FD::Vec3, "uColor"}
-        {FD::Vec2,  "aPosition"}
-    }
-    Shader testShader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
-    */
+    std::map<std::string, TextureType> textures = {
+        {"uColorTexture", TextureType::SAMPLER2D}
+    };
 
-    this->basic_shader = Shader({"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"});
-    this->skybox_shader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
-    this->aabb_shader = Shader({"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"});
+    Geometry::Cube();
+
+    this->basic_shader = Shader(
+        {"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"},
+        uniforms,
+        textures
+    );
+
+    this->skybox_shader = Shader(
+        {"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"},
+        uniforms,
+        textures
+    );
+
+    this->aabb_shader = Shader(
+        {"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"}
+        uniforms,
+        textures
+    );
     // this->particle_shader = Shader();
     // this->pbr_shader = Shader();
 }

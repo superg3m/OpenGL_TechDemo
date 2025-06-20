@@ -2,7 +2,7 @@
 #include <mesh.hpp>
 #include <glad/glad.h>
 
-Mesh::Mesh(Material material, Geometry geometry) {
+Mesh::Mesh(Geometry geometry, Material material) {
     this->material = material;
     this->geometry = geometry;
 }

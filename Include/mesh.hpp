@@ -12,7 +12,7 @@ struct Mesh {
     Material material;
 
     Mesh() = default;
-    Mesh(Material material, Geometry geometry);
+    Mesh(Geometry geometry, Material material = Material());
 
     void draw();
 };

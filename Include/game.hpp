@@ -30,6 +30,7 @@ struct Game {
     Shader basic_shader;
     Shader skybox_shader;
     Shader aabb_shader;
+    Shader light_shader;
     Shader particle_shader;
     Shader pbr_shader;
 

@@ -2,12 +2,13 @@
 
 #include <vector>
 #include <gm.hpp>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 #include <string>
 #include <map>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 enum class TextureType {
     SAMPLER2D,
@@ -18,15 +19,16 @@ using GLTextureID = int;
 struct Shader {
     unsigned int id;
     const char* path;
-    std::vector<std::string> uniforms;
     std::map<std::string, TextureType> textures;
     int activeTextureCount;
     Shader() = default;
-    Shader(std::vector<const char*> shader_paths, std::vector<std::string> uniforms, std::map<std::string, TextureType> textures);
+    Shader(std::vector<const char*> shader_paths, std::map<std::string, TextureType> textures);
 
     void use() const;
     void setBool(const char* name, bool value);
     void setInt(const char* name, int value);
+    void setTexture(const char* name, int value);
+    void setCubeTexture(const char* name, int value);
     void setFloat(const char*name, float value);
     void setVec2(const char*name, const GM_Vec2 &value);
     void setVec3(const char*name, const GM_Vec3 &value);
@@ -42,7 +44,9 @@ struct Shader {
     static Shader BasicShader();
     static Shader StandardShader();
 private:
+    std::map<std::string, GLenum> uniforms;
+
     GLint getAttributeLocation(const char* name) const;
-    GLint getUniformLocation(const char* name) const;
+    GLint getUniformLocation(const char* name, GLenum type) const;
     void checkCompileError(unsigned int shaderID, const char* type);
 };

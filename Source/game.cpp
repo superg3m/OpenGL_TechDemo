@@ -103,17 +103,12 @@ u64 Game::getReferenceID() {
 void Game::initalizeResources() {
     srand(time(0));
 
-    std::vector<std::string> uniforms = {
-        {"uColor"}
-    };
-
     std::map<std::string, TextureType> textures = {
         {"uColorTexture", TextureType::SAMPLER2D}
     };
 
     this->basic_shader = Shader(
         {"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"},
-        uniforms,
         textures
     );
 
@@ -123,17 +118,18 @@ void Game::initalizeResources() {
 
     this->skybox_shader = Shader(
         {"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"},
-        uniforms,
         textures
     );
 
     this->aabb_shader = Shader(
         {"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"},
-        uniforms,
         {}
     );
-    // this->particle_shader = Shader();
-    // this->pbr_shader = Shader();
+
+    this->light_shader = Shader(
+        {"../../shader_source/light/light.vert", "../../shader_source/light/light.frag"},
+        {}
+    );
 
     std::array<const char*, 6> cubemap_faces = {
         "../../assets/city_skybox/right.jpg",
@@ -151,18 +147,26 @@ void Game::initalizeResources() {
     skybox->setTexture("uSkyboxTexture", ResourceLoader::getTexture(SKYBOX));
     ResourceLoader::setSkyboxReference(SKYBOX, skybox);
 
+    Entity* light = new Entity(Mesh(Geometry::Cube()));
+    light->setPosition(5, 0, 0);
+    light->setScale(0.25f);
+    ResourceLoader::setLightReference("light", light);
+
     Entity* cube = new Entity(Mesh(Geometry::Cube()));
+    cube->mesh.material.color = GM_Vec4(0.14f, 1.0f, 0.84f, 1);
     cube->setPosition(-2.0f, -1.0f, -1.0f);
     cube->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
     cube->setScale(0.5f);
 
     Entity* sphere = new Entity(Mesh(Geometry::Sphere(32)));
+    sphere->mesh.material.color = GM_Vec4(0.4f, 0.3f, 0.5f, 1.0f);
     sphere->setPosition(0.0f, 0.0f, 0.0f);
     sphere->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
     sphere->setScale(0.5f);
 
     ResourceLoader::setEntityReference("cube", cube);
     ResourceLoader::setEntityReference("sphere", sphere);
+    ResourceLoader::setEntityReference("light", light);
 }
 
 void Game::initalizeInputBindings() {
@@ -268,16 +272,8 @@ void Game::update(GLFWwindow* window, float dt) {
             GM_Vec3 p0 = ray_origin;
             GM_Vec3 p1 = ray_origin + (ray_direction.scale(ray_length));
 
-            bool intersecting = GM_AABB::intersection(entity->getAABB(), p0, p1);
-            if (intersecting) {
-                entity->mesh.material.color = GM_Vec4(1, 0, 0, 1);
-                entity->should_render_aabb = true;
-            } else {
-                entity->mesh.material.color = GM_Vec4(1, 1, 1, 1);
-                entity->should_render_aabb = false;
-            }
+            entity->should_render_aabb = GM_AABB::intersection(entity->getAABB(), p0, p1);
         } else {
-            entity->mesh.material.color = GM_Vec4(1, 1, 1, 1);
             entity->should_render_aabb = false;
         }
     }
@@ -308,15 +304,49 @@ void Game::render() {
     }
     glDepthFunc(GL_LESS);
 
+    for (const auto& key : ResourceLoader::light_keys) {
+        Entity* light = ResourceLoader::getLightReference(key);
+        GM_Matrix4 model = light->getTransform();
+        GM_Matrix4 view = sourceView;
+
+        this->light_shader.use();
+        this->light_shader.setMat4("uModel", model);
+        this->light_shader.setMat4("uView",view);
+        this->light_shader.setMat4("uProjection", projection);
+        this->light_shader.setVec4("uObjectColor", light->mesh.material.color);
+        light->draw();
+
+        if (light->should_render_aabb) {
+            model = light->getAABBTransform();
+            Mesh aabb_mesh = Mesh(Geometry::AABB());
+            this->aabb_shader.use();
+            this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
+            this->aabb_shader.setMat4("uMVP", projection * view * model);
+            aabb_mesh.draw();
+        }
+    }
+
+
     for (const auto& key : ResourceLoader::entity_keys) {
         Entity* entity = ResourceLoader::getEntityReference(key);
         GM_Matrix4 model = entity->getTransform();
         GM_Matrix4 view = sourceView;
 
         this->basic_shader.use();
-        this->basic_shader.setVec4("uColor", entity->mesh.material.color);
-        this->basic_shader.setMat4("uMVP", projection * view * model);
+        this->basic_shader.setMat4("uModel", model);
+        this->basic_shader.setMat4("uView",view);
+        this->basic_shader.setMat4("uProjection", projection);
+
+        if (entity->should_render_aabb) {
+            this->basic_shader.setVec4("uObjectColor", GM_Vec4(1, 0, 0, 1));
+        } else {
+            this->basic_shader.setVec4("uObjectColor", entity->mesh.material.color);
+        }
+        this->basic_shader.setVec3("uLightColor", GM_Vec3(1.0f, 1.0f, 1.0f));
+        this->basic_shader.setVec3("uLightPosition", GM_Vec3(5, 0, 0));
+        this->basic_shader.setVec3("uViewPosition", Game::camera.position);
         this->basic_shader.bindTexture("uColorTexture", entity->mesh.material.textures["uColorTexture"]);
+        this->basic_shader.setBool("uHasColorTexture", false);
         entity->draw();
         this->basic_shader.unbindTextures();
 

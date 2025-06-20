@@ -11,6 +11,8 @@ std::map<std::string, Entity*> ResourceLoader::entity_map;
 std::vector<std::string> ResourceLoader::skybox_keys;
 std::map<std::string, Entity*> ResourceLoader::skybox_map;
 
+std::vector<std::string> ResourceLoader::light_keys;
+std::map<std::string, Entity*> ResourceLoader::light_map;
 
 void ResourceLoader::loadTexture(std::string key, const char *file, int texture_flags) {
     ckg_assert_msg(ckg_io_path_exists(file), "Texture path: '%s' doesn't exist!\n", file);
@@ -162,6 +164,24 @@ Entity* ResourceLoader::getSkyboxReference(std::string key) {
     }
 
     return ResourceLoader::skybox_map[key];
+}
+
+void ResourceLoader::setLightReference(std::string key, Entity* entity) {
+    if (ResourceLoader::light_map.count(key)) {
+        CKG_LOG_WARN("ResourceLoader | Key: '%s' already exists overwriting entity\n", key.c_str());
+    }
+
+    ResourceLoader::light_keys.push_back(key);
+    ResourceLoader::light_map[key] = entity;
+}
+
+Entity* ResourceLoader::getLightReference(std::string key) {
+    if (!ResourceLoader::light_map.count(key)) {
+        CKG_LOG_ERROR("ResourceLoader | Key: '%s' doesn't exist for entity\n", key.c_str());
+        return nullptr;
+    }
+
+    return ResourceLoader::light_map[key];
 }
 
 TextureAtlas::TextureAtlas(std::string key, const char *file, int texture_flags) {

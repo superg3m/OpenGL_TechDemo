@@ -49,9 +49,8 @@ internal ShaderType shaderTypeFromExtension(const char* shader_source_path) {
     return INVALID_SHADER;
 }
 
-Shader::Shader(std::vector<const char*> shader_paths, std::vector<std::string> uniforms, std::map<std::string, TextureType> textures) {
+Shader::Shader(std::vector<const char*> shader_paths, std::map<std::string, TextureType> textures) {
     this->id = glCreateProgram();
-    this->uniforms = uniforms;
     this->textures = textures;
     this->path = shader_paths[0];
 
@@ -97,6 +96,20 @@ Shader::Shader(std::vector<const char*> shader_paths, std::vector<std::string> u
     for (int i = 0; i < shaderIDs.size(); i++) {
         glDeleteShader(shaderIDs[i]);
     }
+
+    GLint size; // size of the variable
+    GLenum type; // type of the variable (float, vec3 or mat4, etc)
+
+    const GLsizei bufSize = 128; // maximum name length
+    GLchar name[bufSize]; // variable name in GLSL
+    GLsizei length; // name length
+
+    int count = 0;
+    glGetProgramiv(this->id, GL_ACTIVE_UNIFORMS, &count);
+    for (int i = 0; i < count; i++) {
+        glGetActiveUniform(this->id, (GLuint)i, bufSize, &length, &size, &type, name);
+        this->uniforms[name] = type;
+    }
 }
 
 void Shader::use() const {
@@ -105,66 +118,81 @@ void Shader::use() const {
 
 // Date: June 19, 2025
 // TODO(Jovanni): Re-enable this in time
-GLint Shader::getUniformLocation(const char* name) const {
+GLint Shader::getUniformLocation(const char* name, GLenum type) const {
     GLint location = glGetUniformLocation(this->id, name);
     if (location == -1) {
         CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
+    }
+
+    if (location != -1 && this->uniforms.at(name) != type) {
+        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' Is the wrong type!\nExpected: %d | Got: %d\n", this->path, name, type, this->uniforms.at(name));
     }
 
     return location;
 }
 
 void Shader::setBool(const char* name, bool value) {   
-    this->use();      
-    glUniform1i(this->getUniformLocation(name), (int)value); 
+    this->use();     
+
+    glUniform1i(this->getUniformLocation(name, GL_BOOL), (int)value); 
 }
 
 void Shader::setInt(const char* name, int value) { 
     this->use();
-    glUniform1i(this->getUniformLocation(name), value); 
+    glUniform1i(this->getUniformLocation(name, GL_INT), value); 
+}
+
+void Shader::setTexture(const char* name, int value) { 
+    this->use();
+    glUniform1i(this->getUniformLocation(name, GL_SAMPLER_2D), value); 
+}
+
+void Shader::setCubeTexture(const char* name, int value) { 
+    this->use();
+    glUniform1i(this->getUniformLocation(name, GL_SAMPLER_CUBE), value); 
 }
 
 void Shader::setFloat(const char* name, float value) { 
     this->use();
-    glUniform1f(this->getUniformLocation(name), value); 
+    glUniform1f(this->getUniformLocation(name, GL_FLOAT), value); 
 }
 
 void Shader::setVec2(const char* name, const GM_Vec2 &value) {
     this->use();
-    glUniform2fv(this->getUniformLocation(name), 1, &value.x);
+    glUniform2fv(this->getUniformLocation(name, GL_FLOAT_VEC2), 1, &value.x);
 }
 
 void Shader::setVec3(const char* name, const GM_Vec3 &value) {
     this->use();
-    glUniform3fv(this->getUniformLocation(name), 1, &value.x);
+    glUniform3fv(this->getUniformLocation(name, GL_FLOAT_VEC3), 1, &value.x);
 }
 
 void Shader::setVec3(const char* name, float x, float y, float z) {
     this->use();
     GM_Vec3 temp = GM_Vec3(x, y, z);
-    glUniform3fv(this->getUniformLocation(name), 1, &temp.x);
+    glUniform3fv(this->getUniformLocation(name, GL_FLOAT_VEC3), 1, &temp.x);
 }
 
 void Shader::setVec4(const char* name, const GM_Vec4 &value) {
     this->use();
-    glUniform4fv(this->getUniformLocation(name), 1, &value.x);
+    glUniform4fv(this->getUniformLocation(name, GL_FLOAT_VEC4), 1, &value.x);
 }
 
 void Shader::setIVec4(const char* name, const GM_Vec4 &value) {
     GLint data[4] = {(GLint)value.x, (GLint)value.y, (GLint)value.z, (GLint)value.w};
 
     this->use();
-    glUniform4iv(this->getUniformLocation(name), 1, data);
+    glUniform4iv(this->getUniformLocation(name, GL_INT_VEC4), 1, data);
 }
 
 void Shader::setMat4(const char* name, const GM_Matrix4 &mat) {
     this->use();
-    glUniformMatrix4fv(this->getUniformLocation(name), 1, GL_TRUE, &mat.v[0].x);
+    glUniformMatrix4fv(this->getUniformLocation(name, GL_FLOAT_MAT4), 1, GL_TRUE, &mat.v[0].x);
 }
 
 void Shader::setMat4(const char* name, const glm::mat4 &mat) const {
     this->use();
-    glUniformMatrix4fv(this->getUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
+    glUniformMatrix4fv(this->getUniformLocation(name, GL_FLOAT_MAT4), 1, GL_FALSE, &mat[0][0]);
 }
 
 void Shader::bindTexture(std::string name, GLTextureID textureID) {
@@ -173,11 +201,12 @@ void Shader::bindTexture(std::string name, GLTextureID textureID) {
     glActiveTexture(GL_TEXTURE0 + this->activeTextureCount);
     if (type == TextureType::SAMPLER2D) {
         glBindTexture(GL_TEXTURE_2D, textureID);
+        this->setTexture(name.c_str(), this->activeTextureCount);
     } else if (type == TextureType::CUBEMAP ) {
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+        this->setCubeTexture(name.c_str(), this->activeTextureCount);
     }
-    this->setInt(name.c_str(), this->activeTextureCount);
-    
+
     this->activeTextureCount += 1;
 }
 

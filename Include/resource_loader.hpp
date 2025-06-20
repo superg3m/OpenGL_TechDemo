@@ -38,6 +38,9 @@ struct ResourceLoader {
     static std::vector<std::string> skybox_keys;
     static std::map<std::string, Entity*> skybox_map;
 
+    static std::vector<std::string> light_keys;
+    static std::map<std::string, Entity*> light_map;
+
     static std::vector<std::string> entity_keys;
     static std::map<std::string, Entity*> entity_map;
 
@@ -53,6 +56,9 @@ struct ResourceLoader {
 
     static void setSkyboxReference(std::string key, Entity* entity);
     static Entity* getSkyboxReference(std::string key);
+
+    static void setLightReference(std::string key, Entity* entity);
+    static Entity* getLightReference(std::string key);
 private:
     ResourceLoader() = default;
 };

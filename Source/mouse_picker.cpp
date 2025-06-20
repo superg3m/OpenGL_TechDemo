@@ -14,17 +14,17 @@ void MousePicker::update(GM_Matrix4 projection, GM_Matrix4 view) {
         ((2.0 * mouse_y) / Game::WINDOW_HEIGHT) - 1
     );
 
-    GM_Vec4 clipCoordsNear = GM_Vec4(ndc.x, -ndc.y, -1.0f, 1.0f); // Z = -1 for near plane
-    GM_Vec4 clipCoordsFar  = GM_Vec4(ndc.x, -ndc.y,  1.0f, 1.0f); // Z =  1 for far plane
+    GM_Vec4 clipCoordsNear = GM_Vec4(ndc.x, -ndc.y, -1.0f, 1.0f);
+    GM_Vec4 clipCoordsFar  = GM_Vec4(ndc.x, -ndc.y,  1.0f, 1.0f);
 
     GM_Matrix4 ProjectView = projection * view;
     GM_Matrix4 viewProjectionInverse = GM_Matrix4::inverse(ProjectView, nullptr);
 
-    // 4. Unproject the two points to World Space
+    // Unproject
     GM_Vec4 worldPosNear = viewProjectionInverse * clipCoordsNear;
     GM_Vec4 worldPosFar  = viewProjectionInverse * clipCoordsFar;
 
-    // 5. Perform Perspective Divide for both points
+    // Perspective Divide (need to study this more it makes snse i'm just a little bit confused because it feels like it should be a multiply to undo the perspective divide?)
     this->rayOrigin = GM_Vec3(worldPosNear.x / worldPosNear.w,
                               worldPosNear.y / worldPosNear.w,
                               worldPosNear.z / worldPosNear.w);

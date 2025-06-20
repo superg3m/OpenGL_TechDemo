@@ -7,14 +7,7 @@ Mesh::Mesh(Material material, Geometry geometry) {
     this->geometry = geometry;
 }
 
-void Mesh::draw(GM_Matrix4 mvp) {
-    this->material.shader.setMat4("mvp", mvp);
-
-    this->material.bindTextures();
-    if (this->material.textures[TEXTURE_CUBEMAP] != TEXTURE_INVALID) {
-        glDepthFunc(GL_LEQUAL);
-    }
-
+void Mesh::draw() {
     glBindVertexArray(geometry.VAO);
     int index_count = geometry.indices.size();
     if (index_count > 0) {
@@ -22,10 +15,5 @@ void Mesh::draw(GM_Matrix4 mvp) {
     } else {
         glDrawArrays(this->geometry.draw_type, 0, geometry.vertices.size());
     }
-
-    if (this->material.textures[TEXTURE_CUBEMAP] != TEXTURE_INVALID) {
-        glDepthFunc(GL_LESS);
-    }
-    this->material.unbindTextures();
     glBindVertexArray(0);
 }

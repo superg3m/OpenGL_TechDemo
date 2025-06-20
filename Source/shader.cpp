@@ -96,7 +96,7 @@ Shader::Shader(std::vector<const char*> shader_paths) {
     }
 }
 
-void Shader::use() {
+void Shader::use() const {
     glUseProgram(this->id);
 }
 
@@ -165,5 +165,31 @@ void Shader::setMat4(const char* name, const GM_Matrix4 &mat) {
 }
 
 void Shader::setMat4(const char* name, const glm::mat4 &mat) const {
+    this->use();
     glUniformMatrix4fv(this->getUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
+}
+
+void Shader::bindTexture(std::string name, GLTextureID textureID) {
+    this->use();
+    TextureType type = this->textures[name];
+    glActiveTexture(GL_TEXTURE0 + this->activeTextureCount);
+    if (type == TextureType::SAMPLER2D) {
+        glBindTexture(GL_TEXTURE_2D, textureID);
+    } else if (type == TextureType::CUBEMAP ) {
+        glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+    }
+    this->setInt(name.c_str(), this->activeTextureCount);
+    
+    this->activeTextureCount += 1;
+}
+
+void Shader::unbindTextures() {
+    this->use();
+    for (int i = 0; i < this->activeTextureCount; i++) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
+
+    this->activeTextureCount = 0;
 }

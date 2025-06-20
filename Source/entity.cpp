@@ -8,16 +8,15 @@ Entity::Entity(Mesh mesh) {
     this->scale = GM_Vec3(1, 1, 1);
 
     this->mesh = mesh;
-
-    Shader aabbShader = Shader({"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"});
-    this->aabb_mesh = Mesh(Material(aabbShader), Geometry::AABB());
-    this->aabb_mesh.material.color = GM_Vec4(0, 1, 0, 1);
     this->should_render_aabb = false;
 
     this->dead = false;
 }
 
 GM_AABB Entity::getAABB() {
+
+    // find_min from verticies
+
     return GM_AABB::fromCenterExtents(this->position, this->scale.scale(0.5));
 }
 
@@ -53,8 +52,8 @@ void Entity::setScale(float scale_x, float scale_y, float scale_z) {
     this->scale = GM_Vec3(scale_x, scale_y, scale_z);
 }
 
-void Entity::setTexture(GLTextureID id, TextureType type){
-    this->mesh.material.textures[type] = id;
+void Entity::setTexture(std::string texture_name, GLTextureID id){
+    this->mesh.material.textures[texture_name] = id;
 }
 
 GM_Matrix4 Entity::getTransform() {
@@ -66,16 +65,18 @@ GM_Matrix4 Entity::getTransform() {
     return transform;
 }
 
-void Entity::draw(GM_Matrix4 mvp) {
+GM_Matrix4 Entity::getAABBTransform() {
+    GM_AABB aabb = this->getAABB();
+    GM_Matrix4 transform = GM_Matrix4::identity();
+    transform = GM_Matrix4::scale(transform, aabb.getExtents());
+    transform = GM_Matrix4::rotate(transform, this->orientation);
+    transform = GM_Matrix4::translate(transform, aabb.getCenter());
+
+    return transform;
+}
+
+void Entity::draw() {
     if (this->dead) return;
 
-    this->mesh.material.shader.setVec4("color", this->mesh.material.color);
-    this->aabb_mesh.material.shader.setVec4("color", this->aabb_mesh.material.color);
-
-    // materialShaderBind() sets up like setVec4("color and stuff")
-
-    this->mesh.draw(mvp);
-    if (this->should_render_aabb) {
-        this->aabb_mesh.draw(mvp);
-    }
+    this->mesh.draw();
 }

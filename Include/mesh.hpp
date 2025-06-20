@@ -6,6 +6,7 @@
 
 // TODO(Jovanni): Consider removing transform from Mesh, 
 // as entities typically have transforms, not meshes themselves.
+
 struct Mesh {
     Geometry geometry;
     Material material;
@@ -13,5 +14,5 @@ struct Mesh {
     Mesh() = default;
     Mesh(Material material, Geometry geometry);
 
-    void draw(GM_Matrix4 mvp);
+    void draw();
 };

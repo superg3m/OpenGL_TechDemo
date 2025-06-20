@@ -3,14 +3,14 @@
 in vec2 TexCoords;
 out vec4 FragColor;
 
-#define SYNCED_TEXTURE_COLOR    0
-#define SYNCED_TEXTURE_DECAL    1
-#define SYNCED_TEXTURE_SPECULAR 2
-#define SYNCED_TEXTURE_NORMAL   3
-#define SYNCED_TEXTURE_HEIGHT   4
-#define SYNCED_TEXTURE_ALPHA    5
-#define SYNCED_TEXTURE_CUBEMAP  6
-#define SYNCED_TEXTURE_MAX      7
+#define TEXTURE_COLOR    0
+#define TEXTURE_DECAL    1
+#define TEXTURE_SPECULAR 2
+#define TEXTURE_NORMAL   3
+#define TEXTURE_HEIGHT   4
+#define TEXTURE_ALPHA    5
+#define TEXTURE_CUBEMAP  6
+#define TEXTURE_MAX      7
 
 uniform sampler2D texture0; // TEXTURE_COLOR
 uniform sampler2D texture1; // TEXTURE_DECAL

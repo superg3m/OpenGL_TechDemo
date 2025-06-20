@@ -23,12 +23,7 @@ int main() {
 
         IOD::poll();
 
-        int substeps = 8;
-        float substep_dt = Game::deltaTime / (float)substeps;
-        for (int step = 0; step < substeps; step++) {
-            application.update(window, substep_dt);
-        }
-
+        application.update(window, Game::deltaTime);
         application.render();
 
         glfwSwapBuffers(window);

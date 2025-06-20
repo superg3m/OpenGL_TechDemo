@@ -19,7 +19,6 @@ struct Entity {
     GM_Vec3 scale;
 
     Mesh mesh;
-    Mesh aabb_mesh;
     bool should_render_aabb;
 
     float speed;
@@ -42,8 +41,9 @@ struct Entity {
     void setScale(GM_Vec3 scale);
     void setScale(float scale_x, float scale_y, float scale_z);
 
-    void setTexture(GLTextureID id, TextureType type);
-
+    void setTexture(std::string texture_name, GLTextureID id);
+ 
     GM_Matrix4 getTransform();
-    void draw(GM_Matrix4 mvp);
+    GM_Matrix4 getAABBTransform();
+    void draw();
 };

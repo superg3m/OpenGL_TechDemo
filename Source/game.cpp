@@ -12,6 +12,26 @@ MousePicker Game::picker = MousePicker();
 Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     Game::WINDOW_WIDTH = WINDOW_WIDTH;
     Game::WINDOW_HEIGHT = WINDOW_HEIGHT;
+
+    /*
+    VertexAttributeFormat vbf = {
+        {FD::Vec3,  "aPosition"},
+        {FD::Vec3,  "aNormal"  },
+        {FD::Vec2,  "aTexCoord"}
+    }
+
+    FragmentUniformFormat vbf = {
+        {FD::Vec3, "uColor"}
+        {FD::Vec2,  "aPosition"}
+    }
+    Shader testShader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
+    */
+
+    this->basic_shader = Shader({"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"});
+    this->skybox_shader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
+    this->aabb_shader = Shader({"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"});
+    // this->particle_shader = Shader();
+    // this->pbr_shader = Shader();
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -106,38 +126,19 @@ void Game::initalizeResources() {
     ResourceLoader::loadCubemapTexture(SKYBOX, cubemap_faces);
     ResourceLoader::loadTexture(CRATE, "../../assets/container.jpg");
 
-    /*
-    VertexAttributeFormat vbf = {
-        {FD::Vec3,  "aPosition"},
-        {FD::Vec3,  "aNormal"  },
-        {FD::Vec2,  "aTexCoord"}
-    }
 
-    FragmentUniformFormat vbf = {
-        {FD::Vec3, "uColor"}
-        {FD::Vec2,  "aPosition"}
-    }
-    Shader testShader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
-    */
-
-    Shader skyboxShader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
-    Material skyboxMaterial = Material(skyboxShader);
-    Entity* skybox = new Entity(Mesh(skyboxMaterial, Geometry::Cube()));
-    skybox->setTexture(ResourceLoader::getTexture(SKYBOX), TEXTURE_CUBEMAP);
+    Material material;
+    Entity* skybox = new Entity(Mesh(material, Geometry::Cube()));
+    skybox->setTexture("uSkyboxTexture", ResourceLoader::getTexture(SKYBOX));
     ResourceLoader::setEntityReference(SKYBOX, skybox);
 
-    Shader sphereShader = Shader({"../../shader_source/basic/basic_material.vert", "../../shader_source/basic/basic_material.frag"});
-    Material sphereMaterial = Material(sphereShader);
-    Entity* sphere = new Entity(Mesh(sphereMaterial, Geometry::Sphere(32)));
+    Entity* sphere = new Entity(Mesh(material, Geometry::Sphere(32)));
     sphere->setPosition(0.0f, 0.0f, 0.0f);
-    sphere->setTexture(ResourceLoader::getTexture(CRATE), TEXTURE_COLOR);
+    sphere->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
     
-
-    Shader sphere2Shader = Shader({"../../shader_source/basic/basic_material.vert", "../../shader_source/basic/basic_material.frag"});
-    Material sphere2Material = Material(sphere2Shader);
-    Entity* sphere2 = new Entity(Mesh(sphere2Material, Geometry::Sphere(32)));
+    Entity* sphere2 = new Entity(Mesh(material, Geometry::Sphere(32)));
     sphere2->setPosition(-2.0f, -1.0f, 0.0f);
-    sphere2->setTexture(ResourceLoader::getTexture(CRATE), TEXTURE_COLOR);
+    sphere2->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
 
     ResourceLoader::setEntityReference("sphere", sphere);
     ResourceLoader::setEntityReference("sphere2", sphere2);
@@ -223,8 +224,41 @@ float currentTime = 0;
 void Game::update(GLFWwindow* window, float dt) {
     currentTime += dt;
 
+    int substeps = 8;
+    float substep_dt = dt / (float)substeps;
+    for (int step = 0; step < substeps; step++) {
+        // physics
+        // collisions
+        // etc.
+    }
+
     if (!Game::mouse_captured) {
         Game::picker.update(this->getProjectionMatrix(), Game::camera.get_view_matrix());
+    }
+
+    for (const auto& key : ResourceLoader::entity_keys) {
+        Entity* entity = ResourceLoader::getEntityReference(key);
+        
+        if (!Game::mouse_captured) {
+            GM_Vec3 ray_origin    = Game::picker.rayOrigin;
+            GM_Vec3 ray_direction = Game::picker.rayDirection;
+
+            float ray_length = 1000.0f;
+            GM_Vec3 p0 = ray_origin;
+            GM_Vec3 p1 = ray_origin + (ray_direction.scale(ray_length));
+
+            bool intersecting = GM_AABB::intersection(entity->getAABB(), p0, p1);
+            if (intersecting) {
+                entity->mesh.material.color = GM_Vec4(1, 0, 0, 1);
+                entity->should_render_aabb = true;
+            } else {
+                entity->mesh.material.color = GM_Vec4(1, 1, 1, 1);
+                entity->should_render_aabb = false;
+            }
+        } else {
+            entity->mesh.material.color = GM_Vec4(1, 1, 1, 1);
+            entity->should_render_aabb = false;
+        }
     }
 }
 
@@ -236,42 +270,48 @@ void Game::render() {
     GM_Matrix4 sourceView = camera.get_view_matrix();
     GM_Matrix4 projection = this->getProjectionMatrix();
 
+    // Render Skyboxes
+    glDepthFunc(GL_LEQUAL);
+    for (const auto& skybox_entity : ResourceLoader::skyboxes) {
+        GM_Matrix4 model = GM_Matrix4::identity();
+        GM_Matrix4 withoutTranslationView = sourceView;
+        withoutTranslationView.v[0].w = 0.0f;
+        withoutTranslationView.v[1].w = 0.0f;
+        withoutTranslationView.v[2].w = 0.0f;
+
+        this->skybox_shader.bindTexture("uSkyboxTexture", ResourceLoader::getTexture(SKYBOX));
+        this->skybox_shader.setMat4("uMVP", projection * withoutTranslationView * model);
+
+        skybox_entity->draw(&this->basic_shader);
+    }
+    glDepthFunc(GL_LESS);
+
     for (const auto& key : ResourceLoader::entity_keys) {
         Entity* entity = ResourceLoader::getEntityReference(key);
         GM_Matrix4 model = entity->getTransform();
         GM_Matrix4 view = sourceView;
 
-        if (entity->mesh.material.textures[TEXTURE_CUBEMAP] != TEXTURE_INVALID) {
-            GM_Matrix4 withoutTranslation = view;
-            withoutTranslation.v[0].w = 0.0f;
-            withoutTranslation.v[1].w = 0.0f;
-            withoutTranslation.v[2].w = 0.0f;
-            view = withoutTranslation;
-            model = GM_Matrix4::identity();
-        } else {
-            if (!Game::mouse_captured) {
-                GM_Vec3 ray_origin    = Game::picker.rayOrigin;
-                GM_Vec3 ray_direction = Game::picker.rayDirection;
+        this->basic_shader.use();
+        this->basic_shader.setVec4("uColor", entity->mesh.material.color);
+        this->basic_shader.setMat4("uMVP", projection * view * model);
+        this->basic_shader.bindTexture("uColorTexture", entity->mesh.material.textures["uColorTexture"]);
+        entity->draw();
+        this->basic_shader.unbindTextures();
 
-                float ray_length = 1000.0f;
-                GM_Vec3 p0 = ray_origin;
-                GM_Vec3 p1 = ray_origin + (ray_direction.scale(ray_length));
+        if (entity->should_render_aabb) {
+            Material material;
+            material.color = GM_Vec4(0, 1, 0, 1);
 
-                bool intersecting = GM_AABB::intersection(entity->getAABB(), p0, p1);
-                if (intersecting) {
-                    entity->mesh.material.color = GM_Vec4(1, 0, 0, 1);
-                    entity->should_render_aabb = true;
-                } else {
-                    entity->mesh.material.color = GM_Vec4(1, 1, 1, 1);
-                    entity->should_render_aabb = false;
-                }
-            } else {
-                entity->mesh.material.color = GM_Vec4(1, 1, 1, 1);
-                entity->should_render_aabb = false;
-            }
+            model = entity->getAABBTransform();
+
+            Mesh aabb_mesh = Mesh(material, Geometry::AABB());
+            this->aabb_shader.use();
+            this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
+
+            this->basic_shader.setVec4("uColor", aabb_mesh.material.color);
+            this->basic_shader.setMat4("uMVP", projection * view * model);
+            Mesh aabb_mesh;
         }
-
-        entity->draw(projection * view * model);
     }
 }
 

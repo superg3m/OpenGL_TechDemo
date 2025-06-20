@@ -28,8 +28,13 @@ struct Game {
     static float deltaTime;
     static MousePicker picker;
 
-    Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
+    Shader basic_shader;
+    Shader skybox_shader;
+    Shader aabb_shader;
+    Shader particle_shader;
+    Shader pbr_shader;
 
+    Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
 
     GLFWwindow* initalizeWindow();
     void initalizeResources();

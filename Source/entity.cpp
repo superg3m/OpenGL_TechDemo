@@ -14,10 +14,8 @@ Entity::Entity(Mesh mesh) {
 }
 
 GM_AABB Entity::getAABB() {
-
     // find_min from verticies
-
-    return GM_AABB::fromCenterExtents(this->position, this->scale.scale(0.5));
+    return GM_AABB::fromCenterExtents(this->position, this->scale);
 }
 
 void Entity::setPosition(GM_Vec3 position) {
@@ -68,7 +66,7 @@ GM_Matrix4 Entity::getTransform() {
 GM_Matrix4 Entity::getAABBTransform() {
     GM_AABB aabb = this->getAABB();
     GM_Matrix4 transform = GM_Matrix4::identity();
-    transform = GM_Matrix4::scale(transform, aabb.getExtents());
+    transform = GM_Matrix4::scale(transform, aabb.getExtents().scale(1.005f)); // scale to stop z-fighting
     transform = GM_Matrix4::rotate(transform, this->orientation);
     transform = GM_Matrix4::translate(transform, aabb.getCenter());
 

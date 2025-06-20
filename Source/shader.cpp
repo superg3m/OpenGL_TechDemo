@@ -182,8 +182,10 @@ void Shader::bindTexture(std::string name, GLTextureID textureID) {
 }
 
 void Shader::unbindTextures() {
+    #define TEXTURE_MAX 32
+
     this->use();
-    for (int i = 0; i < this->activeTextureCount; i++) {
+    for (int i = 0; i < TEXTURE_MAX; i++) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);

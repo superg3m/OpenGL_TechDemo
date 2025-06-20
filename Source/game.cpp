@@ -127,12 +127,12 @@ void Game::initalizeResources() {
     // this->pbr_shader = Shader();
 
     std::array<const char*, 6> cubemap_faces = {
-        "../../assets/skybox/right.jpg",
-        "../../assets/skybox/left.jpg",
-        "../../assets/skybox/top.jpg",
-        "../../assets/skybox/bottom.jpg",
-        "../../assets/skybox/front.jpg",
-        "../../assets/skybox/back.jpg",
+        "../../assets/city_skybox/right.jpg",
+        "../../assets/city_skybox/left.jpg",
+        "../../assets/city_skybox/top.jpg",
+        "../../assets/city_skybox/bottom.jpg",
+        "../../assets/city_skybox/front.jpg",
+        "../../assets/city_skybox/back.jpg",
     };
 
     ResourceLoader::loadCubemapTexture(SKYBOX, cubemap_faces);
@@ -143,12 +143,14 @@ void Game::initalizeResources() {
     ResourceLoader::setSkyboxReference(SKYBOX, skybox);
 
     Entity* cube = new Entity(Mesh(Geometry::Cube()));
-    cube->setPosition(-2.0f, -1.0f, 0.0f);
-    // cube->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
+    cube->setPosition(-2.0f, -1.0f, -1.0f);
+    cube->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
+    cube->setScale(0.5f);
 
     Entity* sphere = new Entity(Mesh(Geometry::Sphere(32)));
     sphere->setPosition(0.0f, 0.0f, 0.0f);
-    // sphere->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
+    sphere->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
+    sphere->setScale(0.5f);
 
     ResourceLoader::setEntityReference("cube", cube);
     ResourceLoader::setEntityReference("sphere", sphere);
@@ -290,8 +292,9 @@ void Game::render() {
         withoutTranslationView.v[1].w = 0.0f;
         withoutTranslationView.v[2].w = 0.0f;
 
-        this->skybox_shader.bindTexture("uSkyboxTexture", ResourceLoader::getTexture(SKYBOX));
+        this->skybox_shader.bindTexture("uSkyboxTexture", skybox->mesh.material.textures["uSkyboxTexture"]);
         this->skybox_shader.setMat4("uMVP", projection * withoutTranslationView * model);
+        this->skybox_shader.unbindTextures();
         skybox->draw();
     }
     glDepthFunc(GL_LESS);
@@ -304,7 +307,7 @@ void Game::render() {
         this->basic_shader.use();
         this->basic_shader.setVec4("uColor", entity->mesh.material.color);
         this->basic_shader.setMat4("uMVP", projection * view * model);
-        //this->basic_shader.bindTexture("uColorTexture", entity->mesh.material.textures["uColorTexture"]);
+        this->basic_shader.bindTexture("uColorTexture", entity->mesh.material.textures["uColorTexture"]);
         entity->draw();
         this->basic_shader.unbindTextures();
 

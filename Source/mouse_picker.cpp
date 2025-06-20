@@ -17,9 +17,8 @@ void MousePicker::update(GM_Matrix4 projection, GM_Matrix4 view) {
     GM_Vec4 clipCoordsNear = GM_Vec4(ndc.x, -ndc.y, -1.0f, 1.0f); // Z = -1 for near plane
     GM_Vec4 clipCoordsFar  = GM_Vec4(ndc.x, -ndc.y,  1.0f, 1.0f); // Z =  1 for far plane
 
-    // 3. Calculate the Inverse View-Projection Matrix
     GM_Matrix4 ProjectView = projection * view;
-    GM_Matrix4 viewProjectionInverse = GM_Matrix4::inverse(ProjectView, nullptr); // Ensure nullptr is appropriate for your inverse function
+    GM_Matrix4 viewProjectionInverse = GM_Matrix4::inverse(ProjectView, nullptr);
 
     // 4. Unproject the two points to World Space
     GM_Vec4 worldPosNear = viewProjectionInverse * clipCoordsNear;

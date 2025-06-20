@@ -2,7 +2,9 @@
 #include <IOD.hpp>
 #include <game.hpp>
 
-// study this tomorrow!
+
+// Date: June 20, 2025
+// TODO(Jovanni): Fully break this down and study it more, then write up a summery of going from screen space to world space and vice versa
 void MousePicker::update(GM_Matrix4 projection, GM_Matrix4 view) {
     float mouse_x = IOD::getMouseX();
     float mouse_y = IOD::getMouseY();

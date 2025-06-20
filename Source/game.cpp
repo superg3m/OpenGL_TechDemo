@@ -38,21 +38,30 @@ GLFWwindow* Game::initalizeWindow() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    IOD_GLFW_BIND_MOUSE_MOVE_CALLBACK([](GLFWwindow *window, double xpos, double ypos) {
-        float mouse_x = xpos;
-        float mouse_y = ypos;
+    IOD_GLFW_BIND_MOUSE_MOVE_CALLBACK([](GLFWwindow *window, double mouse_x, double mouse_y) {
+        local_persist bool previous_frame_mouse_was_captured = true;
+        if (!Game::mouse_captured) { 
+            previous_frame_mouse_was_captured = false;
+            return;
+        }
+        
         local_persist float last_mouse_x = mouse_x;
         local_persist float last_mouse_y = mouse_y;
 
         float xoffset = mouse_x - last_mouse_x;
         float yoffset = last_mouse_y - mouse_y;
 
-        last_mouse_x = mouse_x;
-        last_mouse_y = mouse_y;
-
-        if (Game::mouse_captured) {
-            Game::camera.process_mouse_movements(xoffset, yoffset);
-        }
+        if (!previous_frame_mouse_was_captured && Game::mouse_captured) {
+            xoffset = 0;
+            yoffset = 0;
+            glfwSetCursorPos(window, last_mouse_x, last_mouse_y);
+        } else {
+            last_mouse_x = mouse_x;
+            last_mouse_y = mouse_y;
+        }  
+        
+        Game::camera.process_mouse_movements(xoffset, yoffset);
+        previous_frame_mouse_was_captured = true;
     });
 
     IOD_GLFW_BIND_KEY_CALLBACK([](GLFWwindow* window, int key, int scancode, int action, int mods) {

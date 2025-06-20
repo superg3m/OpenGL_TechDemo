@@ -58,8 +58,13 @@ if cc.compiler_name == "cl":
     cc.compiler_warning_level = "2"
     cc.compiler_disable_specific_warnings = ["5105", "4668", "4820", "4996"]
 else:
-    cc.compiler_warning_level = "all"
-    cc.compiler_disable_specific_warnings = ["deprecated", "parentheses"]
+    cc.compiler_warning_level = ""
+    cc.compiler_disable_specific_warnings = [
+        "deprecated", 
+        "parentheses", 
+        "implicit-fallthrough",
+        "unused-variable"
+    ]
 
 
 glfw_lib_path = "../../Libraries/glfw/" 
@@ -76,8 +81,13 @@ libs = [
     GET_LIB_FLAG(cc, "User32"),
     GET_LIB_FLAG(cc, "Gdi32"),
     GET_LIB_FLAG(cc, "OpenGL32"),
+    f"../../ckg/{build_postfix}/{GET_LIB_NAME(cc, "ckg")}",
+    f"../../GameMath/{build_postfix}/{GET_LIB_NAME(cc, "gm")}",
+    f"../../IOD/{build_postfix}/{GET_LIB_NAME(cc, "IOD")}",
     glfw_lib_path
 ]
+
+C_BUILD_COMPILER_NAME
 
 procedures_config = {
     "OpenGL_TechDemo": ProcedureConfig(
@@ -85,9 +95,6 @@ procedures_config = {
         output_name = f"OpenGL_TechDemo.exe",
         source_files = [
             "../../Source/*.cpp",
-            "../../ckg/*.c",
-            "../../GameMath/*.cpp",
-            "../../IOD/*.cpp",
             "../../Libraries/glad/src/glad.c"
         ],
         additional_libs = libs,

@@ -7,8 +7,6 @@
 #include <GLFW_IOD.hpp>
 #include <mesh.hpp>
 #include <mouse_picker.hpp>
-#include <vertex.hpp>
-
 #include <camera.hpp>
 #include <ctime>
 

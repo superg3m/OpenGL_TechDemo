@@ -1,9 +1,11 @@
 #pragma once
 
-#include <gm.hpp>
-#include <glad/glad.h>
-#include <shader.hpp>
 #include <vector>
+
+#include <glad/glad.h>
+#include <Shader.hpp>
+
+#include <gm.hpp>
 
 using GLTextureID = int;
 struct Material {

@@ -1,4 +1,4 @@
-#include <camera.hpp>
+#include <Camera.hpp>
 
 void Camera::update_camera_vectors() {
     GM_Vec3 new_front = GM_Vec3::euler(this->yaw, this->pitch);

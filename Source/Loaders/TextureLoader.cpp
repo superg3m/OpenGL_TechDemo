@@ -1,0 +1,2 @@
+// cubemap
+// sampler2d

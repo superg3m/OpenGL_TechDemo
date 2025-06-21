@@ -1,7 +1,10 @@
+#pragma once
+
 #include <gm.hpp>
 #include <ckg.h>
+
 #include <vector>
-#include <mesh.hpp>
+#include <Mesh.hpp>
 
 // Date: June 03, 2025
 // TODO(Jovanni): I think the reference ID is a unique ID for serialization?

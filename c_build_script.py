@@ -84,6 +84,7 @@ libs = [
     f"../../ckg/{build_postfix}/{GET_LIB_NAME(cc, "ckg")}",
     f"../../GameMath/{build_postfix}/{GET_LIB_NAME(cc, "gm")}",
     f"../../IOD/{build_postfix}/{GET_LIB_NAME(cc, "IOD")}",
+    f"../../Libraries/assimp/lib/Debug/{GET_LIB_NAME(cc, "assimp-vc143-mtd")}",
     glfw_lib_path
 ]
 
@@ -94,12 +95,13 @@ procedures_config = {
         build_directory = f"./{build_postfix}",
         output_name = f"OpenGL_TechDemo.exe",
         source_files = [
-            "../../Source/*.cpp",
+            "../../Source/**/*.cpp",
             "../../Libraries/glad/src/glad.c"
         ],
         additional_libs = libs,
         include_paths = [
             "../../Include", 
+            "../../Include/Loaders", 
             "../../ckg",
             "../../GameMath",
             "../../IOD",
@@ -107,6 +109,7 @@ procedures_config = {
             "../../Libraries/stb",
             "../../Libraries/glad/include", 
             "../../Libraries/glfw",
+            "../../Libraries/assimp/include",
         ],
     )
 }

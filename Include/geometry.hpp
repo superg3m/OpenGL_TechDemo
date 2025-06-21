@@ -1,9 +1,11 @@
 #pragma once
 
+#include <vector>
+
 #include <gm.hpp>
 #include <glad/glad.h>
-#include <vector>
-#include <vertex.hpp>
+
+#include <Vertex.hpp>
 
 struct Geometry {
     // Date: June 15, 2025
@@ -29,6 +31,7 @@ struct Geometry {
     static Geometry AABB();
     static Geometry Cube();
     static Geometry Sphere(int segments);
+    static Geometry Model(const char* path);
 
     void setup(VertexAttributeFlag flags);
 };

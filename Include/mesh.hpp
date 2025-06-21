@@ -1,8 +1,8 @@
 #pragma once
 
-#include <shader.hpp>
-#include <geometry.hpp>
-#include <material.hpp>
+#include <Shader.hpp>
+#include <Geometry.hpp>
+#include <Material.hpp>
 
 // TODO(Jovanni): Consider removing transform from Mesh, 
 // as entities typically have transforms, not meshes themselves.

@@ -190,11 +190,6 @@ void Shader::setMat4(const char* name, const GM_Matrix4 &mat) {
     glUniformMatrix4fv(this->getUniformLocation(name, GL_FLOAT_MAT4), 1, GL_TRUE, &mat.v[0].x);
 }
 
-void Shader::setMat4(const char* name, const glm::mat4 &mat) const {
-    this->use();
-    glUniformMatrix4fv(this->getUniformLocation(name, GL_FLOAT_MAT4), 1, GL_FALSE, &mat[0][0]);
-}
-
 void Shader::bindTexture(std::string name, GLTextureID textureID) {
     this->use();
     TextureType type = this->textures[name];

@@ -1,14 +1,12 @@
 #pragma once
 
-#include <vector>
-#include <gm.hpp>
-#include <glad/glad.h>
 #include <string>
+#include <vector>
 #include <map>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <gm.hpp>
+
+#include <glad/glad.h>
 
 enum class TextureType {
     SAMPLER2D,
@@ -36,7 +34,6 @@ struct Shader {
     void setVec4(const char*name, const GM_Vec4 &value);
     void setIVec4(const char*name, const GM_Vec4 &value);
     void setMat4(const char*name, const GM_Matrix4 &mat);
-    void setMat4(const char* name, const glm::mat4 &mat) const;
 
     void bindTexture(std::string name, GLTextureID textureID);
     void unbindTextures();

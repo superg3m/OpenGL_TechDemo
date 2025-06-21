@@ -1,14 +1,17 @@
 #pragma once
 
-#include <resource_loader.hpp>
+#include <ctime>
 
 #include <ckg.h>
 #include <gm.hpp>
 #include <GLFW_IOD.hpp>
-#include <mesh.hpp>
-#include <mouse_picker.hpp>
-#include <camera.hpp>
-#include <ctime>
+
+#include <ResourceLoader.hpp>
+#include <EntityLoader.hpp>
+
+#include <Mesh.hpp>
+#include <MousePicker.hpp>
+#include <Camera.hpp>
 
 // #include <glm/glm.hpp>
 // #include <glm/gtc/matrix_transform.hpp>

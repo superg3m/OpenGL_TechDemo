@@ -1,6 +1,5 @@
 #include <ckg.h>
-#include <mesh.hpp>
-#include <glad/glad.h>
+#include <Mesh.hpp>
 
 Mesh::Mesh(Geometry geometry, Material material) {
     this->material = material;

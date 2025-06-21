@@ -336,17 +336,27 @@ void Game::render() {
         this->basic_shader.setMat4("uModel", model);
         this->basic_shader.setMat4("uView",view);
         this->basic_shader.setMat4("uProjection", projection);
-
-        if (entity->should_render_aabb) {
-            this->basic_shader.setVec4("uObjectColor", GM_Vec4(1, 0, 0, 1));
-        } else {
-            this->basic_shader.setVec4("uObjectColor", entity->mesh.material.color);
-        }
-        this->basic_shader.setVec3("uLightColor", GM_Vec3(1.0f, 1.0f, 1.0f));
-        this->basic_shader.setVec3("uLightPosition", GM_Vec3(5, 0, 0));
         this->basic_shader.setVec3("uViewPosition", Game::camera.position);
-        this->basic_shader.bindTexture("uColorTexture", entity->mesh.material.textures["uColorTexture"]);
-        this->basic_shader.setBool("uHasColorTexture", false);
+
+        // light properties
+        GM_Vec3 lightColor;
+        lightColor.x = (float)(sin(glfwGetTime() * 2.0));
+        lightColor.y = (float)(sin(glfwGetTime() * 0.7));
+        lightColor.z = (float)(sin(glfwGetTime() * 1.3));
+        GM_Vec3 diffuseColor = lightColor   * GM_Vec3(0.5f);
+        GM_Vec3 ambientColor = diffuseColor * GM_Vec3(0.2f);
+        this->basic_shader.setVec3("uLight.position", GM_Vec3(5, 0, 0));
+        this->basic_shader.setVec3("uLight.ambient", ambientColor);
+        this->basic_shader.setVec3("uLight.diffuse", diffuseColor);
+        this->basic_shader.setVec3("uLight.specular", 1.0f, 1.0f, 1.0f);
+
+        // material properties
+        this->basic_shader.setVec3("uMaterial.ambient", 1.0f, 0.5f, 0.31f);
+        this->basic_shader.setVec3("uMaterial.diffuse", 1.0f, 0.5f, 0.31f);
+        this->basic_shader.setVec3("uMaterial.specular", 0.5f, 0.5f, 0.5f);
+        this->basic_shader.setFloat("uMaterial.shininess", 32.0f);
+        // this->basic_shader.bindTexture("uColorTexture", entity->mesh.material.textures["uColorTexture"]);
+        // this->basic_shader.setBool("uHasColorTexture", false);
         entity->draw();
         this->basic_shader.unbindTextures();
 

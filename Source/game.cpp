@@ -142,31 +142,53 @@ void Game::initalizeResources() {
 
     ResourceLoader::loadCubemapTexture(SKYBOX, cubemap_faces);
     ResourceLoader::loadTexture(CRATE, "../../assets/container.jpg");
+    ResourceLoader::loadTexture(CRATE2, "../../assets/container2.png");
+    ResourceLoader::loadTexture(CRATE2_SPECULAR, "../../assets/container2_specular.png");
 
     Entity* skybox = new Entity(Mesh(Geometry::Cube()));
     skybox->setTexture("uSkyboxTexture", ResourceLoader::getTexture(SKYBOX));
     ResourceLoader::setSkyboxReference(SKYBOX, skybox);
 
-    Entity* light = new Entity(Mesh(Geometry::Cube()));
-    light->setPosition(5, 0, 0);
-    light->setScale(0.25f);
-    ResourceLoader::setLightReference("light", light);
+    // positions all containers
+    GM_Vec3 cubePositions[] = {
+        GM_Vec3( 0.0f,  0.0f,  0.0f),
+        GM_Vec3( 2.0f,  5.0f, -15.0f),
+        GM_Vec3(-1.5f, -2.2f, -2.5f),
+        GM_Vec3(-3.8f, -2.0f, -12.3f),
+        GM_Vec3( 2.4f, -0.4f, -3.5f),
+        GM_Vec3(-1.7f,  3.0f, -7.5f),
+        GM_Vec3( 1.3f, -2.0f, -2.5f),
+        GM_Vec3( 1.5f,  2.0f, -2.5f),
+        GM_Vec3( 1.5f,  0.2f, -1.5f),
+        GM_Vec3(-1.3f,  1.0f, -1.5f)
+    };
+    
+    for (int i = 0; i < ArrayCount(cubePositions); i++) {
+        Entity* cube = new Entity(Mesh(Geometry::Cube()));
+        cube->mesh.material.color = GM_Vec4(0.14f, 1.0f, 0.84f, 1);
+        cube->setPosition(cubePositions[i]);
+        cube->setTexture("uMaterial.diffuse", ResourceLoader::getTexture(CRATE2));
+        cube->setTexture("uMaterial.specular", ResourceLoader::getTexture(CRATE2_SPECULAR));
+        cube->setScale(0.5f);
 
-    Entity* cube = new Entity(Mesh(Geometry::Cube()));
-    cube->mesh.material.color = GM_Vec4(0.14f, 1.0f, 0.84f, 1);
-    cube->setPosition(-2.0f, -1.0f, -1.0f);
-    cube->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
-    cube->setScale(0.5f);
+        ResourceLoader::setEntityReference("cube" + std::to_string(i), cube);
+    }
 
-    Entity* sphere = new Entity(Mesh(Geometry::Sphere(32)));
-    sphere->mesh.material.color = GM_Vec4(0.4f, 0.3f, 0.5f, 1.0f);
-    sphere->setPosition(0.0f, 0.0f, 0.0f);
-    sphere->setTexture("uColorTexture", ResourceLoader::getTexture(CRATE));
-    sphere->setScale(0.5f);
+    // positions of the point lights
+    GM_Vec3 pointLightPositions[] = {
+        GM_Vec3( 0.7f,  0.2f,  2.0f),
+        GM_Vec3( 2.3f, -3.3f, -4.0f),
+        GM_Vec3(-4.0f,  2.0f, -12.0f),
+        GM_Vec3( 0.0f,  0.0f, -3.0f)
+    };
 
-    ResourceLoader::setEntityReference("cube", cube);
-    ResourceLoader::setEntityReference("sphere", sphere);
-    ResourceLoader::setEntityReference("light", light);
+    for (int i = 0; i < ArrayCount(pointLightPositions); i++) {
+        Entity* light = new Entity(Mesh(Geometry::Cube()));
+        light->setPosition(pointLightPositions[i]);
+        light->setScale(0.20f);
+
+        ResourceLoader::setLightReference("light" + std::to_string(i), light);
+    }
 }
 
 void Game::initalizeInputBindings() {
@@ -209,6 +231,18 @@ void Game::initalizeInputBindings() {
     profile->bind(IOD_KEY_CTRL, IOD_InputState::PRESSED|IOD_InputState::DOWN,
         []() {
             Game::camera.process_keyboard(DOWN, Game::deltaTime);  
+        }
+    );
+
+    profile->bind(IOD_KEY_F, IOD_InputState::PRESSED|IOD_InputState::DOWN,
+        [&]() {
+            this->basic_shader.setBool("uUseFlashlight", true);
+        }
+    );
+
+    profile->bind(IOD_KEY_F, IOD_InputState::RELEASED|IOD_InputState::UP,
+        [&]() {
+            this->basic_shader.setBool("uUseFlashlight", false);
         }
     );
 
@@ -304,10 +338,28 @@ void Game::render() {
     }
     glDepthFunc(GL_LESS);
 
-    for (const auto& key : ResourceLoader::light_keys) {
+    // directional light
+    this->basic_shader.use();
+    this->basic_shader.setVec3("uDirLight.direction", -0.2f, -1.0f, -0.3f);
+    this->basic_shader.setVec3("uDirLight.ambient", 0.05f, 0.05f, 0.05f);
+    this->basic_shader.setVec3("uDirLight.diffuse", 0.4f, 0.4f, 0.4f);
+    this->basic_shader.setVec3("uDirLight.specular", 0.5f, 0.5f, 0.5f);
+
+    //  point lights
+    for (int i = 0; i < ResourceLoader::light_keys.size(); i++) {
+        const std::string key = ResourceLoader::light_keys[i];
         Entity* light = ResourceLoader::getLightReference(key);
         GM_Matrix4 model = light->getTransform();
         GM_Matrix4 view = sourceView;
+
+        this->basic_shader.use();
+        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].position").c_str(), light->position);
+        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].ambient").c_str(), 0.05f, 0.05f, 0.05f);
+        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].diffuse").c_str(), 0.8f, 0.8f, 0.8f);
+        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].specular").c_str(), 1.0f, 1.0f, 1.0f);
+        this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].constant").c_str(), 1.0f);
+        this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].linear").c_str(), 0.09f);
+        this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].quadratic").c_str(), 0.032f);
 
         this->light_shader.use();
         this->light_shader.setMat4("uModel", model);
@@ -326,6 +378,17 @@ void Game::render() {
         }
     }
 
+    // spotLight
+    this->basic_shader.setVec3("uSpotLight.position", Game::camera.position);
+    this->basic_shader.setVec3("uSpotLight.direction", Game::camera.front);
+    this->basic_shader.setVec3("uSpotLight.ambient", 0.0f, 0.0f, 0.0f);
+    this->basic_shader.setVec3("uSpotLight.diffuse", 1.0f, 1.0f, 1.0f);
+    this->basic_shader.setVec3("uSpotLight.specular", 1.0f, 1.0f, 1.0f);
+    this->basic_shader.setFloat("uSpotLight.constant", 1.0f);
+    this->basic_shader.setFloat("uSpotLight.linear", 0.09f);
+    this->basic_shader.setFloat("uSpotLight.quadratic", 0.032f);
+    this->basic_shader.setFloat("uSpotLight.cutOff", glm::cos(glm::radians(12.5f)));
+    this->basic_shader.setFloat("uSpotLight.outerCutOff", glm::cos(glm::radians(15.0f)));   
 
     for (const auto& key : ResourceLoader::entity_keys) {
         Entity* entity = ResourceLoader::getEntityReference(key);
@@ -338,25 +401,10 @@ void Game::render() {
         this->basic_shader.setMat4("uProjection", projection);
         this->basic_shader.setVec3("uViewPosition", Game::camera.position);
 
-        // light properties
-        GM_Vec3 lightColor;
-        lightColor.x = (float)(sin(glfwGetTime() * 2.0));
-        lightColor.y = (float)(sin(glfwGetTime() * 0.7));
-        lightColor.z = (float)(sin(glfwGetTime() * 1.3));
-        GM_Vec3 diffuseColor = lightColor   * GM_Vec3(0.5f);
-        GM_Vec3 ambientColor = diffuseColor * GM_Vec3(0.2f);
-        this->basic_shader.setVec3("uLight.position", GM_Vec3(5, 0, 0));
-        this->basic_shader.setVec3("uLight.ambient", ambientColor);
-        this->basic_shader.setVec3("uLight.diffuse", diffuseColor);
-        this->basic_shader.setVec3("uLight.specular", 1.0f, 1.0f, 1.0f);
-
         // material properties
-        this->basic_shader.setVec3("uMaterial.ambient", 1.0f, 0.5f, 0.31f);
-        this->basic_shader.setVec3("uMaterial.diffuse", 1.0f, 0.5f, 0.31f);
-        this->basic_shader.setVec3("uMaterial.specular", 0.5f, 0.5f, 0.5f);
+        this->basic_shader.bindTexture("uMaterial.diffuse", entity->mesh.material.textures["uMaterial.diffuse"]);
+        this->basic_shader.bindTexture("uMaterial.specular", entity->mesh.material.textures["uMaterial.specular"]);
         this->basic_shader.setFloat("uMaterial.shininess", 32.0f);
-        // this->basic_shader.bindTexture("uColorTexture", entity->mesh.material.textures["uColorTexture"]);
-        // this->basic_shader.setBool("uHasColorTexture", false);
         entity->draw();
         this->basic_shader.unbindTextures();
 

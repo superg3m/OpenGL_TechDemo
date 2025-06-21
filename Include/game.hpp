@@ -16,6 +16,8 @@
 
 #define SKYBOX "Skybox"
 #define CRATE "Crate"
+#define CRATE2 "Crate2"
+#define CRATE2_SPECULAR "Crate2_Specular"
 
 struct Game {
     static bool mouse_captured;

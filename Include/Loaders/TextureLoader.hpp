@@ -1,8 +1,10 @@
-#pragma once
-
 #include <map>
 #include <string>
-#include <Entity.hpp>
+#include <array>
+
+#include <ckg.h>
+#include <glad/glad.h>
+#include <stb_image.h>
 
 enum TextureFlag {
     TEXTURE_DEFAULT = 0x0,
@@ -10,6 +12,7 @@ enum TextureFlag {
     TEXTURE_VERTICAL_FLIP = 0x2
 };
 
+using GLTextureID = int;
 struct TextureAtlas {
     u8* atlasTexture;
     int m_width;
@@ -24,16 +27,9 @@ struct TextureAtlas {
     void freeAtlas();
 };
 
-/**
- * @brief One natural Pattern that is being exhibited is the bundling of resources
- * For example I have a "BRICK" Texture and a "BRICK" Entity.
- */
-
-using GLTextureID = int;
-struct ResourceLoader {
+struct TextureLoader {
     static std::map<std::string, GLTextureID> textures;
     static std::map<std::string, TextureAtlas*> atlas;
-    static std::map<std::string, Geometry*> geometry;
 
     static void loadTexture(std::string key, const char *file, int texture_flags = TEXTURE_DEFAULT);
     static void loadCubemapTexture(std::string key, std::array<const char*, 6> cubeMapTextures);
@@ -42,5 +38,5 @@ struct ResourceLoader {
     static TextureAtlas* loadTextureAtlas(std::string key, const char *file, int texture_flags = TEXTURE_DEFAULT);
     static TextureAtlas* getTextureAtlas(std::string key);
 private:
-    ResourceLoader() = default;
+    TextureLoader() = default;
 };

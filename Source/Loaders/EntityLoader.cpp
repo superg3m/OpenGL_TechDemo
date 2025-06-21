@@ -1,7 +1,3 @@
-// skybox
-// lights
-// entities
-
 #include <EntityLoader.hpp>
 
 std::vector<std::string> EntityLoader::entity_keys;

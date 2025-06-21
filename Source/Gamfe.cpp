@@ -140,13 +140,13 @@ void Game::initalizeResources() {
         "../../assets/city_skybox/back.jpg",
     };
 
-    ResourceLoader::loadCubemapTexture(SKYBOX, cubemap_faces);
-    ResourceLoader::loadTexture(CRATE, "../../assets/container.jpg");
-    ResourceLoader::loadTexture(CRATE2, "../../assets/container2.png");
-    ResourceLoader::loadTexture(CRATE2_SPECULAR, "../../assets/container2_specular.png");
+    TextureLoader::loadCubemapTexture(SKYBOX, cubemap_faces);
+    TextureLoader::loadTexture(CRATE, "../../assets/container.jpg");
+    TextureLoader::loadTexture(CRATE2, "../../assets/container2.png");
+    TextureLoader::loadTexture(CRATE2_SPECULAR, "../../assets/container2_specular.png");
 
     Entity* skybox = new Entity(Mesh(Geometry::Cube()));
-    skybox->setTexture("uSkyboxTexture", ResourceLoader::getTexture(SKYBOX));
+    skybox->setTexture("uSkyboxTexture", TextureLoader::getTexture(SKYBOX));
     EntityLoader::setSkyboxReference(SKYBOX, skybox);
 
     // positions all containers
@@ -167,8 +167,8 @@ void Game::initalizeResources() {
         Entity* cube = new Entity(Mesh(Geometry::Cube()));
         cube->mesh.material.color = GM_Vec4(0.14f, 1.0f, 0.84f, 1);
         cube->setPosition(cubePositions[i]);
-        cube->setTexture("uMaterial.diffuse", ResourceLoader::getTexture(CRATE2));
-        cube->setTexture("uMaterial.specular", ResourceLoader::getTexture(CRATE2_SPECULAR));
+        cube->setTexture("uMaterial.diffuse", TextureLoader::getTexture(CRATE2));
+        cube->setTexture("uMaterial.specular", TextureLoader::getTexture(CRATE2_SPECULAR));
         cube->setScale(0.5f);
 
         EntityLoader::setEntityReference("cube" + std::to_string(i), cube);

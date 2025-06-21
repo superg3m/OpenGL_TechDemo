@@ -6,8 +6,8 @@
 #include <gm.hpp>
 #include <GLFW_IOD.hpp>
 
-#include <ResourceLoader.hpp>
 #include <EntityLoader.hpp>
+#include <TextureLoader.hpp>
 
 #include <Mesh.hpp>
 #include <MousePicker.hpp>

@@ -8,7 +8,7 @@ float lastFrame = 0.0f;
 // this would be especially good with Geometry::Cube() or Geometry::Sphere becuaes I don't have to regenerate the vertex data
 
 int main() {
-    Game application(800, 600);
+    Game application(800, 800);
     GLFWwindow* window = application.initalizeWindow();
     ckg_assert_msg(window, "failed to initalize glfw or glad\n");
 

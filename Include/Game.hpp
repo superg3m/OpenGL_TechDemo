@@ -31,8 +31,11 @@ struct Game {
     static Camera camera;
     static float deltaTime;
     static MousePicker picker;
+    static float xoffset;
+    static float yoffset;
 
     Shader basic_shader;
+    Shader outline_shader;
     Shader skybox_shader;
     Shader aabb_shader;
     Shader light_shader;

@@ -121,7 +121,7 @@ void Shader::use() const {
 GLint Shader::getUniformLocation(const char* name, GLenum type) const {
     GLint location = glGetUniformLocation(this->id, name);
     if (location == -1) {
-        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
+        // CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
     }
 
     if (location != -1 && this->uniforms.at(name) != type) {
@@ -146,7 +146,7 @@ void Shader::setTexture(const char* name, int value) {
     this->use();
 
     if (this->textures.count(name) == 0) {
-        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
+        // CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
         return;
     }
 

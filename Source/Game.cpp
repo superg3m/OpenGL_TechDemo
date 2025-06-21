@@ -8,6 +8,8 @@ float Game::timeScale = 1.0f;
 Camera Game::camera = Camera(0, 0, 5);
 float Game::deltaTime = 0.0f;
 MousePicker Game::picker = MousePicker();
+float Game::xoffset = 0.0f;
+float Game::yoffset = 0.0f;
 
 Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     Game::WINDOW_WIDTH = WINDOW_WIDTH;
@@ -42,25 +44,28 @@ GLFWwindow* Game::initalizeWindow() {
         local_persist bool previous_frame_mouse_was_captured = true;
         if (!Game::mouse_captured) { 
             previous_frame_mouse_was_captured = false;
-            return;
         }
         
         local_persist float last_mouse_x = mouse_x;
         local_persist float last_mouse_y = mouse_y;
 
-        float xoffset = mouse_x - last_mouse_x;
-        float yoffset = last_mouse_y - mouse_y;
+        Game::xoffset = mouse_x - last_mouse_x;
+        Game::yoffset = last_mouse_y - mouse_y;
 
         if (!previous_frame_mouse_was_captured && Game::mouse_captured) {
-            xoffset = 0;
-            yoffset = 0;
+            Game::xoffset = 0;
+            Game::yoffset = 0;
             glfwSetCursorPos(window, last_mouse_x, last_mouse_y);
         } else {
             last_mouse_x = mouse_x;
             last_mouse_y = mouse_y;
         }  
         
-        Game::camera.process_mouse_movements(xoffset, yoffset);
+        if (Game::mouse_captured) { 
+            Game::camera.process_mouse_movements(xoffset, yoffset);
+            return;
+        }
+
         previous_frame_mouse_was_captured = true;
     });
 
@@ -83,6 +88,7 @@ GLFWwindow* Game::initalizeWindow() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     
     return window;
 }
@@ -112,6 +118,11 @@ void Game::initalizeResources() {
     this->basic_shader = Shader(
         {"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"},
         textures
+    );
+
+    this->outline_shader = Shader(
+        {"../../shader_source/outline/outline.vert", "../../shader_source/outline/outline.frag"},
+        {}
     );
 
     textures = {
@@ -172,6 +183,13 @@ void Game::initalizeResources() {
     backpack->setEulerAngles(0, 90, 0);
     backpack->setScale(0.5f);
     EntityLoader::registerEntity("backpack", backpack);
+
+    Entity* mouse = new Entity(new Mesh(Geometry::Cube()));
+    mouse->setPosition(GM_Vec3(0, -5, 0));
+    mouse->setTexture("uMaterial.diffuse", TextureLoader::getTexture(CRATE2));
+    mouse->setTexture("uMaterial.specular", TextureLoader::getTexture(CRATE2_SPECULAR));
+    mouse->setScale(2.0f);
+    EntityLoader::registerEntity("mouse", mouse);
     
     for (int i = 0; i < ArrayCount(cubePositions); i++) {
         Entity* cube = new Entity(new Mesh(Geometry::Cube()));
@@ -334,6 +352,13 @@ void Game::update(GLFWwindow* window, float dt) {
             GM_Vec3 p1 = ray_origin + (ray_direction.scale(ray_length));
 
             entity->should_render_aabb = GM_AABB::intersection(entity->getAABB(), p0, p1);
+            if (entity->should_render_aabb && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)) {
+                GM_Matrix4 view = Game::camera.get_view_matrix();
+                GM_Vec4 objectViewSpace = view * GM_Vec4(entity->position, 1.0f);
+                GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
+                entity->position.x = world_space.x;
+                entity->position.y = world_space.y;
+            }
         } else {
             entity->should_render_aabb = false;
         }
@@ -422,13 +447,28 @@ void Game::render() {
 
         this->basic_shader.use();
         this->basic_shader.setMat4("uModel", model);
-        this->basic_shader.setMat4("uView",view);
+        this->basic_shader.setMat4("uView", view);
         this->basic_shader.setMat4("uProjection", projection);
         this->basic_shader.setVec3("uViewPosition", Game::camera.position);
 
         // material properties
         this->basic_shader.setFloat("uMaterial.shininess", 32.0f);
+
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
         entity->draw(this->basic_shader);
+
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        glDisable(GL_DEPTH_TEST);
+        this->outline_shader.setMat4("uModel", model);
+        this->outline_shader.setMat4("uView", view);
+        this->outline_shader.setMat4("uProjection", projection);
+        this->outline_shader.setFloat("uOutlineScale", 0.02f);
+        entity->draw(this->outline_shader);
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 0, 0xFF);   
+        glEnable(GL_DEPTH_TEST);
 
         if (entity->should_render_aabb) {
             model = entity->getAABBTransform();

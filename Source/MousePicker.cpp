@@ -35,3 +35,30 @@ void MousePicker::update(GM_Matrix4 projection, GM_Matrix4 view) {
 
     this->rayDirection = (rayDirectionRaw - this->rayOrigin).normalize();
 }
+
+GM_Vec3 MousePicker::getFromObjectZ(GM_Matrix4 projection, GM_Matrix4 view, float object_z) {
+    GM_Matrix4 projectionInverse = GM_Matrix4::inverse(projection, nullptr);
+    GM_Matrix4 viewInverse = GM_Matrix4::inverse(view, nullptr);
+
+    // Step 1 - Viewport to NDC
+    float mouse_x = IOD::getMouseX();
+    float mouse_y = IOD::getMouseY();
+
+    GM_Vec2 ndc = GM_Vec2(
+        ((2.0 * mouse_x) / Game::WINDOW_WIDTH) - 1, 
+        ((2.0 * mouse_y) / Game::WINDOW_HEIGHT) - 1
+    );
+
+    
+    // Step 2 - NDC to view (my version)
+    float focal_length = 1.0f/tanf((float)DEGREES_TO_RAD(45.0f / 2.0f));
+    float ar = (float)Game::WINDOW_HEIGHT / (float)Game::WINDOW_WIDTH;
+    GM_Vec3 ray_view(-ndc.x / focal_length, (ndc.y * ar) / focal_length, 1.0f);
+
+    // Step 3 - intersect view vector with object Z plane (in view)
+    GM_Vec4 view_space_intersect = GM_Vec4(ray_view.scale(object_z), 1.0f);
+
+    // Step 4 - View to World space
+    GM_Vec4 point_world = viewInverse * view_space_intersect;
+    return GM_Vec3(point_world);
+}

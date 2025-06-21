@@ -340,6 +340,9 @@ void Game::update(GLFWwindow* window, float dt) {
         }
     }
 
+    
+    Entity* entity_to_drag = nullptr;
+    float smallest_distance = FLT_MAX;
     for (const auto& key : EntityLoader::entity_keys) {
         Entity* entity = EntityLoader::getEntity(key);
         
@@ -351,17 +354,33 @@ void Game::update(GLFWwindow* window, float dt) {
             GM_Vec3 p0 = ray_origin;
             GM_Vec3 p1 = ray_origin + (ray_direction.scale(ray_length));
 
-            entity->should_render_aabb = GM_AABB::intersection(entity->getAABB(), p0, p1);
-            if (entity->should_render_aabb && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)) {
-                GM_Matrix4 view = Game::camera.get_view_matrix();
-                GM_Vec4 objectViewSpace = view * GM_Vec4(entity->position, 1.0f);
-                GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
-                entity->position.x = world_space.x;
-                entity->position.y = world_space.y;
+            bool intersection = GM_AABB::intersection(entity->getAABB(), p0, p1);
+            if (!intersection) {
+                entity->should_render_aabb = false;
+                continue;
+            }
+
+            float current_distance = GM_Vec3::distance(entity->position, Game::camera.position);
+            if (smallest_distance > current_distance) {
+                if (entity_to_drag) {
+                    entity_to_drag->should_render_aabb = false;
+                }
+
+                entity_to_drag = entity;
+                entity_to_drag->should_render_aabb = true;
+                smallest_distance = current_distance;
             }
         } else {
             entity->should_render_aabb = false;
         }
+    }
+
+    if (entity_to_drag && entity_to_drag->should_render_aabb && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)) {
+        GM_Matrix4 view = Game::camera.get_view_matrix();
+        GM_Vec4 objectViewSpace = view * GM_Vec4(entity_to_drag->position, 1.0f);
+        GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
+        entity_to_drag->position.x = world_space.x;
+        entity_to_drag->position.y = world_space.y;
     }
 }
 

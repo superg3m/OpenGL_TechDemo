@@ -1,4 +1,4 @@
-#include <main.hpp>
+#include <Main.hpp>
 
 float lastFrame = 0.0f;
 

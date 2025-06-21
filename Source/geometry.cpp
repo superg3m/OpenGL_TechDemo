@@ -325,7 +325,6 @@ void Geometry::setup(VertexAttributeFlag flags, const std::vector<Vertex>& verti
     this->vertex_count = vertices.size();
     this->index_count = indices.size();
 
-
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 

@@ -84,7 +84,7 @@ libs = [
     f"../../ckg/{build_postfix}/{GET_LIB_NAME(cc, "ckg")}",
     f"../../GameMath/{build_postfix}/{GET_LIB_NAME(cc, "gm")}",
     f"../../IOD/{build_postfix}/{GET_LIB_NAME(cc, "IOD")}",
-    f"../../Libraries/assimp/lib/Debug/{GET_LIB_NAME(cc, "assimp-vc143-mtd")}",
+    f"../../Libraries/assimp/{GET_LIB_NAME(cc, "assimp-vc143-mtd")}",
     glfw_lib_path
 ]
 

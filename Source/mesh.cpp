@@ -8,11 +8,11 @@ Mesh::Mesh(Geometry geometry, Material material) {
 
 void Mesh::draw() {
     glBindVertexArray(geometry.VAO);
-    int index_count = geometry.indices.size();
-    if (index_count > 0) {
-        glDrawElements(this->geometry.draw_type, index_count, GL_UNSIGNED_INT, 0);
+    if (geometry.index_count > 0) {
+        glDrawElements(this->geometry.draw_type, geometry.index_count, GL_UNSIGNED_INT, 0);
     } else {
-        glDrawArrays(this->geometry.draw_type, 0, geometry.vertices.size());
+        glDrawArrays(this->geometry.draw_type, 0, geometry.vertex_count);
     }
+    
     glBindVertexArray(0);
 }

@@ -2,8 +2,18 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <GeometryLoader.hpp>
+
+#define RESERVED_QUAD   "ReservedQuad"
+#define RESERVED_CUBE   "ReservedCube"
+#define RESERVED_AABB   "ReservedAABB"
+#define RESERVED_SPHERE "ReservedSphere"
 
 Geometry Geometry::Quad() {
+    if (GeometryLoader::geometry.count(RESERVED_QUAD) != 0) {
+        return GeometryLoader::getGeometry(RESERVED_QUAD);
+    }
+
     std::vector<Vertex> quad_vertices = {
         //         Posrtion             Normal          UV
         Vertex{GM_Vec3( 1.0f,  1.0f, 0.0f),  GM_Vec3(1.0f, 0.0f, 0.0f),  GM_Vec2(1, 1)}, // top right
@@ -18,16 +28,20 @@ Geometry Geometry::Quad() {
     };
 
     Geometry ret;
-    ret.vertices = quad_vertices;
-    ret.indices = quad_indices;
     ret.draw_type = GL_TRIANGLES;
-    ret.setup(VertexAttributeFlag::PNTBundle);
+    ret.setup(VertexAttributeFlag::PNTBundle, quad_vertices, quad_indices);
+
+    GeometryLoader::registerGeometry(RESERVED_QUAD, ret);
 
     return ret;
 }
 
 Geometry Geometry::AABB() {
-    std::vector<Vertex> quad_vertices = {
+    if (GeometryLoader::geometry.count(RESERVED_AABB) != 0) {
+        return GeometryLoader::getGeometry(RESERVED_AABB);
+    }
+
+    std::vector<Vertex> aabb_vertices = {
         // Bottom face
         Vertex{GM_Vec3(-1.0f, -1.0f, -1.0f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3( 1.0f, -1.0f, -1.0f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
         Vertex{GM_Vec3( 1.0f, -1.0f, -1.0f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)}, Vertex{GM_Vec3( 1.0f, -1.0f,  1.0f), GM_Vec3(0, 0, 0), GM_Vec2(0, 0)},
@@ -48,16 +62,20 @@ Geometry Geometry::AABB() {
     };
 
     Geometry ret;
-    ret.vertices = quad_vertices;
-    ret.indices = {};
     ret.draw_type = GL_LINES;
-    ret.setup(VertexAttributeFlag::PNTBundle);
+    ret.setup(VertexAttributeFlag::PNTBundle, aabb_vertices, {});
+
+    GeometryLoader::registerGeometry(RESERVED_AABB, ret);
 
     return ret;
 }
 
 
 Geometry Geometry::Cube() {
+    if (GeometryLoader::geometry.count(RESERVED_CUBE) != 0) {
+        return GeometryLoader::getGeometry(RESERVED_CUBE);
+    }
+
     std::vector<Vertex> cube_vertices = {
         // Front face
         Vertex{GM_Vec3(-1.0f, -1.0f, -1.0f), GM_Vec3(0, 0, -1), GM_Vec2(0, 0)}, // 0
@@ -106,15 +124,19 @@ Geometry Geometry::Cube() {
     };
 
     Geometry ret;
-    ret.vertices = cube_vertices;
-    ret.indices = cube_indices;
     ret.draw_type = GL_TRIANGLES;
-    ret.setup(VertexAttributeFlag::PNTBundle);
+    ret.setup(VertexAttributeFlag::PNTBundle, cube_vertices, cube_indices);
+
+    GeometryLoader::registerGeometry(RESERVED_CUBE, ret);
 
     return ret;
 }
 
 Geometry Geometry::Sphere(int segments) {
+    if (GeometryLoader::geometry.count(RESERVED_SPHERE) != 0) {
+        return GeometryLoader::getGeometry(RESERVED_SPHERE);
+    }
+
     std::vector<Vertex> sphere_vertices;
     std::vector<unsigned int> sphere_indices;
 
@@ -163,20 +185,19 @@ Geometry Geometry::Sphere(int segments) {
     }
 
     Geometry ret;
-    ret.vertices = sphere_vertices;
-    ret.indices = sphere_indices;
     ret.draw_type = GL_TRIANGLES;
-    ret.setup(VertexAttributeFlag::PNTBundle);
+    ret.setup(VertexAttributeFlag::PNTBundle, sphere_vertices, sphere_indices);
+
+    GeometryLoader::registerGeometry(RESERVED_SPHERE, ret);
 
     return ret;
 }
 
 /*
 Geometry Geometry::Model(const char* path) {
-    if (ResourceLoader::model_map.has(path)) {
-        return
+    if (GeometryLoader::geometry.count(RESERVED_SPHERE) != 0) {
+        return GeometryLoader::getGeometry(RESERVED_SPHERE);
     }
-
 
     auto processMesh = [](aiMesh *mesh, const aiScene *scene) -> Mesh {
         // data to fill
@@ -300,18 +321,22 @@ Geometry Geometry::Model(const char* path) {
 }
 */
 
-void Geometry::setup(VertexAttributeFlag flags) {
+void Geometry::setup(VertexAttributeFlag flags, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
+    this->vertex_count = vertices.size();
+    this->index_count = indices.size();
+
+
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, this->vertex_count * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
     if (!indices.empty()) {
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->index_count * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
     }
 
     bool hasPosition   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aPosition);
@@ -344,9 +369,6 @@ void Geometry::setup(VertexAttributeFlag flags) {
 }
 
 Geometry::Geometry(VertexAttributeFlag flags, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, GLenum draw_type) {
-    this->vertices = vertices;
-    this->indices = indices;
     this->draw_type = draw_type;
-    
-    this->setup(flags);
+    this->setup(flags, vertices, indices);
 }

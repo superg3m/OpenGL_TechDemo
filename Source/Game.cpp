@@ -82,6 +82,7 @@ GLFWwindow* Game::initalizeWindow() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
     
     return window;
 }
@@ -304,6 +305,23 @@ void Game::update(GLFWwindow* window, float dt) {
         Game::picker.update(this->getProjectionMatrix(), Game::camera.get_view_matrix());
     }
 
+    for (const auto& key : EntityLoader::light_keys) {
+        Entity* light = EntityLoader::getLight(key);
+        
+        if (!Game::mouse_captured) {
+            GM_Vec3 ray_origin    = Game::picker.rayOrigin;
+            GM_Vec3 ray_direction = Game::picker.rayDirection;
+
+            float ray_length = 1000.0f;
+            GM_Vec3 p0 = ray_origin;
+            GM_Vec3 p1 = ray_origin + (ray_direction.scale(ray_length));
+
+            light->should_render_aabb = GM_AABB::intersection(light->getAABB(), p0, p1);
+        } else {
+            light->should_render_aabb = false;
+        }
+    }
+
     for (const auto& key : EntityLoader::entity_keys) {
         Entity* entity = EntityLoader::getEntity(key);
         
@@ -324,7 +342,7 @@ void Game::update(GLFWwindow* window, float dt) {
 
 void Game::render() {
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
     GM_Matrix4 sourceView = camera.get_view_matrix();
     GM_Matrix4 projection = this->getProjectionMatrix();

@@ -9,7 +9,7 @@ std::map<std::string, Entity*> EntityLoader::skyboxes;
 std::vector<std::string> EntityLoader::light_keys;
 std::map<std::string, Entity*> EntityLoader::lights;
 
-void EntityLoader::setEntityReference(std::string key, Entity* entity) {
+void EntityLoader::registerEntity(std::string key, Entity* entity) {
     if (EntityLoader::entities.count(key)) {
         CKG_LOG_WARN("EntityLoader | Key: '%s' already exists overwriting entity\n", key.c_str());
     }
@@ -18,7 +18,7 @@ void EntityLoader::setEntityReference(std::string key, Entity* entity) {
     EntityLoader::entities[key] = entity;
 }
 
-Entity* EntityLoader::getEntityReference(std::string key) {
+Entity* EntityLoader::getEntity(std::string key) {
     if (!EntityLoader::entities.count(key)) {
         CKG_LOG_ERROR("EntityLoader | Key: '%s' doesn't exist for entity\n", key.c_str());
         return nullptr;
@@ -27,7 +27,7 @@ Entity* EntityLoader::getEntityReference(std::string key) {
     return EntityLoader::entities[key];
 }
 
-void EntityLoader::setSkyboxReference(std::string key, Entity* entity) {
+void EntityLoader::registerSkybox(std::string key, Entity* entity) {
     if (EntityLoader::skyboxes.count(key)) {
         CKG_LOG_WARN("EntityLoader | Key: '%s' already exists overwriting entity\n", key.c_str());
     }
@@ -36,7 +36,7 @@ void EntityLoader::setSkyboxReference(std::string key, Entity* entity) {
     EntityLoader::skyboxes[key] = entity;
 }
 
-Entity* EntityLoader::getSkyboxReference(std::string key) {
+Entity* EntityLoader::getSkybox(std::string key) {
     if (!EntityLoader::skyboxes.count(key)) {
         CKG_LOG_ERROR("EntityLoader | Key: '%s' doesn't exist for entity\n", key.c_str());
         return nullptr;
@@ -45,7 +45,7 @@ Entity* EntityLoader::getSkyboxReference(std::string key) {
     return EntityLoader::skyboxes[key];
 }
 
-void EntityLoader::setLightReference(std::string key, Entity* entity) {
+void EntityLoader::registerLight(std::string key, Entity* entity) {
     if (EntityLoader::lights.count(key)) {
         CKG_LOG_WARN("EntityLoader | Key: '%s' already exists overwriting entity\n", key.c_str());
     }
@@ -54,7 +54,7 @@ void EntityLoader::setLightReference(std::string key, Entity* entity) {
     EntityLoader::lights[key] = entity;
 }
 
-Entity* EntityLoader::getLightReference(std::string key) {
+Entity* EntityLoader::getLight(std::string key) {
     if (!EntityLoader::lights.count(key)) {
         CKG_LOG_ERROR("EntityLoader | Key: '%s' doesn't exist for entity\n", key.c_str());
         return nullptr;

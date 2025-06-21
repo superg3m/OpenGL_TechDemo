@@ -15,12 +15,12 @@ struct EntityLoader {
     static std::vector<std::string> entity_keys;
     static std::map<std::string, Entity*> entities;
 
-    static void setEntityReference(std::string key, Entity* entity);
-    static Entity* getEntityReference(std::string key);
+    static void registerEntity(std::string key, Entity* entity);
+    static Entity* getEntity(std::string key);
 
-    static void setSkyboxReference(std::string key, Entity* entity);
-    static Entity* getSkyboxReference(std::string key);
+    static void registerSkybox(std::string key, Entity* entity);
+    static Entity* getSkybox(std::string key);
 
-    static void setLightReference(std::string key, Entity* entity);
-    static Entity* getLightReference(std::string key);
+    static void registerLight(std::string key, Entity* entity);
+    static Entity* getLight(std::string key);
 };

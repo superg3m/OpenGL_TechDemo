@@ -147,7 +147,7 @@ void Game::initalizeResources() {
 
     Entity* skybox = new Entity(Mesh(Geometry::Cube()));
     skybox->setTexture("uSkyboxTexture", TextureLoader::getTexture(SKYBOX));
-    EntityLoader::setSkyboxReference(SKYBOX, skybox);
+    EntityLoader::registerSkybox(SKYBOX, skybox);
 
     // positions all containers
     GM_Vec3 cubePositions[] = {
@@ -171,7 +171,7 @@ void Game::initalizeResources() {
         cube->setTexture("uMaterial.specular", TextureLoader::getTexture(CRATE2_SPECULAR));
         cube->setScale(0.5f);
 
-        EntityLoader::setEntityReference("cube" + std::to_string(i), cube);
+        EntityLoader::registerEntity("cube" + std::to_string(i), cube);
     }
 
     // positions of the point lights
@@ -187,7 +187,7 @@ void Game::initalizeResources() {
         light->setPosition(pointLightPositions[i]);
         light->setScale(0.20f);
 
-        EntityLoader::setLightReference("light" + std::to_string(i), light);
+        EntityLoader::registerLight("light" + std::to_string(i), light);
     }
 }
 
@@ -296,7 +296,7 @@ void Game::update(GLFWwindow* window, float dt) {
     }
 
     for (const auto& key : EntityLoader::entity_keys) {
-        Entity* entity = EntityLoader::getEntityReference(key);
+        Entity* entity = EntityLoader::getEntity(key);
         
         if (!Game::mouse_captured) {
             GM_Vec3 ray_origin    = Game::picker.rayOrigin;
@@ -323,7 +323,7 @@ void Game::render() {
     // Render Skyboxes
     glDepthFunc(GL_LEQUAL);
     for (const auto& key : EntityLoader::skybox_keys) {
-        Entity* skybox = EntityLoader::getSkyboxReference(key);
+        Entity* skybox = EntityLoader::getSkybox(key);
 
         GM_Matrix4 model = GM_Matrix4::identity();
         GM_Matrix4 withoutTranslationView = sourceView;
@@ -348,7 +348,7 @@ void Game::render() {
     //  point lights
     for (int i = 0; i < EntityLoader::light_keys.size(); i++) {
         const std::string key = EntityLoader::light_keys[i];
-        Entity* light = EntityLoader::getLightReference(key);
+        Entity* light = EntityLoader::getLight(key);
         GM_Matrix4 model = light->getTransform();
         GM_Matrix4 view = sourceView;
 
@@ -391,7 +391,7 @@ void Game::render() {
     this->basic_shader.setFloat("uSpotLight.outerCutOff", cosf((float)DEGREES_TO_RAD(15.0f)));   
 
     for (const auto& key : EntityLoader::entity_keys) {
-        Entity* entity = EntityLoader::getEntityReference(key);
+        Entity* entity = EntityLoader::getEntity(key);
         GM_Matrix4 model = entity->getTransform();
         GM_Matrix4 view = sourceView;
 

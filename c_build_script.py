@@ -101,7 +101,7 @@ procedures_config = {
         additional_libs = libs,
         include_paths = [
             "../../Include", 
-            "../../Include/Loaders", 
+            "../../Include/Loader", 
             "../../ckg",
             "../../GameMath",
             "../../IOD",

@@ -1,9 +1,9 @@
 #include <ckg.h>
-
 #include <Model.hpp>
-#include <TextureLoader.hpp>
 
-Model::Model(std::string const &path) {
+Model::Model(std::string const &path, int texture_flags) {
+    this->texture_flags = texture_flags;
+
     this->loadModel(path);
 }
 
@@ -117,7 +117,7 @@ std::vector<GLTextureID> Model::loadMaterialTextures(aiMaterial *mat, aiTextureT
 
         if(!skip) {
             std::string filename = this->directory + '/' + std::string(str.C_Str());
-            GLTextureID texture = TextureLoader::loadTexture(filename.c_str());
+            GLTextureID texture = TextureLoader::loadTexture(filename.c_str(), this->texture_flags);
             textures.push_back(texture);
             this->loaded_textures[key] = texture;
         }

@@ -25,8 +25,6 @@ struct Shader {
     void use() const;
     void setBool(const char* name, bool value);
     void setInt(const char* name, int value);
-    void setTexture(const char* name, int value);
-    void setCubeTexture(const char* name, int value);
     void setFloat(const char*name, float value);
     void setVec2(const char*name, const GM_Vec2 &value);
     void setVec3(const char*name, const GM_Vec3 &value);
@@ -42,7 +40,7 @@ struct Shader {
     static Shader StandardShader();
 private:
     std::map<std::string, GLenum> uniforms;
-
+    void setTexture(const char* name, int value);
     GLint getAttributeLocation(const char* name) const;
     GLint getUniformLocation(const char* name, GLenum type) const;
     void checkCompileError(unsigned int shaderID, const char* type);

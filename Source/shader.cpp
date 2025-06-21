@@ -144,12 +144,14 @@ void Shader::setInt(const char* name, int value) {
 
 void Shader::setTexture(const char* name, int value) { 
     this->use();
-    glUniform1i(this->getUniformLocation(name, GL_SAMPLER_2D), value); 
-}
 
-void Shader::setCubeTexture(const char* name, int value) { 
-    this->use();
-    glUniform1i(this->getUniformLocation(name, GL_SAMPLER_CUBE), value); 
+    if (this->textures.count(name) == 0) {
+        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
+        return;
+    }
+
+    GLenum gl_type = this->textures.at(name) == TextureType::SAMPLER2D ? GL_SAMPLER_2D : GL_SAMPLER_CUBE;
+    glUniform1i(this->getUniformLocation(name, gl_type), value); 
 }
 
 void Shader::setFloat(const char* name, float value) { 
@@ -196,11 +198,10 @@ void Shader::bindTexture(std::string name, GLTextureID textureID) {
     glActiveTexture(GL_TEXTURE0 + this->activeTextureCount);
     if (type == TextureType::SAMPLER2D) {
         glBindTexture(GL_TEXTURE_2D, textureID);
-        this->setTexture(name.c_str(), this->activeTextureCount);
-    } else if (type == TextureType::CUBEMAP ) {
+    } else if (type == TextureType::CUBEMAP) {
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-        this->setCubeTexture(name.c_str(), this->activeTextureCount);
     }
+    this->setTexture(name.c_str(), this->activeTextureCount);
 
     this->activeTextureCount += 1;
 }

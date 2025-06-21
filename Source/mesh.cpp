@@ -8,7 +8,7 @@ Mesh::Mesh(Geometry geometry, Material material) {
 
 void Mesh::draw(Shader &shader) {
     for (const auto &[key, id] : this->material.textures) {
-        shader.setTexture(key.c_str(), id);
+        shader.bindTexture(key.c_str(), id);
     }
 
     glBindVertexArray(geometry.VAO);

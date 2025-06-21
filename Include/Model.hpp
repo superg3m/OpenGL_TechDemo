@@ -9,15 +9,17 @@
 
 #include <Mesh.hpp>
 #include <Shader.hpp>
+#include <TextureLoader.hpp>
 
 struct Model : public Mesh {
     std::vector<Mesh> meshes;
 
-    Model(std::string const &path);
+    Model(std::string const &path, int texture_flags = TEXTURE_DEFAULT);
     void draw(Shader &shader) override;
 private:
     std::string directory;
     std::map<std::string, GLTextureID> loaded_textures;
+    int texture_flags;
 
     void loadModel(std::string const &path);
     void processNode(aiNode *node, const aiScene *scene);

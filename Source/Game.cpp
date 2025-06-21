@@ -104,7 +104,8 @@ void Game::initalizeResources() {
     srand(time(0));
 
     std::map<std::string, TextureType> textures = {
-        {"uColorTexture", TextureType::SAMPLER2D}
+        {"uMaterial.diffuse", TextureType::SAMPLER2D},
+        {"uMaterial.specular", TextureType::SAMPLER2D},
     };
 
     this->basic_shader = Shader(
@@ -163,7 +164,7 @@ void Game::initalizeResources() {
         GM_Vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    Entity* backpack = new Entity(new Model("../../assets/backpack/backpack.obj"));
+    Entity* backpack = new Entity(new Model("../../assets/backpack/backpack.obj", TEXTURE_VERTICAL_FLIP));
     backpack->setPosition(GM_Vec3(-5.0f,  0.0f, 2.0f));
     // backpack->setTexture("uMaterial.diffuse", TextureLoader::getTexture(CRATE2));
     // backpack->setTexture("uMaterial.specular", TextureLoader::getTexture(CRATE2_SPECULAR));

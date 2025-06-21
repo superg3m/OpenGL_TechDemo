@@ -141,11 +141,11 @@ void Game::initalizeResources() {
     };
 
     TextureLoader::loadCubemapTexture(SKYBOX, cubemap_faces);
-    TextureLoader::loadTexture(CRATE, "../../assets/container.jpg");
-    TextureLoader::loadTexture(CRATE2, "../../assets/container2.png");
-    TextureLoader::loadTexture(CRATE2_SPECULAR, "../../assets/container2_specular.png");
+    TextureLoader::registerTexture(CRATE, "../../assets/container.jpg");
+    TextureLoader::registerTexture(CRATE2, "../../assets/container2.png");
+    TextureLoader::registerTexture(CRATE2_SPECULAR, "../../assets/container2_specular.png");
 
-    Entity* skybox = new Entity(Mesh(Geometry::Cube()));
+    Entity* skybox = new Entity(new Mesh(Geometry::Cube()));
     skybox->setTexture("uSkyboxTexture", TextureLoader::getTexture(SKYBOX));
     EntityLoader::registerSkybox(SKYBOX, skybox);
 
@@ -162,10 +162,18 @@ void Game::initalizeResources() {
         GM_Vec3( 1.5f,  0.2f, -1.5f),
         GM_Vec3(-1.3f,  1.0f, -1.5f)
     };
+
+    Entity* backpack = new Entity(new Model("../../assets/backpack/backpack.obj"));
+    backpack->setPosition(GM_Vec3(-5.0f,  0.0f, 2.0f));
+    // backpack->setTexture("uMaterial.diffuse", TextureLoader::getTexture(CRATE2));
+    // backpack->setTexture("uMaterial.specular", TextureLoader::getTexture(CRATE2_SPECULAR));
+    backpack->setEulerAngles(0, 90, 0);
+    backpack->setScale(0.5f);
+    EntityLoader::registerEntity("backpack", backpack);
     
     for (int i = 0; i < ArrayCount(cubePositions); i++) {
-        Entity* cube = new Entity(Mesh(Geometry::Cube()));
-        cube->mesh.material.color = GM_Vec4(0.14f, 1.0f, 0.84f, 1);
+        Entity* cube = new Entity(new Mesh(Geometry::Cube()));
+        cube->mesh->material.color = GM_Vec4(0.14f, 1.0f, 0.84f, 1);
         cube->setPosition(cubePositions[i]);
         cube->setTexture("uMaterial.diffuse", TextureLoader::getTexture(CRATE2));
         cube->setTexture("uMaterial.specular", TextureLoader::getTexture(CRATE2_SPECULAR));
@@ -183,7 +191,7 @@ void Game::initalizeResources() {
     };
 
     for (int i = 0; i < ArrayCount(pointLightPositions); i++) {
-        Entity* light = new Entity(Mesh(Geometry::Cube()));
+        Entity* light = new Entity(new Mesh(Geometry::Cube()));
         light->setPosition(pointLightPositions[i]);
         light->setScale(0.20f);
 
@@ -331,10 +339,8 @@ void Game::render() {
         withoutTranslationView.v[1].w = 0.0f;
         withoutTranslationView.v[2].w = 0.0f;
 
-        this->skybox_shader.bindTexture("uSkyboxTexture", skybox->mesh.material.textures["uSkyboxTexture"]);
         this->skybox_shader.setMat4("uMVP", projection * withoutTranslationView * model);
-        this->skybox_shader.unbindTextures();
-        skybox->draw();
+        skybox->draw(this->skybox_shader);
     }
     glDepthFunc(GL_LESS);
 
@@ -365,8 +371,8 @@ void Game::render() {
         this->light_shader.setMat4("uModel", model);
         this->light_shader.setMat4("uView",view);
         this->light_shader.setMat4("uProjection", projection);
-        this->light_shader.setVec4("uObjectColor", light->mesh.material.color);
-        light->draw();
+        this->light_shader.setVec4("uObjectColor", light->mesh->material.color);
+        light->draw(this->light_shader);
 
         if (light->should_render_aabb) {
             model = light->getAABBTransform();
@@ -374,7 +380,7 @@ void Game::render() {
             this->aabb_shader.use();
             this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
             this->aabb_shader.setMat4("uMVP", projection * view * model);
-            aabb_mesh.draw();
+            aabb_mesh.draw(this->aabb_shader);
         }
     }
 
@@ -402,11 +408,8 @@ void Game::render() {
         this->basic_shader.setVec3("uViewPosition", Game::camera.position);
 
         // material properties
-        this->basic_shader.bindTexture("uMaterial.diffuse", entity->mesh.material.textures["uMaterial.diffuse"]);
-        this->basic_shader.bindTexture("uMaterial.specular", entity->mesh.material.textures["uMaterial.specular"]);
         this->basic_shader.setFloat("uMaterial.shininess", 32.0f);
-        entity->draw();
-        this->basic_shader.unbindTextures();
+        entity->draw(this->basic_shader);
 
         if (entity->should_render_aabb) {
             model = entity->getAABBTransform();
@@ -414,7 +417,7 @@ void Game::render() {
             this->aabb_shader.use();
             this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
             this->aabb_shader.setMat4("uMVP", projection * view * model);
-            aabb_mesh.draw();
+            aabb_mesh.draw(this->aabb_shader);
         }
     }
 

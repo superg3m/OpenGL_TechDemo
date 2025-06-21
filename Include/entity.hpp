@@ -21,7 +21,7 @@ struct Entity {
     GM_Quaternion orientation;
     GM_Vec3 scale;
 
-    Mesh mesh;
+    Mesh* mesh;
     bool should_render_aabb;
 
     float speed;
@@ -29,7 +29,7 @@ struct Entity {
     int maxHealth;
     bool dead;
 
-    Entity(Mesh mesh);
+    Entity(Mesh* mesh);
 
     GM_AABB getAABB();
 
@@ -48,5 +48,5 @@ struct Entity {
  
     GM_Matrix4 getTransform();
     GM_Matrix4 getAABBTransform();
-    void draw();
+    void draw(Shader &shader);
 };

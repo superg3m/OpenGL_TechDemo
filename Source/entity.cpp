@@ -1,6 +1,6 @@
 #include <game.hpp>
 
-Entity::Entity(Mesh mesh) {
+Entity::Entity(Mesh* mesh) {
     this->reference_identifer = Game::getReferenceID();
 
     this->position = GM_Vec3(0, 0, 0);
@@ -50,8 +50,14 @@ void Entity::setScale(float scale_x, float scale_y, float scale_z) {
     this->scale = GM_Vec3(scale_x, scale_y, scale_z);
 }
 
-void Entity::setTexture(std::string texture_name, GLTextureID id){
-    this->mesh.material.textures[texture_name] = id;
+void Entity::setTexture(std::string texture_name, GLTextureID id) {
+    Model* model = dynamic_cast<Model*>(this->mesh);
+    if (model) {
+        CKG_LOG_ERROR("Setting a texture on a model is invalid right now!\n");
+        return;
+    }
+    
+    this->mesh->material.textures[texture_name] = id;
 }
 
 GM_Matrix4 Entity::getTransform() {
@@ -73,8 +79,8 @@ GM_Matrix4 Entity::getAABBTransform() {
     return transform;
 }
 
-void Entity::draw() {
+void Entity::draw(Shader &shader) {
     if (this->dead) return;
 
-    this->mesh.draw();
+    this->mesh->draw(shader);
 }

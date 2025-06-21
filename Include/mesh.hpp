@@ -14,5 +14,5 @@ struct Mesh {
     Mesh() = default;
     Mesh(Geometry geometry, Material material = Material());
 
-    void draw();
+    virtual void draw(Shader &shader);
 };

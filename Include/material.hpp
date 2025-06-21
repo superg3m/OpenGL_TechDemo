@@ -14,6 +14,5 @@ struct Material {
 
     Material();
 
-    void bindTextures();
-    void unbindTextures();
+    void bindTextures(Shader &shader);
 };

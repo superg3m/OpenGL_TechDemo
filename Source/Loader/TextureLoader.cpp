@@ -3,13 +3,8 @@
 std::map<std::string, GLTextureID> TextureLoader::textures;
 std::map<std::string, TextureAtlas*> TextureLoader::atlas;
 
-void TextureLoader::loadTexture(std::string key, const char *file, int texture_flags) {
+GLTextureID TextureLoader::loadTexture(const char *file, int texture_flags) {
     ckg_assert_msg(ckg_io_path_exists(file), "Texture path: '%s' doesn't exist!\n", file);
-
-    if (TextureLoader::textures.count(key)) {
-        CKG_LOG_WARN("TextureLoader | Key: '%s' already exists\n", key.c_str());
-        return;
-    }
 
     GLenum MIPMAP_TYPE = GET_BIT(texture_flags, 0) ? GL_NEAREST : GL_LINEAR;
     GLenum TEXTURE_VERTICAL_FLIP = GET_BIT(texture_flags, 1);
@@ -49,7 +44,31 @@ void TextureLoader::loadTexture(std::string key, const char *file, int texture_f
     stbi_image_free(data);
     stbi_set_flip_vertically_on_load(FALSE);
 
-    TextureLoader::textures[key] = texture;
+    if (texture == 0) {
+        CKG_LOG_ERROR("TextureLoader | id is invalid!\n");
+    }
+
+    return texture;
+}
+
+void TextureLoader::registerTexture(std::string key, const char *file, int texture_flags) {
+    ckg_assert_msg(ckg_io_path_exists(file), "Texture path: '%s' doesn't exist!\n", file);
+
+    if (TextureLoader::textures.count(key)) {
+        CKG_LOG_WARN("TextureLoader | Key: '%s' already exists\n", key.c_str());
+        return;
+    }
+
+    TextureLoader::textures[key] = TextureLoader::loadTexture(file, texture_flags);
+}
+
+void registerTexture(std::string key, GLTextureID id) {
+    if (TextureLoader::textures.count(key)) {
+        CKG_LOG_WARN("TextureLoader | Key: '%s' already exists\n", key.c_str());
+        return;
+    }
+
+    TextureLoader::textures[key] = id;
 }
 
 // {right, left,  top, bottom, front, back}

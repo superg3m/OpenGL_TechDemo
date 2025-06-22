@@ -22,7 +22,7 @@
 #define CRATE2 "Crate2"
 #define CRATE2_SPECULAR "Crate2_Specular"
 
-struct Game {
+struct GameState {
     static bool mouse_captured;
     static float timeScale;
     static GM_Matrix4 projection;
@@ -42,7 +42,7 @@ struct Game {
     Shader particle_shader;
     Shader pbr_shader;
 
-    Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
+    GameState(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
 
     GLFWwindow* initalizeWindow();
     void initalizeResources();

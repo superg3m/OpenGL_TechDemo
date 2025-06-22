@@ -1,7 +1,7 @@
-#include <game.hpp>
+#include <GameState.hpp>
 
 Entity::Entity(Mesh* mesh) {
-    this->reference_identifer = Game::getReferenceID();
+    this->reference_identifer = GameState::getReferenceID();
 
     this->position = GM_Vec3(0, 0, 0);
     this->orientation = GM_Quaternion::literal(1, 0, 0, 0);

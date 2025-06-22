@@ -6,4 +6,4 @@
 
 #include <Shader.hpp>
 #include <Mesh.hpp>
-#include <Game.hpp>
+#include <GameState.hpp>

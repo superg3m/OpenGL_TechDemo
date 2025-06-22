@@ -1,25 +1,25 @@
-#include <Game.hpp>
+#include <GameState.hpp>
 
-GM_Matrix4 Game::projection;
-unsigned int Game::WINDOW_WIDTH;
-unsigned int Game::WINDOW_HEIGHT;
-bool Game::mouse_captured = true;
-float Game::timeScale = 1.0f;
-Camera Game::camera = Camera(0, 0, 5);
-float Game::deltaTime = 0.0f;
-MousePicker Game::picker = MousePicker();
-float Game::xoffset = 0.0f;
-float Game::yoffset = 0.0f;
+GM_Matrix4 GameState::projection;
+unsigned int GameState::WINDOW_WIDTH;
+unsigned int GameState::WINDOW_HEIGHT;
+bool GameState::mouse_captured = true;
+float GameState::timeScale = 1.0f;
+Camera GameState::camera = Camera(0, 0, 5);
+float GameState::deltaTime = 0.0f;
+MousePicker GameState::picker = MousePicker();
+float GameState::xoffset = 0.0f;
+float GameState::yoffset = 0.0f;
 
-Game::Game(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
-    Game::WINDOW_WIDTH = WINDOW_WIDTH;
-    Game::WINDOW_HEIGHT = WINDOW_HEIGHT;
+GameState::GameState(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
+    GameState::WINDOW_WIDTH = WINDOW_WIDTH;
+    GameState::WINDOW_HEIGHT = WINDOW_HEIGHT;
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-GLFWwindow* Game::initalizeWindow() {
+GLFWwindow* GameState::initalizeWindow() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -29,7 +29,7 @@ GLFWwindow* Game::initalizeWindow() {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
 
-    GLFWwindow* window = glfwCreateWindow(Game::WINDOW_WIDTH, Game::WINDOW_HEIGHT, "LearnOpenGL", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(GameState::WINDOW_WIDTH, GameState::WINDOW_HEIGHT, "LearnOpenGL", nullptr, nullptr);
     if (window == nullptr) {
         CKG_LOG_ERROR("Failed to create GLFW window\n");
         glfwTerminate();
@@ -42,27 +42,27 @@ GLFWwindow* Game::initalizeWindow() {
 
     IOD_GLFW_BIND_MOUSE_MOVE_CALLBACK([](GLFWwindow *window, double mouse_x, double mouse_y) {
         local_persist bool previous_frame_mouse_was_captured = true;
-        if (!Game::mouse_captured) { 
+        if (!GameState::mouse_captured) { 
             previous_frame_mouse_was_captured = false;
         }
         
         local_persist float last_mouse_x = mouse_x;
         local_persist float last_mouse_y = mouse_y;
 
-        Game::xoffset = mouse_x - last_mouse_x;
-        Game::yoffset = last_mouse_y - mouse_y;
+        GameState::xoffset = mouse_x - last_mouse_x;
+        GameState::yoffset = last_mouse_y - mouse_y;
 
-        if (!previous_frame_mouse_was_captured && Game::mouse_captured) {
-            Game::xoffset = 0;
-            Game::yoffset = 0;
+        if (!previous_frame_mouse_was_captured && GameState::mouse_captured) {
+            GameState::xoffset = 0;
+            GameState::yoffset = 0;
             glfwSetCursorPos(window, last_mouse_x, last_mouse_y);
         } else {
             last_mouse_x = mouse_x;
             last_mouse_y = mouse_y;
         }  
         
-        if (Game::mouse_captured) { 
-            Game::camera.process_mouse_movements(xoffset, yoffset);
+        if (GameState::mouse_captured) { 
+            GameState::camera.process_mouse_movements(xoffset, yoffset);
             return;
         }
 
@@ -71,8 +71,8 @@ GLFWwindow* Game::initalizeWindow() {
 
     IOD_GLFW_BIND_KEY_CALLBACK([](GLFWwindow* window, int key, int scancode, int action, int mods) {
         if (key == GLFW_KEY_C && action == GLFW_PRESS) {
-            Game::mouse_captured = !Game::mouse_captured;
-            glfwSetInputMode(window, GLFW_CURSOR, Game::mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+            GameState::mouse_captured = !GameState::mouse_captured;
+            glfwSetInputMode(window, GLFW_CURSOR, GameState::mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
         }
     });
     
@@ -93,21 +93,21 @@ GLFWwindow* Game::initalizeWindow() {
     return window;
 }
 
-GM_Matrix4 Game::getProjectionMatrix() {
-    float fov = Game::camera.zoom;
-    float aspect = (float)Game::WINDOW_WIDTH / (float)Game::WINDOW_HEIGHT;
+GM_Matrix4 GameState::getProjectionMatrix() {
+    float fov = GameState::camera.zoom;
+    float aspect = (float)GameState::WINDOW_WIDTH / (float)GameState::WINDOW_HEIGHT;
     float near_plane = 0.1f;
     float far_plane = 100.0f;
 
     return GM_Matrix4::perspective(fov, aspect, near_plane, far_plane);
 }
 
-u64 Game::getReferenceID() {
+u64 GameState::getReferenceID() {
     local_persist u64 referenceID = 0;
     return referenceID++;
 }
 
-void Game::initalizeResources() {
+void GameState::initalizeResources() {
     srand(time(0));
 
     std::map<std::string, TextureType> textures = {
@@ -220,7 +220,7 @@ void Game::initalizeResources() {
     }
 }
 
-void Game::initalizeInputBindings() {
+void GameState::initalizeInputBindings() {
     GLFWwindow* window = (GLFWwindow*)IOD::glfw_window_instance;
 
     IOD_Profile* profile = IOD::createProfile("player");
@@ -240,8 +240,8 @@ void Game::initalizeInputBindings() {
     // TODO(Jovanni): Investigate why glfwSetInputMode is failing in the lambda?
     profile->bind(IOD_KEY_C, IOD_InputState::PRESSED,
         []() {
-            // Game::mouse_captured = !Game::mouse_captured;
-            // glfwSetInputMode((GLFWwindow*)IOD::glfw_window_instance, GLFW_CURSOR, Game::mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+            // GameState::mouse_captured = !GameState::mouse_captured;
+            // glfwSetInputMode((GLFWwindow*)IOD::glfw_window_instance, GLFW_CURSOR, GameState::mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
         }
     );
 
@@ -253,13 +253,13 @@ void Game::initalizeInputBindings() {
 
     profile->bind(IOD_KEY_SPACE, IOD_InputState::PRESSED|IOD_InputState::DOWN,
         []() {
-            Game::camera.process_keyboard(UP, Game::deltaTime);  
+            GameState::camera.process_keyboard(UP, GameState::deltaTime);  
         }
     );
 
     profile->bind(IOD_KEY_CTRL, IOD_InputState::PRESSED|IOD_InputState::DOWN,
         []() {
-            Game::camera.process_keyboard(DOWN, Game::deltaTime);  
+            GameState::camera.process_keyboard(DOWN, GameState::deltaTime);  
         }
     );
 
@@ -277,31 +277,31 @@ void Game::initalizeInputBindings() {
 
     profile->bind(IOD_KEY_W, IOD_InputState::PRESSED|IOD_InputState::DOWN,
         []() {
-            camera.process_keyboard(FORWARD, Game::deltaTime); 
+            camera.process_keyboard(FORWARD, GameState::deltaTime); 
         }
     );
 
     profile->bind(IOD_KEY_W, IOD_InputState::PRESSED|IOD_InputState::DOWN,
         []() {
-            camera.process_keyboard(FORWARD, Game::deltaTime); 
+            camera.process_keyboard(FORWARD, GameState::deltaTime); 
         }
     );
 
     profile->bind(IOD_KEY_A, IOD_InputState::PRESSED|IOD_InputState::DOWN,
         []() {
-            camera.process_keyboard(LEFT, Game::deltaTime); 
+            camera.process_keyboard(LEFT, GameState::deltaTime); 
         }
     );
 
     profile->bind(IOD_KEY_S, IOD_InputState::PRESSED|IOD_InputState::DOWN,
         []() {
-            camera.process_keyboard(BACKWARD, Game::deltaTime); 
+            camera.process_keyboard(BACKWARD, GameState::deltaTime); 
         }
     );
 
     profile->bind(IOD_KEY_D, IOD_InputState::PRESSED|IOD_InputState::DOWN,
         []() {
-            camera.process_keyboard(RIGHT, Game::deltaTime); 
+            camera.process_keyboard(RIGHT, GameState::deltaTime); 
         }
     );
 }
@@ -310,7 +310,7 @@ void Game::initalizeInputBindings() {
 // TODO(Jovanni): This is not frame independent...
 float currentTime = 0;
 Entity* entity_to_drag = nullptr;
-void Game::update(GLFWwindow* window, float dt) {
+void GameState::update(GLFWwindow* window, float dt) {
     currentTime += dt;
 
     int substeps = 8;
@@ -321,21 +321,21 @@ void Game::update(GLFWwindow* window, float dt) {
         // etc.
     }
 
-    if (entity_to_drag && Game::mouse_captured) {
+    if (entity_to_drag && GameState::mouse_captured) {
         entity_to_drag->should_render_aabb = false;
         entity_to_drag = nullptr;
-    } else if (!Game::mouse_captured) {
-        Game::picker.update(this->getProjectionMatrix(), Game::camera.get_view_matrix());
+    } else if (!GameState::mouse_captured) {
+        GameState::picker.update(this->getProjectionMatrix(), GameState::camera.get_view_matrix());
     }
 
     float smallest_distance = FLT_MAX;
     if (entity_to_drag && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-        GM_Matrix4 view = Game::camera.get_view_matrix();
+        GM_Matrix4 view = GameState::camera.get_view_matrix();
         GM_Vec4 objectViewSpace = view * GM_Vec4(entity_to_drag->position, 1.0f);
         GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
         entity_to_drag->position.x = world_space.x;
         entity_to_drag->position.y = world_space.y;
-    } else if (!Game::mouse_captured) {
+    } else if (!GameState::mouse_captured) {
         if (entity_to_drag) {
             entity_to_drag->should_render_aabb = false;
         }
@@ -345,15 +345,15 @@ void Game::update(GLFWwindow* window, float dt) {
             Entity* light = EntityLoader::getLight(key);
 
             float ray_length = 1000.0f;
-            GM_Vec3 p0 = Game::picker.rayOrigin;
-            GM_Vec3 p1 = p0 + (Game::picker.rayDirection.scale(ray_length));
+            GM_Vec3 p0 = GameState::picker.rayOrigin;
+            GM_Vec3 p1 = p0 + (GameState::picker.rayDirection.scale(ray_length));
             bool intersection = GM_AABB::intersection(light->getAABB(), p0, p1);
             if (!intersection) {
                 light->should_render_aabb = false;
                 continue;
             }
 
-            float current_distance = GM_Vec3::distance(light->position, Game::camera.position);
+            float current_distance = GM_Vec3::distance(light->position, GameState::camera.position);
             if (smallest_distance > current_distance) {
                 if (entity_to_drag) {
                     entity_to_drag->should_render_aabb = false;
@@ -369,15 +369,15 @@ void Game::update(GLFWwindow* window, float dt) {
             Entity* entity = EntityLoader::getEntity(key);
 
             float ray_length = 1000.0f;
-            GM_Vec3 p0 = Game::picker.rayOrigin;
-            GM_Vec3 p1 = p0 + (Game::picker.rayDirection.scale(ray_length));
+            GM_Vec3 p0 = GameState::picker.rayOrigin;
+            GM_Vec3 p1 = p0 + (GameState::picker.rayDirection.scale(ray_length));
             bool intersection = GM_AABB::intersection(entity->getAABB(), p0, p1);
             if (!intersection) {
                 entity->should_render_aabb = false;
                 continue;
             }
 
-            float current_distance = GM_Vec3::distance(entity->position, Game::camera.position);
+            float current_distance = GM_Vec3::distance(entity->position, GameState::camera.position);
             if (smallest_distance > current_distance) {
                 if (entity_to_drag) {
                     entity_to_drag->should_render_aabb = false;
@@ -391,7 +391,7 @@ void Game::update(GLFWwindow* window, float dt) {
     }
 }
 
-void Game::render() {
+void GameState::render() {
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
@@ -455,8 +455,8 @@ void Game::render() {
     }
 
     // spotLight
-    this->basic_shader.setVec3("uSpotLight.position", Game::camera.position);
-    this->basic_shader.setVec3("uSpotLight.direction", Game::camera.front);
+    this->basic_shader.setVec3("uSpotLight.position", GameState::camera.position);
+    this->basic_shader.setVec3("uSpotLight.direction", GameState::camera.front);
     this->basic_shader.setVec3("uSpotLight.ambient", 0.0f, 0.0f, 0.0f);
     this->basic_shader.setVec3("uSpotLight.diffuse", 1.0f, 1.0f, 1.0f);
     this->basic_shader.setVec3("uSpotLight.specular", 1.0f, 1.0f, 1.0f);
@@ -475,7 +475,7 @@ void Game::render() {
         this->basic_shader.setMat4("uModel", model);
         this->basic_shader.setMat4("uView", view);
         this->basic_shader.setMat4("uProjection", projection);
-        this->basic_shader.setVec3("uViewPosition", Game::camera.position);
+        this->basic_shader.setVec3("uViewPosition", GameState::camera.position);
 
         // material properties
         this->basic_shader.setFloat("uMaterial.shininess", 32.0f);

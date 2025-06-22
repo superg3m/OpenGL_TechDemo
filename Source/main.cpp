@@ -8,7 +8,7 @@ float lastFrame = 0.0f;
 // this would be especially good with Geometry::Cube() or Geometry::Sphere becuaes I don't have to regenerate the vertex data
 
 int main() {
-    Game application(800, 800);
+    GameState application(800, 800);
     GLFWwindow* window = application.initalizeWindow();
     ckg_assert_msg(window, "failed to initalize glfw or glad\n");
 
@@ -18,12 +18,12 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = (float)glfwGetTime();
-        Game::deltaTime = (currentFrame - lastFrame) * Game::timeScale;
+        GameState::deltaTime = (currentFrame - lastFrame) * GameState::timeScale;
         lastFrame = currentFrame;
 
         IOD::poll();
 
-        application.update(window, Game::deltaTime);
+        application.update(window, GameState::deltaTime);
         application.render();
 
         glfwSwapBuffers(window);
@@ -35,12 +35,12 @@ int main() {
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    Game::WINDOW_WIDTH = width;
-    Game::WINDOW_HEIGHT = height;
+    GameState::WINDOW_WIDTH = width;
+    GameState::WINDOW_HEIGHT = height;
     
-    glViewport(0, 0, Game::WINDOW_WIDTH, Game::WINDOW_HEIGHT);
+    glViewport(0, 0, GameState::WINDOW_WIDTH, GameState::WINDOW_HEIGHT);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    Game::camera.process_mouse_scroll((float)yoffset);
+    GameState::camera.process_mouse_scroll((float)yoffset);
 }

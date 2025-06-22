@@ -1,6 +1,6 @@
 #include <MousePicker.hpp>
 #include <IOD.hpp>
-#include <Game.hpp>
+#include <GameState.hpp>
 
 
 // Date: June 20, 2025
@@ -10,8 +10,8 @@ void MousePicker::update(GM_Matrix4 projection, GM_Matrix4 view) {
     float mouse_y = IOD::getMouseY();
 
     GM_Vec2 ndc = GM_Vec2(
-        ((2.0 * mouse_x) / Game::WINDOW_WIDTH) - 1, 
-        ((2.0 * mouse_y) / Game::WINDOW_HEIGHT) - 1
+        ((2.0 * mouse_x) / GameState::WINDOW_WIDTH) - 1, 
+        ((2.0 * mouse_y) / GameState::WINDOW_HEIGHT) - 1
     );
 
     GM_Vec4 clipCoordsNear = GM_Vec4(ndc.x, -ndc.y, -1.0f, 1.0f);
@@ -45,13 +45,13 @@ GM_Vec3 MousePicker::getFromObjectZ(GM_Matrix4 projection, GM_Matrix4 view, floa
     float mouse_y = IOD::getMouseY();
 
     GM_Vec2 ndc = GM_Vec2(
-        ((2.0 * mouse_x) / Game::WINDOW_WIDTH) - 1, 
-        ((2.0 * mouse_y) / Game::WINDOW_HEIGHT) - 1
+        ((2.0 * mouse_x) / GameState::WINDOW_WIDTH) - 1, 
+        ((2.0 * mouse_y) / GameState::WINDOW_HEIGHT) - 1
     );
 
     
-    float focal_length = 1.0f/tanf((float)DEGREES_TO_RAD(Game::camera.zoom / 2.0f));
-    float ar = (float)Game::WINDOW_WIDTH / (float)Game::WINDOW_HEIGHT;
+    float focal_length = 1.0f/tanf((float)DEGREES_TO_RAD(GameState::camera.zoom / 2.0f));
+    float ar = (float)GameState::WINDOW_WIDTH / (float)GameState::WINDOW_HEIGHT;
     GM_Vec3 ray_view((-ndc.x * ar) / focal_length, ndc.y / focal_length, 1.0f);
 
     // Date: June 21, 2025

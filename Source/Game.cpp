@@ -308,6 +308,7 @@ void Game::initalizeInputBindings() {
 // Date: June 15, 2025
 // TODO(Jovanni): This is not frame independent...
 float currentTime = 0;
+Entity* entity_to_drag = nullptr;
 void Game::update(GLFWwindow* window, float dt) {
     currentTime += dt;
 
@@ -340,13 +341,11 @@ void Game::update(GLFWwindow* window, float dt) {
         }
     }
 
-    
-    Entity* entity_to_drag = nullptr;
     float smallest_distance = FLT_MAX;
-    for (const auto& key : EntityLoader::entity_keys) {
-        Entity* entity = EntityLoader::getEntity(key);
-        
-        if (!Game::mouse_captured) {
+    if (!Game::mouse_captured && !entity_to_drag) {
+        for (const auto& key : EntityLoader::entity_keys) {
+            Entity* entity = EntityLoader::getEntity(key);
+
             GM_Vec3 ray_origin    = Game::picker.rayOrigin;
             GM_Vec3 ray_direction = Game::picker.rayDirection;
 
@@ -370,17 +369,17 @@ void Game::update(GLFWwindow* window, float dt) {
                 entity_to_drag->should_render_aabb = true;
                 smallest_distance = current_distance;
             }
-        } else {
-            entity->should_render_aabb = false;
         }
     }
 
-    if (entity_to_drag && entity_to_drag->should_render_aabb && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)) {
+    if (entity_to_drag && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
         GM_Matrix4 view = Game::camera.get_view_matrix();
         GM_Vec4 objectViewSpace = view * GM_Vec4(entity_to_drag->position, 1.0f);
         GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
         entity_to_drag->position.x = world_space.x;
         entity_to_drag->position.y = world_space.y;
+    } else {
+        entity_to_drag = nullptr;
     }
 }
 

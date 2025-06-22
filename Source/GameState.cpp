@@ -164,6 +164,12 @@ void GameState::initalizeResources() {
     window_transparent->setEulerAngles(0, 90, 0);
     window_transparent->setTexture("uTexture", TextureLoader::getTexture(WINDOW));
     EntityLoader::registerTransparentEntity(WINDOW, window_transparent);
+
+    Entity* window_transparent2 = new Entity(new Mesh(Geometry::Quad()));
+    window_transparent2->setPosition(GM_Vec3(0.0f,  0.0f, 3.0f));
+    window_transparent2->setScale(1.0f);
+    window_transparent2->setTexture("uTexture", TextureLoader::getTexture(WINDOW));
+    EntityLoader::registerTransparentEntity(WINDOW2, window_transparent2);
     
     for (int i = 0; i < ArrayCount(primitivePositions); i++) {
         Geometry geometry = (rand() % 2 == 0) ? Geometry::Cube() : Geometry::Sphere(16);

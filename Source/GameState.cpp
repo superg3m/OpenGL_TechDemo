@@ -329,7 +329,7 @@ void GameState::update(GLFWwindow* window, float dt) {
     }
 
     float smallest_distance = FLT_MAX;
-    if (entity_to_drag && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    if (entity_to_drag && (IOD::getInputState(IOD_MOUSE_BUTTON_LEFT) == IOD_InputState::DOWN)) {
         GM_Matrix4 view = GameState::camera.get_view_matrix();
         GM_Vec4 objectViewSpace = view * GM_Vec4(entity_to_drag->position, 1.0f);
         GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);

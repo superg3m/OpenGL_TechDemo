@@ -324,35 +324,49 @@ void Game::update(GLFWwindow* window, float dt) {
         Game::picker.update(this->getProjectionMatrix(), Game::camera.get_view_matrix());
     }
 
-    for (const auto& key : EntityLoader::light_keys) {
-        Entity* light = EntityLoader::getLight(key);
-        
-        if (!Game::mouse_captured) {
-            GM_Vec3 ray_origin    = Game::picker.rayOrigin;
-            GM_Vec3 ray_direction = Game::picker.rayDirection;
+    float smallest_distance = FLT_MAX;
+    if (entity_to_drag && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        GM_Matrix4 view = Game::camera.get_view_matrix();
+        GM_Vec4 objectViewSpace = view * GM_Vec4(entity_to_drag->position, 1.0f);
+        GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
+        entity_to_drag->position.x = world_space.x;
+        entity_to_drag->position.y = world_space.y;
+    } else if (!Game::mouse_captured) {
+        if (entity_to_drag) {
+            entity_to_drag->should_render_aabb = false;
+        }
+
+        entity_to_drag = nullptr;
+        for (const auto& key : EntityLoader::light_keys) {
+            Entity* light = EntityLoader::getLight(key);
 
             float ray_length = 1000.0f;
-            GM_Vec3 p0 = ray_origin;
-            GM_Vec3 p1 = ray_origin + (ray_direction.scale(ray_length));
+            GM_Vec3 p0 = Game::picker.rayOrigin;
+            GM_Vec3 p1 = p0 + (Game::picker.rayDirection.scale(ray_length));
+            bool intersection = GM_AABB::intersection(light->getAABB(), p0, p1);
+            if (!intersection) {
+                light->should_render_aabb = false;
+                continue;
+            }
 
-            light->should_render_aabb = GM_AABB::intersection(light->getAABB(), p0, p1);
-        } else {
-            light->should_render_aabb = false;
+            float current_distance = GM_Vec3::distance(light->position, Game::camera.position);
+            if (smallest_distance > current_distance) {
+                if (entity_to_drag) {
+                    entity_to_drag->should_render_aabb = false;
+                }
+
+                entity_to_drag = light;
+                entity_to_drag->should_render_aabb = true;
+                smallest_distance = current_distance;
+            }
         }
-    }
 
-    float smallest_distance = FLT_MAX;
-    if (!Game::mouse_captured && !entity_to_drag) {
         for (const auto& key : EntityLoader::entity_keys) {
             Entity* entity = EntityLoader::getEntity(key);
 
-            GM_Vec3 ray_origin    = Game::picker.rayOrigin;
-            GM_Vec3 ray_direction = Game::picker.rayDirection;
-
             float ray_length = 1000.0f;
-            GM_Vec3 p0 = ray_origin;
-            GM_Vec3 p1 = ray_origin + (ray_direction.scale(ray_length));
-
+            GM_Vec3 p0 = Game::picker.rayOrigin;
+            GM_Vec3 p1 = p0 + (Game::picker.rayDirection.scale(ray_length));
             bool intersection = GM_AABB::intersection(entity->getAABB(), p0, p1);
             if (!intersection) {
                 entity->should_render_aabb = false;
@@ -370,16 +384,6 @@ void Game::update(GLFWwindow* window, float dt) {
                 smallest_distance = current_distance;
             }
         }
-    }
-
-    if (entity_to_drag && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-        GM_Matrix4 view = Game::camera.get_view_matrix();
-        GM_Vec4 objectViewSpace = view * GM_Vec4(entity_to_drag->position, 1.0f);
-        GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
-        entity_to_drag->position.x = world_space.x;
-        entity_to_drag->position.y = world_space.y;
-    } else {
-        entity_to_drag = nullptr;
     }
 }
 

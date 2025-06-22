@@ -110,39 +110,11 @@ u64 GameState::getReferenceID() {
 void GameState::initalizeResources() {
     srand(time(0));
 
-    std::map<std::string, TextureType> textures = {
-        {"uMaterial.diffuse", TextureType::SAMPLER2D},
-        {"uMaterial.specular", TextureType::SAMPLER2D},
-    };
-
-    this->basic_shader = Shader(
-        {"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"},
-        textures
-    );
-
-    this->outline_shader = Shader(
-        {"../../shader_source/outline/outline.vert", "../../shader_source/outline/outline.frag"},
-        {}
-    );
-
-    textures = {
-        {"uSkyboxTexture", TextureType::CUBEMAP}
-    };
-
-    this->skybox_shader = Shader(
-        {"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"},
-        textures
-    );
-
-    this->aabb_shader = Shader(
-        {"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"},
-        {}
-    );
-
-    this->light_shader = Shader(
-        {"../../shader_source/light/light.vert", "../../shader_source/light/light.frag"},
-        {}
-    );
+    this->basic_shader = Shader({"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"});
+    this->outline_shader = Shader({"../../shader_source/outline/outline.vert", "../../shader_source/outline/outline.frag"});
+    this->skybox_shader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
+    this->aabb_shader = Shader({"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"});
+    this->light_shader = Shader({"../../shader_source/light/light.vert", "../../shader_source/light/light.frag"});
 
     std::array<const char*, 6> cubemap_faces = {
         "../../assets/city_skybox/right.jpg",
@@ -492,7 +464,7 @@ void GameState::render() {
             this->outline_shader.setMat4("uView", view);
             this->outline_shader.setMat4("uProjection", projection);
             this->outline_shader.setFloat("uOutlineScale", 0.02f);
-            entity->draw(this->outline_shader);
+            entity->draw(this->outline_shader, false);
             glEnable(GL_DEPTH_TEST);
             glStencilMask(0xFF);
             glStencilFunc(GL_ALWAYS, 0, 0xFF);
@@ -502,7 +474,7 @@ void GameState::render() {
             this->aabb_shader.use();
             this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
             this->aabb_shader.setMat4("uMVP", projection * view * model);
-            aabb_mesh.draw(this->aabb_shader);
+            aabb_mesh.draw(this->aabb_shader, false);
         } else {
             glStencilMask(0xFF);
             glStencilFunc(GL_ALWAYS, 0, 0xFF);  

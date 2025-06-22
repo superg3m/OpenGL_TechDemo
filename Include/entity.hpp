@@ -48,5 +48,5 @@ struct Entity {
  
     GM_Matrix4 getTransform();
     GM_Matrix4 getAABBTransform();
-    void draw(Shader &shader);
+    void draw(Shader &shader, bool should_draw_textures = true);
 };

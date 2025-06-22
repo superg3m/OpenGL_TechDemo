@@ -79,8 +79,8 @@ GM_Matrix4 Entity::getAABBTransform() {
     return transform;
 }
 
-void Entity::draw(Shader &shader) {
+void Entity::draw(Shader &shader, bool should_draw_textures) {
     if (this->dead) return;
 
-    this->mesh->draw(shader);
+    this->mesh->draw(shader, should_draw_textures);
 }

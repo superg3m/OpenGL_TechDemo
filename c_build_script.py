@@ -91,11 +91,33 @@ libs = [
 C_BUILD_COMPILER_NAME
 
 procedures_config = {
+    "Game": ProcedureConfig(
+        build_directory = f"./{build_postfix}",
+        output_name = f"Game.dll",
+        source_files = [
+            "../../Source/Game/*.cpp",
+        ],
+        additional_libs = libs,
+        include_paths = [
+            "../../Include", 
+            "../../Include/Loader", 
+            "../../ckg",
+            "../../GameMath",
+            "../../IOD",
+            "../../Libraries",
+            "../../Libraries/stb",
+            "../../Libraries/glad/include", 
+            "../../Libraries/glfw",
+            "../../Libraries/assimp/include",
+        ],
+    ),
+    
     "OpenGL_TechDemo": ProcedureConfig(
         build_directory = f"./{build_postfix}",
         output_name = f"OpenGL_TechDemo.exe",
         source_files = [
-            "../../Source/**/*.cpp",
+            "../../Source/*.cpp",
+            "../../Source/Loader/*.cpp",
             "../../Libraries/glad/src/glad.c"
         ],
         additional_libs = libs,

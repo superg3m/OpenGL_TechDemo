@@ -6,9 +6,11 @@ Mesh::Mesh(Geometry geometry, Material material) {
     this->geometry = geometry;
 }
 
-void Mesh::draw(Shader &shader) {
-    for (const auto &[key, id] : this->material.textures) {
-        shader.bindTexture(key.c_str(), id);
+void Mesh::draw(Shader &shader, bool should_draw_textures) {
+    if (should_draw_textures) {
+        for (const auto &[key, id] : this->material.textures) {
+            shader.bindTexture(key.c_str(), id);
+        }
     }
 
     glBindVertexArray(geometry.VAO);

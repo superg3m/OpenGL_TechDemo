@@ -7,9 +7,9 @@ Model::Model(std::string const &path, int texture_flags) {
     this->loadModel(path);
 }
 
-void Model::draw(Shader &shader) {
+void Model::draw(Shader &shader, bool should_draw_textures) {
     for(unsigned int i = 0; i < this->meshes.size(); i++) {
-        this->meshes[i].draw(shader);
+        this->meshes[i].draw(shader, should_draw_textures);
     }
 }
 

@@ -4,13 +4,17 @@
 // Date: June 22, 2025
 // NOTE(Jovanni): Only run this one on engine init
 __declspec(dllexport) void game_init(GameState* state) {
+    // set engine framerate
+    // engine->setFrameRate(120); // THis will set update and render to 60 frames per second
+    // engine->setFrameRate(0); // if its zero then run as fast as you can
+
+    // IOD bindings here
+
     // registerShader
     // registerTextures
     // registerModels
 
-    // set engine framerate
-    // engine->setFrameRate(120); // THis will set update and render to 60 frames per second
-    // engine->setFrameRate(0); // if its zero then run as fast as you can
+    int i = 0;
 }
 
 // Date: June 22, 2025
@@ -21,6 +25,8 @@ __declspec(dllexport) void game_init(GameState* state) {
 // might be a callback or it will be a binding system I really don't know yet?
 // I know its useful to have both so IOD::getInputState(IOD_KEY_A) == IOD_State::PRESSED
 __declspec(dllexport) void game_input(GameState* state) {
+    // engine->openEditor();
+    // engine->closeEditor();
 
 }
 

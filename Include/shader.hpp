@@ -8,19 +8,13 @@
 
 #include <glad/glad.h>
 
-enum class TextureType {
-    SAMPLER2D,
-    CUBEMAP
-}; 
-
 using GLTextureID = int;
 struct Shader {
     unsigned int id;
     const char* path;
-    std::map<std::string, TextureType> textures;
     int activeTextureCount;
     Shader() = default;
-    Shader(std::vector<const char*> shader_paths, std::map<std::string, TextureType> textures);
+    Shader(std::vector<const char*> shader_paths);
 
     void use() const;
     void setBool(const char* name, bool value);

@@ -49,9 +49,8 @@ internal ShaderType shaderTypeFromExtension(const char* shader_source_path) {
     return INVALID_SHADER;
 }
 
-Shader::Shader(std::vector<const char*> shader_paths, std::map<std::string, TextureType> textures) {
+Shader::Shader(std::vector<const char*> shader_paths) {
     this->id = glCreateProgram();
-    this->textures = textures;
     this->path = shader_paths[0];
 
     std::vector<unsigned int> shaderIDs; 
@@ -121,7 +120,7 @@ void Shader::use() const {
 GLint Shader::getUniformLocation(const char* name, GLenum type) const {
     GLint location = glGetUniformLocation(this->id, name);
     if (location == -1) {
-        // CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
+        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
     }
 
     if (location != -1 && this->uniforms.at(name) != type) {
@@ -144,13 +143,7 @@ void Shader::setInt(const char* name, int value) {
 
 void Shader::setTexture(const char* name, int value) { 
     this->use();
-
-    if (this->textures.count(name) == 0) {
-        // CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
-        return;
-    }
-
-    GLenum gl_type = this->textures.at(name) == TextureType::SAMPLER2D ? GL_SAMPLER_2D : GL_SAMPLER_CUBE;
+    GLenum gl_type = this->uniforms.at(name);
     glUniform1i(this->getUniformLocation(name, gl_type), value); 
 }
 
@@ -194,15 +187,22 @@ void Shader::setMat4(const char* name, const GM_Matrix4 &mat) {
 
 void Shader::bindTexture(std::string name, GLTextureID textureID) {
     this->use();
-    TextureType type = this->textures[name];
-    glActiveTexture(GL_TEXTURE0 + this->activeTextureCount);
-    if (type == TextureType::SAMPLER2D) {
-        glBindTexture(GL_TEXTURE_2D, textureID);
-    } else if (type == TextureType::CUBEMAP) {
-        glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-    }
-    this->setTexture(name.c_str(), this->activeTextureCount);
 
+    if (this->uniforms.count(name) == 0) {
+        CKG_LOG_ERROR("Shader {%s} Texture: '%s' does not exists\n", this->path, name.c_str());
+        return;
+    }
+
+    GLenum sampler_type = this->uniforms.at(name);
+    if (sampler_type != GL_SAMPLER_2D && sampler_type != GL_SAMPLER_CUBE) {
+        CKG_LOG_ERROR("Shader {%s} Texture: '%s' is the wrong type in the shader | got: %d\n", this->path, name.c_str(), sampler_type);
+        return;
+    }
+
+    GLenum texture_type = sampler_type == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP;
+    glActiveTexture(GL_TEXTURE0 + this->activeTextureCount);
+    glBindTexture(texture_type, textureID);
+    this->setTexture(name.c_str(), this->activeTextureCount);
     this->activeTextureCount += 1;
 }
 

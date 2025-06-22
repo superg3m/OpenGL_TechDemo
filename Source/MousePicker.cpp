@@ -52,8 +52,8 @@ GM_Vec3 MousePicker::getFromObjectZ(GM_Matrix4 projection, GM_Matrix4 view, floa
     
     // Step 2 - NDC to view (my version)
     float focal_length = 1.0f/tanf((float)DEGREES_TO_RAD(45.0f / 2.0f));
-    float ar = (float)Game::WINDOW_HEIGHT / (float)Game::WINDOW_WIDTH;
-    GM_Vec3 ray_view(-ndc.x / focal_length, (ndc.y * ar) / focal_length, 1.0f);
+    float ar = (float)Game::WINDOW_WIDTH / (float)Game::WINDOW_HEIGHT;
+    GM_Vec3 ray_view((-ndc.x * ar) / focal_length, ndc.y / focal_length, 1.0f);
 
     // Step 3 - intersect view vector with object Z plane (in view)
     GM_Vec4 view_space_intersect = GM_Vec4(ray_view.scale(object_z), 1.0f);

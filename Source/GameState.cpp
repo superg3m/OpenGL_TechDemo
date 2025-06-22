@@ -10,6 +10,7 @@ float GameState::deltaTime = 0.0f;
 MousePicker GameState::picker = MousePicker();
 float GameState::xoffset = 0.0f;
 float GameState::yoffset = 0.0f;
+Entity* GameState::selected_entity = nullptr;
 
 GameState::GameState(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     GameState::WINDOW_WIDTH = WINDOW_WIDTH;
@@ -84,9 +85,11 @@ GLFWwindow* GameState::initalizeWindow() {
 
     glfwSwapInterval(1);
 
-    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_FRONT);
+    // glFrontFace(GL_CCW);
     glEnable(GL_STENCIL_TEST);
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     
@@ -115,7 +118,7 @@ void GameState::initalizeResources() {
     this->skybox_shader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
     this->aabb_shader = Shader({"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"});
     this->light_shader = Shader({"../../shader_source/light/light.vert", "../../shader_source/light/light.frag"});
-
+    this->transparent_shader = Shader({"../../shader_source/transparency/t.vert", "../../shader_source/transparency/t.frag"});
     std::array<const char*, 6> cubemap_faces = {
         "../../assets/city_skybox/right.jpg",
         "../../assets/city_skybox/left.jpg",
@@ -129,6 +132,7 @@ void GameState::initalizeResources() {
     TextureLoader::registerTexture(CRATE, "../../assets/container.jpg");
     TextureLoader::registerTexture(CRATE2, "../../assets/container2.png");
     TextureLoader::registerTexture(CRATE2_SPECULAR, "../../assets/container2_specular.png");
+    TextureLoader::registerTexture(WINDOW, "../../assets/blending_transparent_window.png");
 
     Entity* skybox = new Entity(new Mesh(Geometry::Cube()));
     skybox->setTexture("uSkyboxTexture", TextureLoader::getTexture(SKYBOX));
@@ -150,18 +154,16 @@ void GameState::initalizeResources() {
 
     Entity* backpack = new Entity(new Model("../../assets/backpack/backpack.obj", TEXTURE_VERTICAL_FLIP));
     backpack->setPosition(GM_Vec3(-5.0f,  0.0f, 2.0f));
-    // backpack->setTexture("uMaterial.diffuse", TextureLoader::getTexture(CRATE2));
-    // backpack->setTexture("uMaterial.specular", TextureLoader::getTexture(CRATE2_SPECULAR));
-    backpack->setEulerAngles(0, 90, 0);
     backpack->setScale(0.5f);
+    backpack->setEulerAngles(0, 90, 0);
     EntityLoader::registerEntity("backpack", backpack);
 
-    Entity* mouse = new Entity(new Mesh(Geometry::Cube()));
-    mouse->setPosition(GM_Vec3(0, -5, 0));
-    mouse->setTexture("uMaterial.diffuse", TextureLoader::getTexture(CRATE2));
-    mouse->setTexture("uMaterial.specular", TextureLoader::getTexture(CRATE2_SPECULAR));
-    mouse->setScale(2.0f);
-    EntityLoader::registerEntity("mouse", mouse);
+    Entity* window_transparent = new Entity(new Mesh(Geometry::Quad()));
+    window_transparent->setPosition(GM_Vec3(-3.0f,  0.0f, 2.0f));
+    window_transparent->setScale(1.0f);
+    window_transparent->setEulerAngles(0, 90, 0);
+    window_transparent->setTexture("uTexture", TextureLoader::getTexture(WINDOW));
+    EntityLoader::registerTransparentEntity(WINDOW, window_transparent);
     
     for (int i = 0; i < ArrayCount(primitivePositions); i++) {
         Geometry geometry = (rand() % 2 == 0) ? Geometry::Cube() : Geometry::Sphere(16);
@@ -214,6 +216,24 @@ void GameState::initalizeInputBindings() {
         []() {
             // GameState::mouse_captured = !GameState::mouse_captured;
             // glfwSetInputMode((GLFWwindow*)IOD::glfw_window_instance, GLFW_CURSOR, GameState::mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        }
+    );
+    
+    profile->bind(IOD_KEY_UP, IOD_InputState::RELEASED,
+        []() {
+            if (GameState::selected_entity) {
+                GameState::selected_entity->mesh->material.transparency = MIN(GameState::selected_entity->mesh->material.transparency + 0.1f, 1.0f);
+            }
+        }
+    );
+
+    // Date: June 17, 2025
+    // TODO(Jovanni): Investigate why glfwSetInputMode is failing in the lambda?
+    profile->bind(IOD_KEY_DOWN, IOD_InputState::PRESSED,
+        []() {
+            if (GameState::selected_entity) {
+                GameState::selected_entity->mesh->material.transparency = MAX(GameState::selected_entity->mesh->material.transparency - 0.1f, 0.0f);
+            }
         }
     );
 
@@ -281,7 +301,6 @@ void GameState::initalizeInputBindings() {
 // Date: June 15, 2025
 // TODO(Jovanni): This is not frame independent...
 float currentTime = 0;
-Entity* entity_to_drag = nullptr;
 void GameState::update(GLFWwindow* window, float dt) {
     currentTime += dt;
 
@@ -293,26 +312,26 @@ void GameState::update(GLFWwindow* window, float dt) {
         // etc.
     }
 
-    if (entity_to_drag && GameState::mouse_captured) {
-        entity_to_drag->should_render_aabb = false;
-        entity_to_drag = nullptr;
+    if (GameState::selected_entity && GameState::mouse_captured) {
+        GameState::selected_entity->should_render_aabb = false;
+        GameState::selected_entity = nullptr;
     } else if (!GameState::mouse_captured) {
         GameState::picker.update(this->getProjectionMatrix(), GameState::camera.get_view_matrix());
     }
 
     float smallest_distance = FLT_MAX;
-    if (entity_to_drag && (IOD::getInputState(IOD_MOUSE_BUTTON_LEFT) == IOD_InputState::DOWN)) {
+    if (GameState::selected_entity && (IOD::getInputState(IOD_MOUSE_BUTTON_LEFT) == IOD_InputState::DOWN)) {
         GM_Matrix4 view = GameState::camera.get_view_matrix();
-        GM_Vec4 objectViewSpace = view * GM_Vec4(entity_to_drag->position, 1.0f);
+        GM_Vec4 objectViewSpace = view * GM_Vec4(GameState::selected_entity->position, 1.0f);
         GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
-        entity_to_drag->position.x = world_space.x;
-        entity_to_drag->position.y = world_space.y;
+        GameState::selected_entity->position.x = world_space.x;
+        GameState::selected_entity->position.y = world_space.y;
     } else if (!GameState::mouse_captured) {
-        if (entity_to_drag) {
-            entity_to_drag->should_render_aabb = false;
+        if (GameState::selected_entity) {
+            GameState::selected_entity->should_render_aabb = false;
         }
 
-        entity_to_drag = nullptr;
+        GameState::selected_entity = nullptr;
         for (const auto& key : EntityLoader::light_keys) {
             Entity* light = EntityLoader::getLight(key);
 
@@ -327,12 +346,12 @@ void GameState::update(GLFWwindow* window, float dt) {
 
             float current_distance = GM_Vec3::distance(light->position, GameState::camera.position);
             if (smallest_distance > current_distance) {
-                if (entity_to_drag) {
-                    entity_to_drag->should_render_aabb = false;
+                if ( GameState::selected_entity) {
+                     GameState::selected_entity->should_render_aabb = false;
                 }
 
-                entity_to_drag = light;
-                entity_to_drag->should_render_aabb = true;
+                 GameState::selected_entity = light;
+                 GameState::selected_entity->should_render_aabb = true;
                 smallest_distance = current_distance;
             }
         }
@@ -351,12 +370,36 @@ void GameState::update(GLFWwindow* window, float dt) {
 
             float current_distance = GM_Vec3::distance(entity->position, GameState::camera.position);
             if (smallest_distance > current_distance) {
-                if (entity_to_drag) {
-                    entity_to_drag->should_render_aabb = false;
+                if ( GameState::selected_entity) {
+                     GameState::selected_entity->should_render_aabb = false;
                 }
 
-                entity_to_drag = entity;
-                entity_to_drag->should_render_aabb = true;
+                 GameState::selected_entity = entity;
+                 GameState::selected_entity->should_render_aabb = true;
+                smallest_distance = current_distance;
+            }
+        }
+
+        for (const auto& key : EntityLoader::transparent_keys) {
+            Entity* entity = EntityLoader::getTransparentEntity(key);
+
+            float ray_length = 1000.0f;
+            GM_Vec3 p0 = GameState::picker.rayOrigin;
+            GM_Vec3 p1 = p0 + (GameState::picker.rayDirection.scale(ray_length));
+            bool intersection = GM_AABB::intersection(entity->getAABB(), p0, p1);
+            if (!intersection) {
+                entity->should_render_aabb = false;
+                continue;
+            }
+
+            float current_distance = GM_Vec3::distance(entity->position, GameState::camera.position);
+            if (smallest_distance > current_distance) {
+                if ( GameState::selected_entity) {
+                     GameState::selected_entity->should_render_aabb = false;
+                }
+
+                GameState::selected_entity = entity;
+                GameState::selected_entity->should_render_aabb = true;
                 smallest_distance = current_distance;
             }
         }
@@ -436,7 +479,7 @@ void GameState::render() {
     this->basic_shader.setFloat("uSpotLight.linear", 0.09f);
     this->basic_shader.setFloat("uSpotLight.quadratic", 0.032f);
     this->basic_shader.setFloat("uSpotLight.cutOff", cosf((float)DEGREES_TO_RAD(12.5f)));
-    this->basic_shader.setFloat("uSpotLight.outerCutOff", cosf((float)DEGREES_TO_RAD(15.0f)));   
+    this->basic_shader.setFloat("uSpotLight.outerCutOff", cosf((float)DEGREES_TO_RAD(15.0f)));
 
     for (const auto& key : EntityLoader::entity_keys) {
         Entity* entity = EntityLoader::getEntity(key);
@@ -480,5 +523,29 @@ void GameState::render() {
             glStencilFunc(GL_ALWAYS, 0, 0xFF);  
         }
     }
+
+    glEnable(GL_BLEND);
+    for (const auto& key : EntityLoader::transparent_keys) {
+        Entity* entity = EntityLoader::getTransparentEntity(key);
+        GM_Matrix4 model = entity->getTransform();
+        GM_Matrix4 view = sourceView;
+
+        this->transparent_shader.use();
+        this->transparent_shader.setMat4("uModel", model);
+        this->transparent_shader.setMat4("uView", view);
+        this->transparent_shader.setMat4("uProjection", projection);
+        this->transparent_shader.setFloat("uTransparency", entity->mesh->material.transparency);
+        entity->draw(this->transparent_shader);
+
+        if (entity->should_render_aabb) {
+            model = entity->getAABBTransform();
+            Mesh aabb_mesh = Mesh(Geometry::AABB());
+            this->aabb_shader.use();
+            this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
+            this->aabb_shader.setMat4("uMVP", projection * view * model);
+            aabb_mesh.draw(this->aabb_shader, false);
+        }
+    }
+    glDisable(GL_BLEND);
 }
 

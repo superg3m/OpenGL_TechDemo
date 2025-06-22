@@ -5,7 +5,9 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/Include/Loader",
-                "${workspaceFolder}/Libraries/stb"
+                "${workspaceFolder}/Libraries/stb",
+                "${workspaceFolder}/Include",
+                "${workspaceFolder}/GameMath"
             ],
             "defines": [
                 "_DEBUG",

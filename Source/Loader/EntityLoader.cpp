@@ -1,5 +1,8 @@
 #include <EntityLoader.hpp>
 
+std::vector<std::string> EntityLoader::transparent_keys;
+std::map<std::string, Entity*> EntityLoader::transparent_entities;
+
 std::vector<std::string> EntityLoader::entity_keys;
 std::map<std::string, Entity*> EntityLoader::entities;
 
@@ -8,6 +11,24 @@ std::map<std::string, Entity*> EntityLoader::skyboxes;
 
 std::vector<std::string> EntityLoader::light_keys;
 std::map<std::string, Entity*> EntityLoader::lights;
+
+void EntityLoader::registerTransparentEntity(std::string key, Entity* entity) {
+    if (EntityLoader::transparent_entities.count(key)) {
+        CKG_LOG_WARN("EntityLoader | Key: '%s' already exists overwriting entity\n", key.c_str());
+    }
+
+    EntityLoader::transparent_keys.push_back(key);
+    EntityLoader::transparent_entities[key] = entity;
+}
+
+Entity* EntityLoader::getTransparentEntity(std::string key) {
+    if (!EntityLoader::transparent_entities.count(key)) {
+        CKG_LOG_ERROR("EntityLoader | Key: '%s' doesn't exist for entity\n", key.c_str());
+        return nullptr;
+    }
+
+    return EntityLoader::transparent_entities[key];
+}
 
 void EntityLoader::registerEntity(std::string key, Entity* entity) {
     if (EntityLoader::entities.count(key)) {

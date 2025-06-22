@@ -22,6 +22,8 @@
 #define CRATE2 "Crate2"
 #define CRATE2_SPECULAR "Crate2_Specular"
 
+#define WINDOW "Window"
+
 struct GameState {
     static bool mouse_captured;
     static float timeScale;
@@ -33,6 +35,7 @@ struct GameState {
     static MousePicker picker;
     static float xoffset;
     static float yoffset;
+    static Entity* selected_entity;
 
     Shader basic_shader;
     Shader outline_shader;
@@ -41,6 +44,7 @@ struct GameState {
     Shader light_shader;
     Shader particle_shader;
     Shader pbr_shader;
+    Shader transparent_shader;
 
     GameState(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
 

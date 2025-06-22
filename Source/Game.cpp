@@ -163,7 +163,7 @@ void Game::initalizeResources() {
     EntityLoader::registerSkybox(SKYBOX, skybox);
 
     // positions all containers
-    GM_Vec3 cubePositions[] = {
+    GM_Vec3 primitivePositions[] = {
         GM_Vec3( 0.0f,  0.0f,  0.0f),
         GM_Vec3( 2.0f,  5.0f, -15.0f),
         GM_Vec3(-1.5f, -2.2f, -2.5f),
@@ -191,10 +191,11 @@ void Game::initalizeResources() {
     mouse->setScale(2.0f);
     EntityLoader::registerEntity("mouse", mouse);
     
-    for (int i = 0; i < ArrayCount(cubePositions); i++) {
-        Entity* cube = new Entity(new Mesh(Geometry::Cube()));
+    for (int i = 0; i < ArrayCount(primitivePositions); i++) {
+        Geometry geometry = (rand() % 2 == 0) ? Geometry::Cube() : Geometry::Sphere(16);
+        Entity* cube = new Entity(new Mesh(geometry));
         cube->mesh->material.color = GM_Vec4(0.14f, 1.0f, 0.84f, 1);
-        cube->setPosition(cubePositions[i]);
+        cube->setPosition(primitivePositions[i]);
         cube->setTexture("uMaterial.diffuse", TextureLoader::getTexture(CRATE2));
         cube->setTexture("uMaterial.specular", TextureLoader::getTexture(CRATE2_SPECULAR));
         cube->setScale(0.5f);
@@ -320,7 +321,10 @@ void Game::update(GLFWwindow* window, float dt) {
         // etc.
     }
 
-    if (!Game::mouse_captured) {
+    if (entity_to_drag && Game::mouse_captured) {
+        entity_to_drag->should_render_aabb = false;
+        entity_to_drag = nullptr;
+    } else if (!Game::mouse_captured) {
         Game::picker.update(this->getProjectionMatrix(), Game::camera.get_view_matrix());
     }
 
@@ -479,28 +483,30 @@ void Game::render() {
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);
         entity->draw(this->basic_shader);
-
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilMask(0x00);
-        glDisable(GL_DEPTH_TEST);
-        this->outline_shader.setMat4("uModel", model);
-        this->outline_shader.setMat4("uView", view);
-        this->outline_shader.setMat4("uProjection", projection);
-        this->outline_shader.setFloat("uOutlineScale", 0.02f);
-        entity->draw(this->outline_shader);
-        glStencilMask(0xFF);
-        glStencilFunc(GL_ALWAYS, 0, 0xFF);   
-        glEnable(GL_DEPTH_TEST);
 
         if (entity->should_render_aabb) {
+            glDisable(GL_DEPTH_TEST);
+            this->outline_shader.setMat4("uModel", model);
+            this->outline_shader.setMat4("uView", view);
+            this->outline_shader.setMat4("uProjection", projection);
+            this->outline_shader.setFloat("uOutlineScale", 0.02f);
+            entity->draw(this->outline_shader);
+            glEnable(GL_DEPTH_TEST);
+            glStencilMask(0xFF);
+            glStencilFunc(GL_ALWAYS, 0, 0xFF);
+
             model = entity->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
             this->aabb_shader.use();
             this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
             this->aabb_shader.setMat4("uMVP", projection * view * model);
             aabb_mesh.draw(this->aabb_shader);
+        } else {
+            glStencilMask(0xFF);
+            glStencilFunc(GL_ALWAYS, 0, 0xFF);  
         }
     }
-
 }
 

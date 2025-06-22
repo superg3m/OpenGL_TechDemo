@@ -191,8 +191,16 @@ void GameState::initalizeResources() {
         GM_Vec3( 0.0f,  0.0f, -3.0f)
     };
 
+    GM_Vec4 pointLightColors[] = {
+        GM_Vec4(0.7f, 0.2f,  1.0f, 1.0f),
+        GM_Vec4(0.3f, 0.5f,  0.2f, 1.0f),
+        GM_Vec4(1.0f, 1.0f,  1.0f, 1.0f),
+        GM_Vec4(0.5f, 0.1f,  0.3f, 1.0f)
+    };
+
     for (int i = 0; i < ArrayCount(pointLightPositions); i++) {
         Entity* light = new Entity(new Mesh(Geometry::Cube()));
+        light->mesh->material.color = pointLightColors[i];
         light->setPosition(pointLightPositions[i]);
         light->setScale(0.20f);
 
@@ -449,11 +457,13 @@ void GameState::render() {
         GM_Matrix4 model = light->getTransform();
         GM_Matrix4 view = sourceView;
 
+        GM_Vec3 light_color = GM_Vec3(light->mesh->material.color);
+
         this->basic_shader.use();
         this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].position").c_str(), light->position);
-        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].ambient").c_str(), 0.05f, 0.05f, 0.05f);
-        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].diffuse").c_str(), 0.8f, 0.8f, 0.8f);
-        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].specular").c_str(), 1.0f, 1.0f, 1.0f);
+        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].ambient").c_str(), light_color.scale(0.05f));
+        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].diffuse").c_str(), light_color.scale(0.8f));
+        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].specular").c_str(), light_color.scale(1.0f));
         this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].constant").c_str(), 1.0f);
         this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].linear").c_str(), 0.09f);
         this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].quadratic").c_str(), 0.032f);

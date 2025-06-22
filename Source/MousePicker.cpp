@@ -50,15 +50,16 @@ GM_Vec3 MousePicker::getFromObjectZ(GM_Matrix4 projection, GM_Matrix4 view, floa
     );
 
     
-    // Step 2 - NDC to view (my version)
-    float focal_length = 1.0f/tanf((float)DEGREES_TO_RAD(45.0f / 2.0f));
+    float focal_length = 1.0f/tanf((float)DEGREES_TO_RAD(Game::camera.zoom / 2.0f));
     float ar = (float)Game::WINDOW_WIDTH / (float)Game::WINDOW_HEIGHT;
     GM_Vec3 ray_view((-ndc.x * ar) / focal_length, ndc.y / focal_length, 1.0f);
 
-    // Step 3 - intersect view vector with object Z plane (in view)
+    // Date: June 21, 2025
+    // NOTE(Jovanni): So the way this works is pretty dang cool;
+    // When you turn everything into viewspace you are actually offseting all the objects by putting your cameara at the origin;
+    // so you need to take the view * objectPos to get the cannoncial/view pos;
     GM_Vec4 view_space_intersect = GM_Vec4(ray_view.scale(object_z), 1.0f);
 
-    // Step 4 - View to World space
     GM_Vec4 point_world = viewInverse * view_space_intersect;
     return GM_Vec3(point_world);
 }

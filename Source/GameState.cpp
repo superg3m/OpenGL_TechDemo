@@ -339,8 +339,11 @@ void GameState::update(GLFWwindow* window, float dt) {
             }
         }
     };
-    
 
+    sort_entities_by_camera(EntityLoader::entity_keys);
+    sort_entities_by_camera(EntityLoader::light_keys);
+    sort_entities_by_camera(EntityLoader::transparent_keys);
+    
     float smallest_distance = FLT_MAX;
     if (GameState::selected_entity && GameState::mouse_captured) {
         GameState::selected_entity->should_render_aabb = false;
@@ -553,8 +556,8 @@ void GameState::render() {
     }
 
     glEnable(GL_BLEND);
-    for (const auto& key : EntityLoader::transparent_keys) {
-        Entity* entity = EntityLoader::getEntity(key);
+    for (int i = EntityLoader::transparent_keys.size() - 1; i >= 0; i--) {
+        Entity* entity = EntityLoader::getEntity(EntityLoader::transparent_keys[i]);
         GM_Matrix4 model = entity->getTransform();
         GM_Matrix4 view = sourceView;
 

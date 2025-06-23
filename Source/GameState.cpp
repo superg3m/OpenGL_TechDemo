@@ -404,8 +404,21 @@ void GameState::update(GLFWwindow* window, float dt) {
         GM_Matrix4 view = GameState::camera.get_view_matrix();
         GM_Vec4 objectViewSpace = view * GM_Vec4(GameState::selected_entity->position, 1.0f);
         GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
-        GameState::selected_entity->position.x = world_space.x;
-        GameState::selected_entity->position.y = world_space.y;
+        if ((GM_Vec3::dot(picker.rayDirection, GM_Vec3(-1, 0, 0)) > 0.60f) || (GM_Vec3::dot(picker.rayDirection, GM_Vec3(1, 0, 0)) > 0.60f)) {
+            GameState::selected_entity->position.z = world_space.z;
+            GameState::selected_entity->position.y = world_space.y;
+            CKG_LOG_DEBUG("Mag: %f\n", world_space.magnitude());
+            CKG_LOG_DEBUG("World Pos: (%f, %f, %f)\n", world_space.x, world_space.y, world_space.z);
+            CKG_LOG_DEBUG("-------------- View: -------------\n");
+            CKG_LOG_DEBUG("(%f, %f, %f, %f)\n", view.v[0].x, view.v[0].y, view.v[0].z, view.v[0].w);
+            CKG_LOG_DEBUG("(%f, %f, %f, %f)\n", view.v[1].x, view.v[1].y, view.v[1].z, view.v[1].w);
+            CKG_LOG_DEBUG("(%f, %f, %f, %f)\n", view.v[2].x, view.v[2].y, view.v[2].z, view.v[2].w);
+            CKG_LOG_DEBUG("(%f, %f, %f, %f)\n", view.v[3].x, view.v[3].y, view.v[3].z, view.v[3].w);
+        } else {
+            GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
+            GameState::selected_entity->position.x = world_space.x;
+            GameState::selected_entity->position.y = world_space.y;
+        }
     } else if (!GameState::mouse_captured) {
         if (GameState::selected_entity) {
             GameState::selected_entity->should_render_aabb = false;
@@ -456,7 +469,7 @@ void GameState::render() {
 
         this->basic_shader.use();
         this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].position").c_str(), light->position);
-        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].ambient").c_str(), light_color.scale(0.05f));
+        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].ambient").c_str(), light_color.scale(0.55f));
         this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].diffuse").c_str(), light_color.scale(0.8f));
         this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].specular").c_str(), light_color.scale(1.0f));
         this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].constant").c_str(), 1.0f);
@@ -504,7 +517,7 @@ void GameState::render() {
         this->basic_shader.setVec3("uViewPosition", GameState::camera.position);
 
         // material properties
-        this->basic_shader.setFloat("uMaterial.shininess", 32.0f);
+        this->basic_shader.setFloat("uMaterial.shininess", 64.0f);
 
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);

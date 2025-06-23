@@ -63,5 +63,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    GameState::camera.process_mouse_scroll((float)yoffset);
+    if (GameState::selected_entity) {
+        GameState::selected_entity->scale += GM_Vec3(yoffset * 0.1f);
+    } else {
+        GameState::camera.process_mouse_scroll((float)yoffset);
+    }
 }

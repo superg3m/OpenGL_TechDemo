@@ -86,16 +86,21 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
         }
     }
 
-    aiMaterial* aiMaterial = scene->mMaterials[mesh->mMaterialIndex];    
+    aiMaterial* aiMaterial = scene->mMaterials[mesh->mMaterialIndex];
 
     Mesh ret = Mesh();
     std::vector<GLTextureID> diffuseMaps = loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
     std::vector<GLTextureID> specularMaps = loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, "texture_specular");
-    std::vector<GLTextureID> normalMaps = loadMaterialTextures(aiMaterial, aiTextureType_HEIGHT, "texture_normal");
-    std::vector<GLTextureID> heightMaps = loadMaterialTextures(aiMaterial, aiTextureType_AMBIENT, "texture_height");
+    // std::vector<GLTextureID> normalMaps = loadMaterialTextures(aiMaterial, aiTextureType_HEIGHT, "texture_normal");
+    // std::vector<GLTextureID> heightMaps = loadMaterialTextures(aiMaterial, aiTextureType_AMBIENT, "texture_height");
 
     Geometry geometry = Geometry(VertexAttributeFlag::PNTBundle, vertices, indices);
     Material material = Material();
+    float opacity = 1.0f;
+    if (aiMaterial->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
+        material.opacity = opacity;
+    }
+
     material.textures["uMaterial.diffuse"] = diffuseMaps[0];
     material.textures["uMaterial.specular"] = specularMaps[0];
     // material.textures["uMaterial.normal"] = normalMaps[0];

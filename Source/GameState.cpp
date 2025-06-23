@@ -134,10 +134,6 @@ void GameState::initalizeResources() {
     TextureLoader::registerTexture(CRATE2_SPECULAR, "../../assets/container2_specular.png");
     TextureLoader::registerTexture(WINDOW, "../../assets/blending_transparent_window.png");
 
-    Entity* skybox = new Entity(new Mesh(Geometry::Cube()));
-    skybox->setTexture("uSkyboxTexture", TextureLoader::getTexture(SKYBOX));
-    EntityLoader::registerSkybox(SKYBOX, skybox);
-
     // positions all containers
     GM_Vec3 primitivePositions[] = {
         GM_Vec3( 0.0f,  0.0f,  0.0f),
@@ -166,7 +162,7 @@ void GameState::initalizeResources() {
     EntityLoader::registerTransparentEntity(WINDOW, window_transparent);
 
     Entity* window_transparent2 = new Entity(new Mesh(Geometry::Quad()));
-    window_transparent2->setPosition(GM_Vec3(0.0f,  0.0f, 3.0f));
+    window_transparent2->setPosition(GM_Vec3(0.0f,  0.0f, 5.0f));
     window_transparent2->setScale(1.0f);
     window_transparent2->setTexture("uTexture", TextureLoader::getTexture(WINDOW));
     EntityLoader::registerTransparentEntity(WINDOW2, window_transparent2);
@@ -236,7 +232,7 @@ void GameState::initalizeInputBindings() {
     profile->bind(IOD_KEY_UP, IOD_InputState::RELEASED,
         []() {
             if (GameState::selected_entity) {
-                GameState::selected_entity->mesh->material.transparency = MIN(GameState::selected_entity->mesh->material.transparency + 0.1f, 1.0f);
+                GameState::selected_entity->mesh->material.opacity = MIN(GameState::selected_entity->mesh->material.opacity + 0.1f, 1.0f);
             }
         }
     );
@@ -246,7 +242,7 @@ void GameState::initalizeInputBindings() {
     profile->bind(IOD_KEY_DOWN, IOD_InputState::PRESSED,
         []() {
             if (GameState::selected_entity) {
-                GameState::selected_entity->mesh->material.transparency = MAX(GameState::selected_entity->mesh->material.transparency - 0.1f, 0.0f);
+                GameState::selected_entity->mesh->material.opacity = MAX(GameState::selected_entity->mesh->material.opacity - 0.1f, 0.0f);
             }
         }
     );
@@ -326,6 +322,26 @@ void GameState::update(GLFWwindow* window, float dt) {
         // etc.
     }
 
+    // sort entities based on camera and if its transparent or not!
+    const auto sort_entities_by_camera = [](std::vector<std::string>& entities) {
+        for (int i = 0; i < entities.size() - 1; i++) {
+            Entity* entityA = EntityLoader::getEntity(entities[i]);
+            float a_distance = GM_Vec3::distance(entityA->position, GameState::camera.position);
+            for (int j = i + 1; j < entities.size(); j++) {
+                Entity* entityB = EntityLoader::getEntity(entities[j]);
+
+                float b_distance = GM_Vec3::distance(entityB->position, GameState::camera.position);
+                if (a_distance > b_distance) {
+                    std::string temp = entities[i];
+                    entities[i] = entities[j];
+                    entities[j] = temp;
+                }
+            }
+        }
+    };
+    
+
+    float smallest_distance = FLT_MAX;
     if (GameState::selected_entity && GameState::mouse_captured) {
         GameState::selected_entity->should_render_aabb = false;
         GameState::selected_entity = nullptr;
@@ -333,7 +349,6 @@ void GameState::update(GLFWwindow* window, float dt) {
         GameState::picker.update(this->getProjectionMatrix(), GameState::camera.get_view_matrix());
     }
 
-    float smallest_distance = FLT_MAX;
     if (GameState::selected_entity && (IOD::getInputState(IOD_MOUSE_BUTTON_LEFT) == IOD_InputState::DOWN)) {
         GM_Matrix4 view = GameState::camera.get_view_matrix();
         GM_Vec4 objectViewSpace = view * GM_Vec4(GameState::selected_entity->position, 1.0f);
@@ -347,7 +362,7 @@ void GameState::update(GLFWwindow* window, float dt) {
 
         GameState::selected_entity = nullptr;
         for (const auto& key : EntityLoader::light_keys) {
-            Entity* light = EntityLoader::getLight(key);
+            Entity* light = EntityLoader::getEntity(key);
 
             float ray_length = 1000.0f;
             GM_Vec3 p0 = GameState::picker.rayOrigin;
@@ -395,7 +410,7 @@ void GameState::update(GLFWwindow* window, float dt) {
         }
 
         for (const auto& key : EntityLoader::transparent_keys) {
-            Entity* entity = EntityLoader::getTransparentEntity(key);
+            Entity* entity = EntityLoader::getEntity(key);
 
             float ray_length = 1000.0f;
             GM_Vec3 p0 = GameState::picker.rayOrigin;
@@ -429,18 +444,15 @@ void GameState::render() {
 
     // Render Skyboxes
     glDepthFunc(GL_LEQUAL);
-    for (const auto& key : EntityLoader::skybox_keys) {
-        Entity* skybox = EntityLoader::getSkybox(key);
-
-        GM_Matrix4 model = GM_Matrix4::identity();
-        GM_Matrix4 withoutTranslationView = sourceView;
-        withoutTranslationView.v[0].w = 0.0f;
-        withoutTranslationView.v[1].w = 0.0f;
-        withoutTranslationView.v[2].w = 0.0f;
-
-        this->skybox_shader.setMat4("uMVP", projection * withoutTranslationView * model);
-        skybox->draw(this->skybox_shader);
-    }
+    Mesh skybox = Mesh(Geometry::Cube());
+    skybox.material.textures["uSkyboxTexture"] = TextureLoader::getTexture(SKYBOX);
+    GM_Matrix4 model = GM_Matrix4::identity();
+    GM_Matrix4 withoutTranslationView = sourceView;
+    withoutTranslationView.v[0].w = 0.0f;
+    withoutTranslationView.v[1].w = 0.0f;
+    withoutTranslationView.v[2].w = 0.0f;
+    this->skybox_shader.setMat4("uMVP", projection * withoutTranslationView * model);
+    skybox.draw(this->skybox_shader);
     glDepthFunc(GL_LESS);
 
     // directional light
@@ -453,7 +465,7 @@ void GameState::render() {
     //  point lights
     for (int i = 0; i < EntityLoader::light_keys.size(); i++) {
         const std::string key = EntityLoader::light_keys[i];
-        Entity* light = EntityLoader::getLight(key);
+        Entity* light = EntityLoader::getEntity(key);
         GM_Matrix4 model = light->getTransform();
         GM_Matrix4 view = sourceView;
 
@@ -542,7 +554,7 @@ void GameState::render() {
 
     glEnable(GL_BLEND);
     for (const auto& key : EntityLoader::transparent_keys) {
-        Entity* entity = EntityLoader::getTransparentEntity(key);
+        Entity* entity = EntityLoader::getEntity(key);
         GM_Matrix4 model = entity->getTransform();
         GM_Matrix4 view = sourceView;
 
@@ -550,7 +562,7 @@ void GameState::render() {
         this->transparent_shader.setMat4("uModel", model);
         this->transparent_shader.setMat4("uView", view);
         this->transparent_shader.setMat4("uProjection", projection);
-        this->transparent_shader.setFloat("uTransparency", entity->mesh->material.transparency);
+        this->transparent_shader.setFloat("uOpacity", entity->mesh->material.opacity);
         entity->draw(this->transparent_shader);
 
         if (entity->should_render_aabb) {

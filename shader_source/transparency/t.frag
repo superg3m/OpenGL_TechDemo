@@ -3,7 +3,7 @@ out vec4 FragColor;
 in vec2 TexCoords;
 
 uniform sampler2D uTexture;
-uniform float uTransparency;
+uniform float uOpacity;
 
 void main() {             
     if (texture(uTexture, TexCoords).a < 0.1) {
@@ -12,7 +12,7 @@ void main() {
 
     vec4 result = texture(uTexture, TexCoords);
     if (result.r > 0.5) { // Adjust this threshold based on your texture's alpha values
-        result.a = uTransparency;
+        result.a = uOpacity;
     }
 
     FragColor = result;

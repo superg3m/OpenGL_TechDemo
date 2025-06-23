@@ -13,6 +13,5 @@ struct Mesh {
 
     Mesh() = default;
     Mesh(Geometry geometry, Material material = Material());
-
     virtual void draw(Shader &shader, bool should_draw_textures = true);
 };

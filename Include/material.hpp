@@ -10,7 +10,7 @@
 using GLTextureID = int;
 struct Material {
     GM_Vec4 color;
-    float transparency;
+    float opacity;
     std::map<std::string, GLTextureID> textures;
 
     Material();

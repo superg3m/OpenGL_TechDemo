@@ -29,9 +29,6 @@ struct Shader {
 
     void bindTexture(std::string name, GLTextureID textureID);
     void unbindTextures();
-
-    static Shader BasicShader();
-    static Shader StandardShader();
 private:
     std::map<std::string, GLenum> uniforms;
     void setTexture(const char* name, int value);

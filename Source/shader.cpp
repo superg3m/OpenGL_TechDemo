@@ -5,7 +5,8 @@
 typedef enum ShaderType{
     INVALID_SHADER,
     VERTEX_SHADER,
-    FRAGMENT_SHADER
+    FRAGMENT_SHADER,
+    GEOMETRY_SHADER
 } ShaderType;
 
 typedef struct ShaderDescriptor {
@@ -43,9 +44,11 @@ internal ShaderType shaderTypeFromExtension(const char* shader_source_path) {
         return VERTEX_SHADER;
     } else if (ckg_str_contains(extension.data, extension.length, CKG_LIT_ARG(".frag"))) {
         return FRAGMENT_SHADER;
+    } else if (ckg_str_contains(extension.data, extension.length, CKG_LIT_ARG(".gs"))) {
+        return GEOMETRY_SHADER;
     }
 
-    ckg_assert_msg(false, "Unsupported extension: %.*s | Expected: (.vert, .frag)\n", extension.length, extension.data);
+    ckg_assert_msg(false, "Unsupported extension: %.*s | Expected: (.vert, .frag, .gs)\n", extension.length, extension.data);
     return INVALID_SHADER;
 }
 
@@ -75,6 +78,14 @@ Shader::Shader(std::vector<const char*> shader_paths) {
                 glShaderSource(source_id, 1, &shader_source, NULL);
                 glCompileShader(source_id);
                 checkCompileError(source_id, "FRAGMENT");
+                glAttachShader(this->id, source_id);
+            } break;
+
+            case GEOMETRY_SHADER: {
+                source_id = glCreateShader(GL_GEOMETRY_SHADER);
+                glShaderSource(source_id, 1, &shader_source, NULL);
+                glCompileShader(source_id);
+                checkCompileError(source_id, "GEOMETRY");
                 glAttachShader(this->id, source_id);
             } break;
         }

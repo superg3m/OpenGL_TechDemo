@@ -351,6 +351,36 @@ void GameState::update(GLFWwindow* window, float dt) {
         GameState::picker.update(this->getProjectionMatrix(), GameState::camera.get_view_matrix());
     }
 
+    
+    float smallest_distance = FLT_MAX;
+    const auto intersection_test = [&smallest_distance](std::vector<std::string>& entities) {
+        for (const auto& key : entities) {
+            Entity* entity = EntityLoader::getEntity(key);
+
+            float ray_length = 1000.0f;
+            GM_Vec3 p0 = GameState::picker.rayOrigin;
+            GM_Vec3 p1 = p0 + (GameState::picker.rayDirection.scale(ray_length));
+            bool intersection = GM_AABB::intersection(entity->getAABB(), p0, p1);
+            if (!intersection) {
+                entity->should_render_aabb = false;
+                continue;
+            }
+
+            float current_distance = GM_Vec3::distance(entity->position, GameState::camera.position);
+            if (smallest_distance > current_distance) {
+                if (GameState::selected_entity) {
+                    GameState::selected_entity->should_render_aabb = false;
+                }
+
+                GameState::selected_entity = entity;
+                GameState::selected_entity->should_render_aabb = true;
+                smallest_distance = current_distance;
+                
+                return;
+            }
+        }
+    };
+
     if (GameState::selected_entity && (IOD::getInputState(IOD_MOUSE_BUTTON_LEFT) == IOD_InputState::DOWN)) {
         GM_Matrix4 view = GameState::camera.get_view_matrix();
         GM_Vec4 objectViewSpace = view * GM_Vec4(GameState::selected_entity->position, 1.0f);
@@ -361,34 +391,6 @@ void GameState::update(GLFWwindow* window, float dt) {
         if (GameState::selected_entity) {
             GameState::selected_entity->should_render_aabb = false;
         }
-
-        float smallest_distance = FLT_MAX;
-        const auto intersection_test = [&smallest_distance](std::vector<std::string>& entities) {
-            for (const auto& key : entities) {
-                Entity* entity = EntityLoader::getEntity(key);
-
-                float ray_length = 1000.0f;
-                GM_Vec3 p0 = GameState::picker.rayOrigin;
-                GM_Vec3 p1 = p0 + (GameState::picker.rayDirection.scale(ray_length));
-                bool intersection = GM_AABB::intersection(entity->getAABB(), p0, p1);
-                if (!intersection) {
-                    entity->should_render_aabb = false;
-                    continue;
-                }
-
-                float current_distance = GM_Vec3::distance(entity->position, GameState::camera.position);
-                if (smallest_distance > current_distance) {
-                    if (GameState::selected_entity) {
-                        GameState::selected_entity->should_render_aabb = false;
-                    }
-
-                    GameState::selected_entity = entity;
-                    GameState::selected_entity->should_render_aabb = true;
-                    smallest_distance = current_distance;
-                    return;
-                }
-            }
-        };
 
         GameState::selected_entity = nullptr;
         intersection_test(EntityLoader::entity_keys);

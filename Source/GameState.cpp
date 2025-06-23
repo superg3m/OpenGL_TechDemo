@@ -441,7 +441,7 @@ void GameState::render() {
     // directional light
     this->basic_shader.use();
     this->basic_shader.setVec3("uDirLight.direction", -0.2f, -1.0f, -0.3f);
-    this->basic_shader.setVec3("uDirLight.ambient", 0.05f, 0.05f, 0.05f);
+    this->basic_shader.setVec3("uDirLight.ambient", 0.35f, 0.35f, 0.35f);
     this->basic_shader.setVec3("uDirLight.diffuse", 0.4f, 0.4f, 0.4f);
     this->basic_shader.setVec3("uDirLight.specular", 0.5f, 0.5f, 0.5f);
 

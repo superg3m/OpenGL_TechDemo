@@ -3,36 +3,50 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
 uniform float uTime;
+uniform bool uGeometryShader;
+uniform mat4 uView;
+uniform mat4 uProjection;
 
 in VS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
     vec2 texCoords;
 } gs_in[];
 
-vec4 explode(vec4 position, vec3 normal) {
+out vec3 FragPos;
+out vec3 Normal;
+out vec2 TexCoords;
+
+vec3 explode(vec3 position, vec3 normal) {
     float magnitude = 2.0;
     vec3 direction = normal * ((sin(uTime) + 1.0) / 2.0) * magnitude; 
-    return position + vec4(direction, 0.0);
+    return position + direction; // Returns world-space exploded position
 }
 
 vec3 getNormal() {
-    vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
-    vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
+    vec3 a = gs_in[0].FragPos - gs_in[1].FragPos;
+    vec3 b = gs_in[2].FragPos - gs_in[1].FragPos;
     return normalize(cross(a, b));
 }
 
-out vec2 TexCoords; 
+void main() {
+    vec3 faceNormal = getNormal();
 
-void main() {    
-    vec3 normal = getNormal();
+    for (int i = 0; i < 3; i++) {
+        if (uGeometryShader) {
+            FragPos = explode(gs_in[i].FragPos, faceNormal);
+            Normal = gs_in[i].Normal;
+        } else {
+            FragPos = gs_in[i].FragPos;
+            Normal = gs_in[i].Normal;
+        }
 
-    gl_Position = explode(gl_in[0].gl_Position, normal);
-    TexCoords = gs_in[0].texCoords;
-    EmitVertex();
-    gl_Position = explode(gl_in[1].gl_Position, normal);
-    TexCoords = gs_in[1].texCoords;
-    EmitVertex();
-    gl_Position = explode(gl_in[2].gl_Position, normal);
-    TexCoords = gs_in[2].texCoords;
-    EmitVertex();
+        TexCoords = gs_in[i].texCoords;
+
+        gl_Position = uProjection * uView * vec4(FragPos, 1.0); 
+
+        EmitVertex();
+    }
+
     EndPrimitive();
 }

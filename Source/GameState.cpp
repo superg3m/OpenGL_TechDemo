@@ -113,7 +113,7 @@ u64 GameState::getReferenceID() {
 void GameState::initalizeResources() {
     srand(time(0));
 
-    this->basic_shader = Shader({"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"});
+    this->basic_shader = Shader({"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag", "../../shader_source/basic/basic.gs"});
     this->outline_shader = Shader({"../../shader_source/outline/outline.vert", "../../shader_source/outline/outline.frag"});
     this->skybox_shader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
     this->aabb_shader = Shader({"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"});
@@ -217,6 +217,25 @@ void GameState::initalizeInputBindings() {
     profile->bind(IOD_KEY_L, IOD_InputState::RELEASED,
         []() {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+    );
+
+    // Date: June 17, 2025
+    // TODO(Jovanni): Investigate why glfwSetInputMode is failing in the lambda?
+    static float current_time = 3*PI / 2.0f;
+    profile->bind(IOD_KEY_T, IOD_InputState::PRESSED|IOD_InputState::DOWN,
+        [&]() {
+            
+            current_time += GameState::deltaTime;
+            this->basic_shader.setFloat("uTime", current_time);
+            this->basic_shader.setBool("uGeometryShader", true);
+        }
+    );
+
+    profile->bind(IOD_KEY_T, IOD_InputState::RELEASED,
+        [&]() {
+            current_time = 3*PI / 2.0f;
+            this->basic_shader.setBool("uGeometryShader", false);
         }
     );
 
@@ -375,7 +394,7 @@ void GameState::update(GLFWwindow* window, float dt) {
                 GameState::selected_entity = entity;
                 GameState::selected_entity->should_render_aabb = true;
                 smallest_distance = current_distance;
-                
+
                 return;
             }
         }

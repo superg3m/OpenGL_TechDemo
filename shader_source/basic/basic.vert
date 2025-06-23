@@ -22,20 +22,16 @@ uniform mat4 uProjection;
 #define HAS_COLOR_BIT      (1 << 5)
 #define HAS_BONES_BIT      ((1 << 7) | (1 << 6))
 
-out vec3 FragPos;
-out vec3 Normal;
-out vec2 TexCoords;
-
 out VS_OUT {
-    vec2 texCoords;
+    vec3 FragPos;  // Pass fragment position to GS
+    vec3 Normal;   // Pass normal to GS
+    vec2 texCoords; // Pass texture coordinates to GS
 } vs_out;
 
-
 void main() {
-    FragPos = vec3(uModel * vec4(aPos, 1.0));
-    Normal = mat3(transpose(inverse(uModel))) * aNormal;
-    TexCoords = aTexCoords;
+    vs_out.FragPos = vec3(uModel * vec4(aPos, 1.0));
+    vs_out.Normal = mat3(transpose(inverse(uModel))) * aNormal;
     vs_out.texCoords = aTexCoords;
     
-    gl_Position = uProjection * uView * vec4(FragPos, 1.0);
+    gl_Position = uProjection * uView * vec4(vs_out.FragPos, 1.0);
 }

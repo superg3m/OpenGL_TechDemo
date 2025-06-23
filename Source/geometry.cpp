@@ -78,49 +78,49 @@ Geometry Geometry::Cube() {
 
     std::vector<Vertex> cube_vertices = {
         // Front face
-        Vertex{GM_Vec3(-1.0f, -1.0f, -1.0f), GM_Vec3(0, 0, -1), GM_Vec2(0, 0)}, // 0
-        Vertex{GM_Vec3( 1.0f, -1.0f, -1.0f), GM_Vec3(0, 0, -1), GM_Vec2(1, 0)}, // 1
-        Vertex{GM_Vec3( 1.0f,  1.0f, -1.0f), GM_Vec3(0, 0, -1), GM_Vec2(1, 1)}, // 2
-        Vertex{GM_Vec3(-1.0f,  1.0f, -1.0f), GM_Vec3(0, 0, -1), GM_Vec2(0, 1)}, // 3
+        Vertex{GM_Vec3(-1.0f, -1.0f, -1.0f), GM_Vec3(0, 0, -1), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3( 1.0f, -1.0f, -1.0f), GM_Vec3(0, 0, -1), GM_Vec2(1, 0)},
+        Vertex{GM_Vec3( 1.0f,  1.0f, -1.0f), GM_Vec3(0, 0, -1), GM_Vec2(1, 1)},
+        Vertex{GM_Vec3(-1.0f,  1.0f, -1.0f), GM_Vec3(0, 0, -1), GM_Vec2(0, 1)},
 
         // Back face
-        Vertex{GM_Vec3(-1.0f, -1.0f, 1.0f), GM_Vec3(0, 0, 1), GM_Vec2(0, 0)}, // 4
-        Vertex{GM_Vec3( 1.0f, -1.0f, 1.0f), GM_Vec3(0, 0, 1), GM_Vec2(1, 0)}, // 5
-        Vertex{GM_Vec3( 1.0f,  1.0f, 1.0f), GM_Vec3(0, 0, 1), GM_Vec2(1, 1)}, // 6
-        Vertex{GM_Vec3(-1.0f,  1.0f, 1.0f), GM_Vec3(0, 0, 1), GM_Vec2(0, 1)}, // 7
+        Vertex{GM_Vec3(-1.0f, -1.0f, 1.0f), GM_Vec3(0, 0, 1), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3( 1.0f, -1.0f, 1.0f), GM_Vec3(0, 0, 1), GM_Vec2(1, 0)},
+        Vertex{GM_Vec3( 1.0f,  1.0f, 1.0f), GM_Vec3(0, 0, 1), GM_Vec2(1, 1)},
+        Vertex{GM_Vec3(-1.0f,  1.0f, 1.0f), GM_Vec3(0, 0, 1), GM_Vec2(0, 1)},
 
         // Left face
-        Vertex{GM_Vec3(-1.0f, -1.0f,  1.0f), GM_Vec3(-1, 0, 0), GM_Vec2(0, 0)}, // 8
-        Vertex{GM_Vec3(-1.0f, -1.0f, -1.0f), GM_Vec3(-1, 0, 0), GM_Vec2(1, 0)}, // 9
-        Vertex{GM_Vec3(-1.0f,  1.0f, -1.0f), GM_Vec3(-1, 0, 0), GM_Vec2(1, 1)}, // 10
-        Vertex{GM_Vec3(-1.0f,  1.0f,  1.0f), GM_Vec3(-1, 0, 0), GM_Vec2(0, 1)}, // 11
+        Vertex{GM_Vec3(-1.0f, -1.0f,  1.0f), GM_Vec3(-1, 0, 0), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3(-1.0f, -1.0f, -1.0f), GM_Vec3(-1, 0, 0), GM_Vec2(1, 0)},
+        Vertex{GM_Vec3(-1.0f,  1.0f, -1.0f), GM_Vec3(-1, 0, 0), GM_Vec2(1, 1)},
+        Vertex{GM_Vec3(-1.0f,  1.0f,  1.0f), GM_Vec3(-1, 0, 0), GM_Vec2(0, 1)},
 
         // Right face
-        Vertex{GM_Vec3( 1.0f, -1.0f, -1.0f), GM_Vec3(1, 0, 0), GM_Vec2(0, 0)}, // 12
-        Vertex{GM_Vec3( 1.0f, -1.0f,  1.0f), GM_Vec3(1, 0, 0), GM_Vec2(1, 0)}, // 13
-        Vertex{GM_Vec3( 1.0f,  1.0f,  1.0f), GM_Vec3(1, 0, 0), GM_Vec2(1, 1)}, // 14
-        Vertex{GM_Vec3( 1.0f,  1.0f, -1.0f), GM_Vec3(1, 0, 0), GM_Vec2(0, 1)}, // 15
+        Vertex{GM_Vec3( 1.0f, -1.0f, -1.0f), GM_Vec3(1, 0, 0), GM_Vec2(0, 0)},
+        Vertex{GM_Vec3( 1.0f, -1.0f,  1.0f), GM_Vec3(1, 0, 0), GM_Vec2(1, 0)},
+        Vertex{GM_Vec3( 1.0f,  1.0f,  1.0f), GM_Vec3(1, 0, 0), GM_Vec2(1, 1)},
+        Vertex{GM_Vec3( 1.0f,  1.0f, -1.0f), GM_Vec3(1, 0, 0), GM_Vec2(0, 1)},
 
         // Bottom face
-        Vertex{GM_Vec3(-1.0f, -1.0f, -1.0f), GM_Vec3(0, -1, 0), GM_Vec2(0, 1)}, // 16
-        Vertex{GM_Vec3( 1.0f, -1.0f, -1.0f), GM_Vec3(0, -1, 0), GM_Vec2(1, 1)}, // 17
-        Vertex{GM_Vec3( 1.0f, -1.0f,  1.0f), GM_Vec3(0, -1, 0), GM_Vec2(1, 0)}, // 18
-        Vertex{GM_Vec3(-1.0f, -1.0f,  1.0f), GM_Vec3(0, -1, 0), GM_Vec2(0, 0)}, // 19
+        Vertex{GM_Vec3(-1.0f, -1.0f, -1.0f), GM_Vec3(0, -1, 0), GM_Vec2(0, 1)},
+        Vertex{GM_Vec3( 1.0f, -1.0f, -1.0f), GM_Vec3(0, -1, 0), GM_Vec2(1, 1)},
+        Vertex{GM_Vec3( 1.0f, -1.0f,  1.0f), GM_Vec3(0, -1, 0), GM_Vec2(1, 0)},
+        Vertex{GM_Vec3(-1.0f, -1.0f,  1.0f), GM_Vec3(0, -1, 0), GM_Vec2(0, 0)},
 
         // Top face
-        Vertex{GM_Vec3(-1.0f,  1.0f, -1.0f), GM_Vec3(0, 1, 0), GM_Vec2(0, 1)}, // 20
-        Vertex{GM_Vec3( 1.0f,  1.0f, -1.0f), GM_Vec3(0, 1, 0), GM_Vec2(1, 1)}, // 21
-        Vertex{GM_Vec3( 1.0f,  1.0f,  1.0f), GM_Vec3(0, 1, 0), GM_Vec2(1, 0)}, // 22
-        Vertex{GM_Vec3(-1.0f,  1.0f,  1.0f), GM_Vec3(0, 1, 0), GM_Vec2(0, 0)}, // 23
+        Vertex{GM_Vec3(-1.0f,  1.0f, -1.0f), GM_Vec3(0, 1, 0), GM_Vec2(0, 1)},
+        Vertex{GM_Vec3( 1.0f,  1.0f, -1.0f), GM_Vec3(0, 1, 0), GM_Vec2(1, 1)},
+        Vertex{GM_Vec3( 1.0f,  1.0f,  1.0f), GM_Vec3(0, 1, 0), GM_Vec2(1, 0)},
+        Vertex{GM_Vec3(-1.0f,  1.0f,  1.0f), GM_Vec3(0, 1, 0), GM_Vec2(0, 0)},
     };
 
     std::vector<unsigned int> cube_indices = {
-        0,  1,  2,  2,  3,  0,       // Front
-        4,  5,  6,  6,  7,  4,       // Back
-        8,  9,  10, 10, 11, 8,       // Left
-        12, 13, 14, 14, 15, 12,      // Right
-        16, 17, 18, 18, 19, 16,      // Bottom
-        20, 21, 22, 22, 23, 20       // Top
+        0,  1,  2,  2,  3,  0,  // Front
+        4,  5,  6,  6,  7,  4,  // Back
+        8,  9,  10, 10, 11, 8,  // Left
+        12, 13, 14, 14, 15, 12, // Right
+        16, 17, 18, 18, 19, 16, // Bottom
+        20, 21, 22, 22, 23, 20  // Top
     };
 
     Geometry ret;

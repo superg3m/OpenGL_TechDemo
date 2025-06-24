@@ -13,6 +13,8 @@
 
 // Date: June 19, 2025
 // TODO(Jovanni): aabb_mesh needs to be calculated by sorting vertrices and finding the min/max x, y, z
+
+/*
 struct Entity {
     u64 reference_identifer;
 
@@ -47,3 +49,4 @@ struct Entity {
     GM_Matrix4 getAABBTransform();
     void draw(Shader &shader, bool should_draw_textures = true);
 };
+*/

@@ -3,9 +3,9 @@
 #include <vector>
 
 #include <gm.hpp>
-#include <glad/glad.h>
-
 #include <Vertex.hpp>
+
+#include <glad/glad.h>
 
 struct Geometry {
     // Date: June 15, 2025

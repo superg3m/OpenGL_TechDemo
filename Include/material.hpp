@@ -1,22 +1,21 @@
 #pragma once
 
 #include <vector>
-
 #include <glad/glad.h>
-#include <Shader.hpp>
 
+#include <Shader.hpp>
 #include <gm.hpp>
 
 struct PBR_Material {
     float roughness = 0.0f;
     bool isMetal = false;
     GM_Vec3 color = GM_Vec3(0.0f, 0.0f, 0.0f);
-    GLTextureID albedo = 0;
-    GLTextureID roughness = 0;
-    GLTextureID metallic = 0;
+    GLTextureID albedo_map = 0;
+    GLTextureID roughness_map = 0;
+    GLTextureID metallic_map = 0;
     GLTextureID normal_map = 0;
-    GLTextureID AO = 0;
-    GLTextureID emissive = 0;
+    GLTextureID AO_map = 0;
+    GLTextureID emissive_map = 0;
 };
 
 enum TextureType {

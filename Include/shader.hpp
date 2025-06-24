@@ -4,9 +4,9 @@
 #include <vector>
 #include <map>
 
-#include <gm.hpp>
-
 #include <glad/glad.h>
+
+#include <gm.hpp>
 
 using GLTextureID = int;
 struct Shader {

@@ -9,7 +9,7 @@
 #include <EntityLoader.hpp>
 #include <TextureLoader.hpp>
 
-#include <Model.hpp>
+#include <Mesh.hpp>
 #include <MousePicker.hpp>
 #include <Camera.hpp>
 

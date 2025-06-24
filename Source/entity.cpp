@@ -1,5 +1,6 @@
 #include <GameState.hpp>
 
+/*
 Entity::Entity(Mesh* mesh) {
     this->reference_identifer = GameState::getReferenceID();
 
@@ -84,3 +85,4 @@ void Entity::draw(Shader &shader, bool should_draw_textures) {
 
     this->mesh->draw(shader, should_draw_textures);
 }
+*/

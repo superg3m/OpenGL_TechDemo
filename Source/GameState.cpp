@@ -461,7 +461,7 @@ void GameState::render() {
     //  point lights
     for (int i = 0; i < EntityLoader::light_keys.size(); i++) {
         const std::string key = EntityLoader::light_keys[i];
-        Entity* light = EntityLoader::getEntity(key);
+        Mesh* light = EntityLoader::getEntity(key);
         GM_Matrix4 model = light->getTransform();
         GM_Matrix4 view = sourceView;
 

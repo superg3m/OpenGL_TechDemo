@@ -3,9 +3,9 @@
 #include <map>
 #include <string>
 #include <array>
+#include <glad/glad.h>
 
 #include <ckg.h>
-#include <glad/glad.h>
 #include <stb_image.h>
 
 enum TextureFlag {

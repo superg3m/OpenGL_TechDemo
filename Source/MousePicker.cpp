@@ -24,7 +24,7 @@ void MousePicker::update(GM_Matrix4 projection, GM_Matrix4 view) {
 
     bool success = false;
     GM_Matrix4 ProjectView = projection * view;
-    GM_Matrix4 viewProjectionInverse = GM_Matrix4::inverse(ProjectView, &success);
+    GM_Matrix4 viewProjectionInverse = ProjectView.inverse(success);
     if (!success) {
         CKG_LOG_ERROR("Failed to inverse proj view matrix\n");
     }
@@ -47,12 +47,12 @@ void MousePicker::update(GM_Matrix4 projection, GM_Matrix4 view) {
 
 GM_Vec3 MousePicker::getFromObjectZ(GM_Matrix4 projection, GM_Matrix4 view, float object_z) {
     bool success = false;
-    GM_Matrix4 projectionInverse = GM_Matrix4::inverse(projection, &success);
+    GM_Matrix4 projectionInverse = projection.inverse(success);
     if (!success) {
         CKG_LOG_ERROR("Failed to inverse projection matrix\n");
     }
 
-    GM_Matrix4 viewInverse = GM_Matrix4::inverse(view, &success);
+    GM_Matrix4 viewInverse = view.inverse(success);
     if (!success) {
         CKG_LOG_ERROR("Failed to inverse view matrix\n");
     }

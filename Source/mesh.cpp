@@ -112,6 +112,14 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
 
     for (unsigned int i = 0 ; i < scene->mNumMaterials ; i++) {
         const aiMaterial* ai_material = scene->mMaterials[i];
+
+        float opacity = 1.0f;
+        if (ai_material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
+            this->materials[i].opacity = opacity;
+        } else {
+            CKG_LOG_WARN("Mesh Failed opacity matkey?\n");
+        }
+
         for (int type_int = 0; type_int < TEXTURE_COUNT; ++type_int) {
             TextureType type = static_cast<TextureType>(type_int);
 
@@ -151,9 +159,6 @@ void Mesh::loadMeshFromData(const std::vector<Vertex> &vertices, const std::vect
     entry.index_count = indices.size();
 
     this->meshes.reserve(1);
-
-    std::vector<Material> materials;
-    materials.reserve(scene->mNumMaterials);
 
     setup(VertexAttributeFlag::PNTBundle, vertices, indices);
 }

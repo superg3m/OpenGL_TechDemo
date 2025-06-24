@@ -260,7 +260,7 @@ void GameState::initalizeInputBindings() {
     profile->bind(IOD_KEY_UP, IOD_InputState::RELEASED,
         []() {
             if (GameState::selected_mesh) {
-                GameState::selected_mesh->mesh->material.opacity = MIN(GameState::selected_entity->mesh->material.opacity + 0.1f, 1.0f);
+                GameState::selected_mesh->materials[0].opacity = MIN(GameState::selected_mesh->materials[0].opacity + 0.1f, 1.0f);
             }
         }
     );
@@ -269,8 +269,8 @@ void GameState::initalizeInputBindings() {
     // TODO(Jovanni): Investigate why glfwSetInputMode is failing in the lambda?
     profile->bind(IOD_KEY_DOWN, IOD_InputState::PRESSED,
         []() {
-            if (GameState::selected_entity) {
-                GameState::selected_entity->mesh->material.opacity = MAX(GameState::selected_entity->mesh->material.opacity - 0.1f, 0.0f);
+            if (GameState::selected_mesh) {
+                GameState::selected_mesh->materials[0].opacity = MAX(GameState::selected_mesh->materials[0].opacity - 0.1f, 0.0f);
             }
         }
     );
@@ -351,39 +351,37 @@ void GameState::update(GLFWwindow* window, float dt) {
     }
 
     // sort entities based on camera and if its transparent or not!
-    const auto sort_entities_by_camera = [](std::vector<std::string>& entities) {
-        for (int i = 0; i < entities.size() - 1; i++) {
-            Entity* entityA = EntityLoader::getEntity(entities[i]);
-            float a_distance = GM_Vec3::distance(entityA->position, GameState::camera.position);
-            for (int j = i + 1; j < entities.size(); j++) {
-                Entity* entityB = EntityLoader::getEntity(entities[j]);
+    const auto sort_entities_by_camera = [](std::vector<Mesh*>& meshes) {
+        for (int i = 0; i < meshes.size() - 1; i++) {
+            Mesh* meshA = meshes[i];
+            float a_distance = GM_Vec3::distance(meshA->position, GameState::camera.position);
+            for (int j = i + 1; j < meshes.size(); j++) {
+                Mesh* meshB = meshes[j];
 
-                float b_distance = GM_Vec3::distance(entityB->position, GameState::camera.position);
+                float b_distance = GM_Vec3::distance(meshB->position, GameState::camera.position);
                 if (a_distance > b_distance) {
-                    std::string temp = entities[i];
-                    entities[i] = entities[j];
-                    entities[j] = temp;
+                    Mesh* temp = meshes[i];
+                    meshes[i] = meshes[j];
+                    meshes[j] = temp;
                 }
             }
         }
     };
 
-    sort_entities_by_camera(EntityLoader::entity_keys);
-    sort_entities_by_camera(EntityLoader::light_keys);
-    sort_entities_by_camera(EntityLoader::transparent_keys);
+    sort_entities_by_camera(GameState::meshes);
 
-    if (GameState::selected_entity && GameState::mouse_captured) {
-        GameState::selected_entity->should_render_aabb = false;
-        GameState::selected_entity = nullptr;
+    if (GameState::selected_mesh && GameState::mouse_captured) {
+        // GameState::selected_mesh->should_render_aabb = false;
+        GameState::selected_mesh = nullptr;
     } else if (!GameState::mouse_captured) {
         GameState::picker.update(this->getProjectionMatrix(), GameState::camera.get_view_matrix());
     }
 
     
     float smallest_distance = FLT_MAX;
-    const auto intersection_test = [&smallest_distance](std::vector<std::string>& entities) {
-        for (const auto& key : entities) {
-            Entity* entity = EntityLoader::getEntity(key);
+    const auto intersection_test = [&smallest_distance](std::vector<Mesh*>& meshes) {
+        for (Mesh* mesh : meshes) {
+            Mesh* mesh = EntityLoader::getEntity(key);
 
             float ray_length = 1000.0f;
             GM_Vec3 p0 = GameState::picker.rayOrigin;

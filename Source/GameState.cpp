@@ -377,16 +377,14 @@ void GameState::update(GLFWwindow* window, float dt) {
         GameState::picker.update(this->getProjectionMatrix(), GameState::camera.get_view_matrix());
     }
 
-    
+    /*
     float smallest_distance = FLT_MAX;
     const auto intersection_test = [&smallest_distance](std::vector<Mesh*>& meshes) {
         for (Mesh* mesh : meshes) {
-            Mesh* mesh = EntityLoader::getEntity(key);
-
             float ray_length = 1000.0f;
             GM_Vec3 p0 = GameState::picker.rayOrigin;
             GM_Vec3 p1 = p0 + (GameState::picker.rayDirection.scale(ray_length));
-            bool intersection = GM_AABB::intersection(entity->getAABB(), p0, p1);
+            bool intersection = GM_AABB::intersection(mesh->getAABB(), p0, p1);
             if (!intersection) {
                 entity->should_render_aabb = false;
                 continue;
@@ -429,6 +427,7 @@ void GameState::update(GLFWwindow* window, float dt) {
         intersection_test(EntityLoader::light_keys);
         intersection_test(EntityLoader::transparent_keys);
     }
+    */
 }
 
 void GameState::render() {
@@ -441,15 +440,17 @@ void GameState::render() {
     // Render Skyboxes
     glDepthFunc(GL_LEQUAL);
     Mesh skybox = Mesh(Geometry::Cube());
-    skybox.material.textures["uSkyboxTexture"] = TextureLoader::getTexture(SKYBOX);
+    skybox.materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(SKYBOX);
     GM_Matrix4 model = GM_Matrix4::identity();
     GM_Matrix4 withoutTranslationView = sourceView;
     withoutTranslationView.v[0].w = 0.0f;
     withoutTranslationView.v[1].w = 0.0f;
     withoutTranslationView.v[2].w = 0.0f;
     this->skybox_shader.setMat4("uMVP", projection * withoutTranslationView * model);
-    skybox.draw(this->skybox_shader);
+    skybox.draw();
     glDepthFunc(GL_LESS);
+
+    /*
 
     // directional light
     this->basic_shader.use();
@@ -506,6 +507,7 @@ void GameState::render() {
     this->basic_shader.setFloat("uSpotLight.quadratic", 0.032f);
     this->basic_shader.setFloat("uSpotLight.cutOff", cosf((float)DEGREES_TO_RAD(12.5f)));
     this->basic_shader.setFloat("uSpotLight.outerCutOff", cosf((float)DEGREES_TO_RAD(15.0f)));
+    */
 
     for (const auto& key : EntityLoader::entity_keys) {
         Entity* entity = EntityLoader::getEntity(key);
@@ -550,6 +552,7 @@ void GameState::render() {
         }
     }
 
+    /*
     glEnable(GL_BLEND);
     for (int i = EntityLoader::transparent_keys.size() - 1; i >= 0; i--) {
         Entity* entity = EntityLoader::getEntity(EntityLoader::transparent_keys[i]);
@@ -573,5 +576,5 @@ void GameState::render() {
         }
     }
     glDisable(GL_BLEND);
+    */
 }
-

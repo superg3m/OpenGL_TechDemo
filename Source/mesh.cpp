@@ -20,20 +20,21 @@ Mesh::Mesh() {
     this->orientation = GM_Quaternion::identity();
     this->scale = GM_Vec3(1, 1, 1);
     this->base_aabb = GM_AABB(GM_Vec3(0, 0, 0), GM_Vec3(0, 0, 0));
+    this->materials.reserve(1);
 }
 
-Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags, Material material) {
+Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags) {
     this->position = GM_Vec3(0, 0, 0);
     this->orientation = GM_Quaternion::identity();
     this->scale = GM_Vec3(1, 1, 1);
-    // this->material = material;
+
+    // this->base_aabb = this->base_aabb_from_vertices(vertices);
 
     glGenVertexArrays(1, &this->VAO);
     glBindVertexArray(this->VAO);
     glGenBuffers(ArrayCount(this->SSBOs), this->SSBOs);
 
     this->loadMeshFromData(vertices, indices, flags);
-    // this->base_aabb = this->base_aabb_from_vertices(vertices);
 }
 
 Mesh::Mesh(const std::string &path, unsigned int assimp_flags) {
@@ -139,6 +140,20 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
             }
         }
     }
+
+    setup(VertexAttributeFlag::PNTBundle, vertices, indices);
+}
+
+void Mesh::loadMeshFromData(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags) {
+    
+    MeshEntry entry;
+    entry.vertex_count = vertices.size();
+    entry.index_count = indices.size();
+
+    this->meshes.reserve(1);
+
+    std::vector<Material> materials;
+    materials.reserve(scene->mNumMaterials);
 
     setup(VertexAttributeFlag::PNTBundle, vertices, indices);
 }

@@ -22,9 +22,9 @@ enum BufferType {
 #define INVALID_MATERIAL 0xFFFFFFFF
 
 struct MeshEntry {
-    GM_Vec3 position;
-    GM_Quaternion orientation;
-    GM_Vec3 scale;
+    GM_Vec3 position = GM_Vec3(0, 0, 0);
+    GM_Quaternion orientation = GM_Quaternion::identity();
+    GM_Vec3 scale = GM_Vec3(1, 1, 1);
 
     unsigned int vertex_count;
     unsigned int index_count;
@@ -45,8 +45,8 @@ struct Mesh {
     unsigned int SSBOs[BUFFER_COUNT];
 
     Mesh();
-    Mesh(Geometry geometry, VertexAttributeFlag flags = VertexAttributeFlag::PNTBundle, Material material = Material());
-    Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags = VertexAttributeFlag::PNTBundle, Material material = Material());
+    Mesh(Geometry geometry, VertexAttributeFlag flags = VertexAttributeFlag::PNTBundle);
+    Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags = VertexAttributeFlag::PNTBundle);
     Mesh(const std::string &path, unsigned int assimp_flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
     virtual void draw();

@@ -6,7 +6,6 @@
 #include <gm.hpp>
 #include <GLFW_IOD.hpp>
 
-#include <EntityLoader.hpp>
 #include <TextureLoader.hpp>
 
 #include <Mesh.hpp>
@@ -25,6 +24,7 @@
 #define WINDOW "Window"
 #define WINDOW2 "Window2"
 
+/*
 struct DrawElementsCommand {
     unsigned int  count;
     unsigned int  instanceCount;
@@ -32,8 +32,9 @@ struct DrawElementsCommand {
     int  baseVertex;
     unsigned int  baseInstance;
 };
- 
-struct GameState {
+*/
+
+ struct GameState {
     static bool mouse_captured;
     static float timeScale;
     static GM_Matrix4 projection;
@@ -44,8 +45,8 @@ struct GameState {
     static MousePicker picker;
     static float xoffset;
     static float yoffset;
-    static Entity* selected_entity;
-    static std::vector<DrawElementsCommand> command_buffer;
+    static Mesh* selected_mesh;
+    static std::vector<Mesh*> meshes;
 
     Shader basic_shader;
     Shader outline_shader;

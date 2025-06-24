@@ -10,7 +10,8 @@ float GameState::deltaTime = 0.0f;
 MousePicker GameState::picker = MousePicker();
 float GameState::xoffset = 0.0f;
 float GameState::yoffset = 0.0f;
-Entity* GameState::selected_entity = nullptr;
+Mesh* GameState::selected_mesh = nullptr;
+std::vector<Mesh*> GameState::meshes = {};
 
 GameState::GameState(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     GameState::WINDOW_WIDTH = WINDOW_WIDTH;
@@ -154,25 +155,26 @@ void GameState::initalizeResources() {
         GM_Vec3 cannonicalPosition = backpackBasePosition;
         cannonicalPosition.z -= i * 2;
 
-        Entity* backpack = new Entity(new Model("../../assets/backpack/backpack.obj", TEXTURE_VERTICAL_FLIP));
+        Mesh* backpack = new Mesh("../../assets/backpack/backpack.obj", TEXTURE_VERTICAL_FLIP);
         backpack->setPosition(cannonicalPosition);
         backpack->setScale(0.5f);
         backpack->setEulerAngles(0, 90, 0);
-        EntityLoader::registerEntity("backpack" + std::to_string(i), backpack);
+        GameState::meshes.push_back(backpack);
     }
 
-    Entity* window_transparent = new Entity(new Mesh(Geometry::Quad()));
+    Mesh* window_transparent = new Mesh(Geometry::Quad());
     window_transparent->setPosition(GM_Vec3(-3.0f,  0.0f, 2.0f));
     window_transparent->setScale(1.0f);
     window_transparent->setEulerAngles(0, 90, 0);
-    window_transparent->setTexture("uTexture", TextureLoader::getTexture(WINDOW));
-    EntityLoader::registerTransparentEntity(WINDOW, window_transparent);
+    window_transparent->materials[0].bindTexture(TEXTURE_TYPE_DIFFUSE, TextureLoader::getTexture(WINDOW));
+    GameState::meshes.push_back(window_transparent);
 
-    Entity* window_transparent2 = new Entity(new Mesh(Geometry::Quad()));
-    window_transparent2->setPosition(GM_Vec3(0.0f,  0.0f, 5.0f));
-    window_transparent2->setScale(1.0f);
-    window_transparent2->setTexture("uTexture", TextureLoader::getTexture(WINDOW));
-    EntityLoader::registerTransparentEntity(WINDOW2, window_transparent2);
+    Mesh* window_transparent = new Mesh(Geometry::Quad());
+    window_transparent->setPosition(GM_Vec3(-3.0f,  0.0f, 2.0f));
+    window_transparent->setScale(1.0f);
+    window_transparent->setEulerAngles(0, 90, 0);
+    window_transparent->materials[0].bindTexture(TEXTURE_TYPE_DIFFUSE, TextureLoader::getTexture(WINDOW));
+    GameState::meshes.push_back(window_transparent);
     
     for (int i = 0; i < ArrayCount(primitivePositions); i++) {
         Geometry geometry = (rand() % 2 == 0) ? Geometry::Cube() : Geometry::Sphere(16);
@@ -257,8 +259,8 @@ void GameState::initalizeInputBindings() {
     
     profile->bind(IOD_KEY_UP, IOD_InputState::RELEASED,
         []() {
-            if (GameState::selected_entity) {
-                GameState::selected_entity->mesh->material.opacity = MIN(GameState::selected_entity->mesh->material.opacity + 0.1f, 1.0f);
+            if (GameState::selected_mesh) {
+                GameState::selected_mesh->mesh->material.opacity = MIN(GameState::selected_entity->mesh->material.opacity + 0.1f, 1.0f);
             }
         }
     );
@@ -461,7 +463,7 @@ void GameState::render() {
     //  point lights
     for (int i = 0; i < EntityLoader::light_keys.size(); i++) {
         const std::string key = EntityLoader::light_keys[i];
-        Mesh* light = EntityLoader::getEntity(key);
+        Entity* light = EntityLoader::getEntity(key);
         GM_Matrix4 model = light->getTransform();
         GM_Matrix4 view = sourceView;
 

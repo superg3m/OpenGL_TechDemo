@@ -148,17 +148,14 @@ void GameState::initalizeResources() {
         GM_Vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    GM_Vec3 backpackPositions[] = {
-        GM_Vec3(-9.0f, 0.0f, 10.0f),    
-        GM_Vec3(-10.0f, 0.0f, 5.0f), 
-        GM_Vec3(-9.5f, 3.0f, 3.0f),   
-        GM_Vec3(-10.5f, 0.5f, 2.0f),
-        GM_Vec3(-9.0f, -2.0f, 1.0f)
-    };
+    GM_Vec3 backpackBasePosition = GM_Vec3(-10.0f, 0.0f, 100.0f);   
 
-    for (int i = 0; i < ArrayCount(backpackPositions); i++) {
+    for (int i = 0; i < 100; i++) {
+        GM_Vec3 cannonicalPosition = backpackBasePosition;
+        cannonicalPosition.z -= i * 2;
+
         Entity* backpack = new Entity(new Model("../../assets/backpack/backpack.obj", TEXTURE_VERTICAL_FLIP));
-        backpack->setPosition(backpackPositions[i]);
+        backpack->setPosition(cannonicalPosition);
         backpack->setScale(0.5f);
         backpack->setEulerAngles(0, 90, 0);
         EntityLoader::registerEntity("backpack" + std::to_string(i), backpack);

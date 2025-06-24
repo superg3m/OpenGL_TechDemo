@@ -42,6 +42,9 @@ int main() {
         GameState::deltaTime = (currentFrame - lastFrame) * GameState::timeScale;
         lastFrame = currentFrame;
 
+        int fps = (int)(1.0f / GameState::deltaTime);
+        glfwSetWindowTitle(window, std::to_string(fps).c_str());
+
         IOD::poll();
 
         application.update(window, GameState::deltaTime);

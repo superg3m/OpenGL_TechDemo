@@ -9,6 +9,16 @@
 #define RESERVED_AABB   "ReservedAABB"
 #define RESERVED_SPHERE "ReservedSphere"
 
+Geometry::Geometry() {
+    this->VAO = 0;
+    this->VBO = 0;
+    this->EBO = 0;
+
+    this->draw_type = GL_TRIANGLES;
+    this->vertex_count = 0;
+    this->index_count = 0;
+}
+
 Geometry Geometry::Quad() {
     if (GeometryLoader::geometry.count(RESERVED_QUAD) != 0) {
         return GeometryLoader::getGeometry(RESERVED_QUAD);

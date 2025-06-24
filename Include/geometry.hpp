@@ -16,7 +16,7 @@ struct Geometry {
     unsigned int index_count;
     GLenum draw_type; // GL_TRIANGLES, GL_LINES, ...
 
-    Geometry() = default;
+    Geometry();
 
     /**
      * @brief vertices must be in 

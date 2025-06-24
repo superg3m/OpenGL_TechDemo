@@ -148,11 +148,21 @@ void GameState::initalizeResources() {
         GM_Vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    Entity* backpack = new Entity(new Model("../../assets/backpack/backpack.obj", TEXTURE_VERTICAL_FLIP));
-    backpack->setPosition(GM_Vec3(-5.0f,  0.0f, 2.0f));
-    backpack->setScale(0.5f);
-    backpack->setEulerAngles(0, 90, 0);
-    EntityLoader::registerEntity("backpack", backpack);
+    GM_Vec3 backpackPositions[] = {
+        GM_Vec3(-9.0f, 0.0f, 10.0f),    
+        GM_Vec3(-10.0f, 0.0f, 5.0f), 
+        GM_Vec3(-9.5f, 3.0f, 3.0f),   
+        GM_Vec3(-10.5f, 0.5f, 2.0f),
+        GM_Vec3(-9.0f, -2.0f, 1.0f)
+    };
+
+    for (int i = 0; i < ArrayCount(backpackPositions); i++) {
+        Entity* backpack = new Entity(new Model("../../assets/backpack/backpack.obj", TEXTURE_VERTICAL_FLIP));
+        backpack->setPosition(backpackPositions[i]);
+        backpack->setScale(0.5f);
+        backpack->setEulerAngles(0, 90, 0);
+        EntityLoader::registerEntity("backpack" + std::to_string(i), backpack);
+    }
 
     Entity* window_transparent = new Entity(new Mesh(Geometry::Quad()));
     window_transparent->setPosition(GM_Vec3(-3.0f,  0.0f, 2.0f));
@@ -462,8 +472,8 @@ void GameState::render() {
 
         this->basic_shader.use();
         this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].position").c_str(), light->position);
-        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].ambient").c_str(), light_color.scale(0.55f));
-        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].diffuse").c_str(), light_color.scale(0.8f));
+        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].ambient").c_str(), light_color.scale(0.35f));
+        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].diffuse").c_str(), light_color.scale(0.5f));
         this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].specular").c_str(), light_color.scale(1.0f));
         this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].constant").c_str(), 1.0f);
         this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].linear").c_str(), 0.09f);
@@ -474,6 +484,8 @@ void GameState::render() {
         this->light_shader.setMat4("uView",view);
         this->light_shader.setMat4("uProjection", projection);
         this->light_shader.setVec4("uObjectColor", light->mesh->material.color);
+
+        // don't do the draw here push the drawCommand
         light->draw(this->light_shader);
 
         if (light->should_render_aabb) {

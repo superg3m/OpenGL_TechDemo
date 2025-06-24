@@ -4,13 +4,13 @@
 std::vector<std::string> GeometryLoader::geometry_keys;
 std::map<std::string, Geometry> GeometryLoader::geometry;
 
-void GeometryLoader::registerGeometry(std::string key, Geometry entity) {
+void GeometryLoader::registerGeometry(std::string key, Geometry geometry) {
     if (GeometryLoader::geometry.count(key)) {
-        CKG_LOG_WARN("EntityLoader | Key: '%s' already exists overwriting entity\n", key.c_str());
+        CKG_LOG_WARN("GeometryLoader | Key: '%s' already exists overwriting entity\n", key.c_str());
     }
 
     GeometryLoader::geometry_keys.push_back(key);
-    GeometryLoader::geometry[key] = entity;
+    GeometryLoader::geometry[key] = geometry;
 }
 
 Geometry GeometryLoader::getGeometry(std::string key) {

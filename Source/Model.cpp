@@ -1,10 +1,26 @@
 #include <ckg.h>
 #include <Model.hpp>
+#include <ModelLoader.hpp>
+
+Model::Model() {
+    this->directory = "";
+    this->geometry = Geometry();
+    this->loaded_textures = {};
+    this->texture_flags = TEXTURE_DEFAULT;
+    this->loaded_textures = {};
+    this->meshes = {};
+}
 
 Model::Model(std::string const &path, int texture_flags) {
     this->texture_flags = texture_flags;
 
+    if (ModelLoader::models.count(path) != 0) {
+        *this = ModelLoader::getModel(path);
+        return;
+    }
+
     this->loadModel(path);
+    ModelLoader::registerModel(path, *this);
 }
 
 void Model::draw(Shader &shader, bool should_draw_textures) {

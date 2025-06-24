@@ -25,6 +25,14 @@
 #define WINDOW "Window"
 #define WINDOW2 "Window2"
 
+struct DrawElementsCommand {
+    unsigned int  count;
+    unsigned int  instanceCount;
+    unsigned int  firstIndex;
+    int  baseVertex;
+    unsigned int  baseInstance;
+};
+ 
 struct GameState {
     static bool mouse_captured;
     static float timeScale;
@@ -37,6 +45,7 @@ struct GameState {
     static float xoffset;
     static float yoffset;
     static Entity* selected_entity;
+    static std::vector<DrawElementsCommand> command_buffer;
 
     Shader basic_shader;
     Shader outline_shader;

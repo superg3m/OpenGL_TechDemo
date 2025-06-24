@@ -8,6 +8,6 @@ struct GeometryLoader {
     static std::vector<std::string> geometry_keys;
     static std::map<std::string, Geometry> geometry;
 
-    static void registerGeometry(std::string key, Geometry entity);
+    static void registerGeometry(std::string key, Geometry geometry);
     static Geometry getGeometry(std::string key);
 };

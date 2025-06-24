@@ -139,6 +139,8 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
             }
         }
     }
+
+    // populate SSBOs
 }
 
 std::vector<GLTextureID> Model::loadMaterialTextures(aiMaterial *mat, TextureType type, std::string key) {

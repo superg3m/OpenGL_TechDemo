@@ -41,6 +41,7 @@ GLFWwindow* GameState::initalizeWindow() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPos(window, GameState::WINDOW_WIDTH / 2.0f, GameState::WINDOW_HEIGHT / 2.0f);
 
     IOD_GLFW_BIND_MOUSE_MOVE_CALLBACK([](GLFWwindow *window, double mouse_x, double mouse_y) {
         local_persist bool previous_frame_mouse_was_captured = true;
@@ -406,13 +407,6 @@ void GameState::update(GLFWwindow* window, float dt) {
         if ((GM_Vec3::dot(picker.rayDirection, GM_Vec3(-1, 0, 0)) > 0.60f) || (GM_Vec3::dot(picker.rayDirection, GM_Vec3(1, 0, 0)) > 0.60f)) {
             GameState::selected_entity->position.z = world_space.z;
             GameState::selected_entity->position.y = world_space.y;
-            CKG_LOG_DEBUG("Mag: %f\n", world_space.magnitude());
-            CKG_LOG_DEBUG("World Pos: (%f, %f, %f)\n", world_space.x, world_space.y, world_space.z);
-            CKG_LOG_DEBUG("-------------- View: -------------\n");
-            CKG_LOG_DEBUG("(%f, %f, %f, %f)\n", view.v[0].x, view.v[0].y, view.v[0].z, view.v[0].w);
-            CKG_LOG_DEBUG("(%f, %f, %f, %f)\n", view.v[1].x, view.v[1].y, view.v[1].z, view.v[1].w);
-            CKG_LOG_DEBUG("(%f, %f, %f, %f)\n", view.v[2].x, view.v[2].y, view.v[2].z, view.v[2].w);
-            CKG_LOG_DEBUG("(%f, %f, %f, %f)\n", view.v[3].x, view.v[3].y, view.v[3].z, view.v[3].w);
         } else {
             GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
             GameState::selected_entity->position.x = world_space.x;

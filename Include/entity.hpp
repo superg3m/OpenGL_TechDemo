@@ -16,10 +16,7 @@
 struct Entity {
     u64 reference_identifer;
 
-    GM_Vec3 position;
     GM_Vec3 velocity;
-    GM_Quaternion orientation;
-    GM_Vec3 scale;
 
     Mesh* mesh;
     bool should_render_aabb;

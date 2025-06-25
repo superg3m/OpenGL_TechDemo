@@ -1,6 +1,5 @@
-#include <material.hpp>
 #include <ckg.h>
-#include <string>
+#include <material.hpp>
 
 Material::Material() {
     this->opacity = 1.0f;
@@ -8,6 +7,6 @@ Material::Material() {
     ckg_memory_fill(this->textures, ArrayCount(this->textures), 0);
 }
 
-void Material::bindTexture(TextureType type, GLTextureID id) {
+void Material::bindTexture(TextureUnitType type, GLTextureID id) {
     this->textures[type] = id;
 }

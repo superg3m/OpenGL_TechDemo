@@ -4,10 +4,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <Shader.hpp>
-#include <Geometry.hpp>
 #include <Material.hpp>
-
+#include <Vertex.hpp>
+#include <Geometry.hpp>
 // TODO(Jovanni): Consider removing transform from Mesh, 
 // as entities typically have transforms, not meshes themselves.
 
@@ -28,7 +27,8 @@ struct MeshEntry {
 
     unsigned int vertex_count;
     unsigned int index_count;
-
+    unsigned int base_vertex = 0;
+    unsigned int base_index = 0;
     unsigned int material_index = INVALID_MATERIAL;
 };
 
@@ -38,19 +38,17 @@ struct Mesh {
     GM_Vec3 position;
     GM_Quaternion orientation;
     GM_Vec3 scale;
-    Geometry geometry;
 
     std::vector<MeshEntry> meshes;
     std::vector<Material> materials;
     unsigned int SSBOs[BUFFER_COUNT];
 
     Mesh();
-    Mesh(Geometry geometry, VertexAttributeFlag flags = VertexAttributeFlag::PNTBundle);
+    Mesh(Geometry geometry);
     Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags = VertexAttributeFlag::PNTBundle);
     Mesh(const std::string &path, unsigned int assimp_flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
-    virtual void draw();
-    virtual void draw(unsigned int instance_count);
+    void draw();
 
     void setPosition(GM_Vec3 position);
     void setPosition(float x, float y, float z);
@@ -64,6 +62,11 @@ struct Mesh {
     void setScale(float scale_x, float scale_y, float scale_z);
 
     GM_Matrix4 getTransform();
+
+    static Mesh* Quad();
+    static Mesh* AABB();
+    static Mesh* Cube();
+    static Mesh* Sphere(int segments);
     // GM_AABB getAABB();
 private:
     GM_AABB base_aabb;

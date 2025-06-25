@@ -1,6 +1,7 @@
 #include <ckg.h>
 #include <shader.hpp>
 #include <stb_image.h>
+#include <glad/glad.h>
 
 typedef enum ShaderType{
     INVALID_SHADER,
@@ -128,14 +129,14 @@ void Shader::use() const {
 
 // Date: June 19, 2025
 // TODO(Jovanni): Re-enable this in time
-GLint Shader::getUniformLocation(const char* name, GLenum type) const {
+int Shader::getUniformLocation(const char* name, unsigned int gl_type) const {
     GLint location = glGetUniformLocation(this->id, name);
     if (location == -1) {
         CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
     }
 
-    if (location != -1 && this->uniforms.at(name) != type) {
-        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' Is the wrong type!\nExpected: %d | Got: %d\n", this->path, name, type, this->uniforms.at(name));
+    if (location != -1 && this->uniforms.at(name) != gl_type) {
+        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' Is the wrong type!\nExpected: %d | Got: %d\n", this->path, name, gl_type, this->uniforms.at(name));
     }
 
     return location;

@@ -3,10 +3,11 @@
 #include <map>
 #include <string>
 #include <array>
-#include <glad/glad.h>
 
 #include <ckg.h>
 #include <stb_image.h>
+
+#include <glad/glad.h>
 
 enum TextureFlag {
     TEXTURE_DEFAULT = 0x0,

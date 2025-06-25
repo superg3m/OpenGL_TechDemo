@@ -1,17 +1,16 @@
-#include <Mesh.hpp>
 #include <TextureLoader.hpp>
-#include <ckg.h>
+#include <Mesh.hpp>
 
-static std::map<TextureType, aiTextureType> textureTypeToAssimpType = {
-    { TEXTURE_TYPE_DIFFUSE, aiTextureType_DIFFUSE },
-    { TEXTURE_TYPE_SPECULAR, aiTextureType_SPECULAR },
-    { TEXTURE_TYPE_NORMAL, aiTextureType_NORMALS }, // Standard normal maps
-    { TEXTURE_TYPE_METALNESS, aiTextureType_METALNESS },
-    { TEXTURE_TYPE_EMISSIVE, aiTextureType_EMISSIVE },
-    { TEXTURE_TYPE_NORMAL_CAMERA, aiTextureType_NORMAL_CAMERA }, // Direct match in newer Assimp
-    { TEXTURE_TYPE_EMISSION_COLOR, aiTextureType_EMISSION_COLOR }, // Direct match in newer Assimp
-    { TEXTURE_TYPE_ROUGHNESS, aiTextureType_DIFFUSE_ROUGHNESS }, // Common for PBR roughness
-    { TEXTURE_TYPE_AMBIENT_OCCLUSION, aiTextureType_AMBIENT_OCCLUSION }
+static std::map<TextureUnitType, aiTextureType> textureTypeToAssimpType = {
+    { TEXTURE_UNIT_DIFFUSE, aiTextureType_DIFFUSE },
+    { TEXTURE_UNIT_SPECULAR, aiTextureType_SPECULAR },
+    { TEXTURE_UNIT_NORMAL, aiTextureType_NORMALS }, // Standard normal maps
+    { TEXTURE_UNIT_METALNESS, aiTextureType_METALNESS },
+    { TEXTURE_UNIT_EMISSIVE, aiTextureType_EMISSIVE },
+    { TEXTURE_UNIT_NORMAL_CAMERA, aiTextureType_NORMAL_CAMERA }, // Direct match in newer Assimp
+    { TEXTURE_UNIT_EMISSION_COLOR, aiTextureType_EMISSION_COLOR }, // Direct match in newer Assimp
+    { TEXTURE_UNIT_ROUGHNESS, aiTextureType_DIFFUSE_ROUGHNESS }, // Common for PBR roughness
+    { TEXTURE_UNIT_AMBIENT_OCCLUSION, aiTextureType_AMBIENT_OCCLUSION }
     // TEXTURE_COUNT does not map to an Assimp texture type
 };
 
@@ -21,6 +20,17 @@ Mesh::Mesh() {
     this->scale = GM_Vec3(1, 1, 1);
     this->base_aabb = GM_AABB(GM_Vec3(0, 0, 0), GM_Vec3(0, 0, 0));
     this->materials.reserve(1);
+}
+
+Mesh::Mesh(Geometry geometry) {
+    this->VAO = geometry.VAO;
+    this->SSBOs[VERTEX_BUFFER] = geometry.VBO;
+    this->SSBOs[INDEX_BUFFER] = geometry.EBO;
+    this->position = GM_Vec3(0, 0, 0);
+    this->orientation = GM_Quaternion::identity();
+    this->scale = GM_Vec3(1, 1, 1);
+
+    // this->base_aabb = this->base_aabb_from_vertices(vertices);
 }
 
 Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags) {
@@ -58,23 +68,23 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
     std::vector<Material> materials;
     materials.reserve(scene->mNumMaterials);
 
-    unsigned int vertex_count;
-    unsigned int index_count;
+    unsigned int total_vertex_count = 0;
+    unsigned int total_index_count = 0;
     for (unsigned int i = 0 ; i < this->meshes.size() ; i++) {
         this->meshes[i].material_index = scene->mMeshes[i]->mMaterialIndex;
         this->meshes[i].index_count = scene->mMeshes[i]->mNumFaces * 3;
-        this->meshes[i].vertex_count = vertex_count;
-        this->meshes[i].index_count = index_count;
+        this->meshes[i].base_vertex = total_vertex_count;
+        this->meshes[i].base_index = total_index_count;
 
-        vertex_count += scene->mMeshes[i]->mNumVertices;
-        index_count  += this->meshes[i].index_count;
+        total_vertex_count += scene->mMeshes[i]->mNumVertices;
+        total_index_count  += this->meshes[i].index_count;
     }
 
     std::vector<Vertex> vertices;
-    vertices.reserve(vertex_count);
+    vertices.reserve(total_vertex_count);
 
     std::vector<unsigned int> indices;
-    indices.reserve(index_count);
+    indices.reserve(total_index_count);
 
     for (unsigned int i = 0 ; i < this->meshes.size() ; i++) {
         const aiMesh* paiMesh = scene->mMeshes[i];
@@ -121,10 +131,10 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
         }
 
         for (int type_int = 0; type_int < TEXTURE_COUNT; ++type_int) {
-            TextureType type = static_cast<TextureType>(type_int);
+            TextureUnitType type = static_cast<TextureUnitType>(type_int);
 
             if (textureTypeToAssimpType.count(type) == 0) {
-                CKG_LOG_WARN("Skipping TextureType: %s | Reason: has no Assimp mapping.\n", texture_to_string[type]);
+                CKG_LOG_WARN("Skipping TextureUnitType: %s | Reason: has no Assimp mapping.\n", texture_to_string[type]);
                 continue;
             }
     
@@ -258,3 +268,21 @@ GM_Matrix4 Mesh::getAABBTransform() {
     return transform;
 }
 */
+
+void Mesh::draw() {
+    glBindVertexArray(this->VAO);
+
+    for (unsigned int mesh_index = 0 ; mesh_index < this->meshes.size() ; mesh_index++) {
+        unsigned int material_index = this->meshes[mesh_index].material_index;
+
+        glDrawElementsBaseVertex(
+            GL_TRIANGLES, this->meshes[mesh_index].index_count, 
+            GL_UNSIGNED_INT, 
+            (void*)(sizeof(unsigned int) * this->meshes[mesh_index].base_index), 
+            this->meshes[mesh_index].base_index
+        );
+    }
+
+    // Make sure the VAO is not changed from the outside
+    glBindVertexArray(0);
+}

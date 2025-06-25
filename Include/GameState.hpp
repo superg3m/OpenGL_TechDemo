@@ -43,8 +43,8 @@ struct DrawElementsCommand {
     static Camera camera;
     static float deltaTime;
     static MousePicker picker;
-    static float xoffset;
-    static float yoffset;
+
+    static Mesh* skybox;
     static Mesh* selected_mesh;
     static std::vector<Mesh*> meshes;
 

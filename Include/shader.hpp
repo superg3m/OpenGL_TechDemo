@@ -4,8 +4,6 @@
 #include <vector>
 #include <map>
 
-#include <glad/glad.h>
-
 #include <gm.hpp>
 
 using GLTextureID = int;
@@ -30,9 +28,8 @@ struct Shader {
     void bindTexture(std::string name, GLTextureID textureID);
     void unbindTextures();
 private:
-    std::map<std::string, GLenum> uniforms;
+    std::map<std::string, unsigned int> uniforms;
     void setTexture(const char* name, int value);
-    GLint getAttributeLocation(const char* name) const;
-    GLint getUniformLocation(const char* name, GLenum type) const;
+    int getUniformLocation(const char* name, unsigned int gl_type) const;
     void checkCompileError(unsigned int shaderID, const char* type);
 };

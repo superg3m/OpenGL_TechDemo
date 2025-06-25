@@ -239,7 +239,6 @@ void GameState::initalizeInputBindings() {
     static float current_time = 3*PI / 2.0f;
     profile->bind(IOD_KEY_T, IOD_InputState::PRESSED|IOD_InputState::DOWN,
         [&]() {
-            
             current_time += GameState::deltaTime;
             this->basic_shader.setFloat("uTime", current_time);
             this->basic_shader.setBool("uGeometryShader", true);
@@ -248,7 +247,7 @@ void GameState::initalizeInputBindings() {
 
     profile->bind(IOD_KEY_T, IOD_InputState::RELEASED,
         [&]() {
-            current_time = 3*PI / 2.0f;
+            current_time = 3.0f*PI / 2.0f;
             this->basic_shader.setBool("uGeometryShader", false);
         }
     );

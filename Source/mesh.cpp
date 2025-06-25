@@ -29,6 +29,7 @@ Mesh::Mesh(Geometry geometry) {
     this->position = GM_Vec3(0, 0, 0);
     this->orientation = GM_Quaternion::identity();
     this->scale = GM_Vec3(1, 1, 1);
+    this->materials.reserve(1);
 
     // this->base_aabb = this->base_aabb_from_vertices(vertices);
 }
@@ -37,7 +38,7 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> 
     this->position = GM_Vec3(0, 0, 0);
     this->orientation = GM_Quaternion::identity();
     this->scale = GM_Vec3(1, 1, 1);
-
+    this->materials.reserve(1);
     // this->base_aabb = this->base_aabb_from_vertices(vertices);
 
     glGenVertexArrays(1, &this->VAO);

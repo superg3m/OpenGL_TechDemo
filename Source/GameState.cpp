@@ -379,7 +379,7 @@ void GameState::update(GLFWwindow* window, float dt) {
     sort_entities_by_camera(GameState::transparent_meshes);
 
     if (GameState::selected_mesh && GameState::mouse_captured) {
-        // GameState::selected_mesh->should_render_aabb = false;
+        GameState::selected_mesh->should_render_aabb = false;
         GameState::selected_mesh = nullptr;
     } else if (!GameState::mouse_captured) {
         GameState::picker.update(this->getProjectionMatrix(), GameState::camera.get_view_matrix());

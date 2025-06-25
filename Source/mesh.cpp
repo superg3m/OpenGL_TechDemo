@@ -76,6 +76,7 @@ Mesh::Mesh(const std::string &path, unsigned int assimp_flags) {
     glBindVertexArray(this->VAO);
     glGenBuffers(ArrayCount(this->SSBOs), this->SSBOs);
 
+    CKG_LOG_DEBUG("Loading: %s\n", path.c_str());
     this->loadMeshFromScene(path, scene);
     MeshLoader::registerMesh(path, *this);
 }
@@ -138,6 +139,41 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
 
     for (unsigned int i = 0 ; i < scene->mNumMaterials ; i++) {
         const aiMaterial* ai_material = scene->mMaterials[i];
+
+        aiColor4D ambient_color(0.0f, 0.0f, 0.0f, 0.0f);
+        GM_Vec4 white = GM_Vec4(1.0f);
+
+        int ShadingModel = 0;
+        if (ai_material->Get(AI_MATKEY_SHADING_MODEL, ShadingModel) == AI_SUCCESS) {
+            CKG_LOG_DEBUG("Shading model %d\n", ShadingModel);
+        }
+
+        if (ai_material->Get(AI_MATKEY_COLOR_AMBIENT, ambient_color) == AI_SUCCESS) {
+            CKG_LOG_DEBUG("Loaded ambient color [%f %f %f]\n", ambient_color.r, ambient_color.g, ambient_color.b);
+            this->materials[i].ambient_color.r = ambient_color.r;
+            this->materials[i].ambient_color.g = ambient_color.g;
+            this->materials[i].ambient_color.b = ambient_color.b;
+        } else {
+            this->materials[i].ambient_color = white;
+        }
+
+        aiColor3D diffuse_color(0.0f, 0.0f, 0.0f);
+
+        if (ai_material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse_color) == AI_SUCCESS) {
+            CKG_LOG_DEBUG("Loaded diffuse color [%f %f %f]\n", diffuse_color.r, diffuse_color.g, diffuse_color.b);
+            this->materials[i].diffuse_color.r = diffuse_color.r;
+            this->materials[i].diffuse_color.g = diffuse_color.g;
+            this->materials[i].diffuse_color.b = diffuse_color.b;
+        }
+
+        aiColor3D specular_color(0.0f, 0.0f, 0.0f);
+
+        if (ai_material->Get(AI_MATKEY_COLOR_SPECULAR, specular_color) == AI_SUCCESS) {
+            CKG_LOG_DEBUG("Loaded specular color [%f %f %f]\n", specular_color.r, specular_color.g, specular_color.b);
+            this->materials[i].specular_color.r = specular_color.r;
+            this->materials[i].specular_color.g = specular_color.g;
+            this->materials[i].specular_color.b = specular_color.b;
+        }
 
         float opacity = 1.0f;
         if (ai_material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {

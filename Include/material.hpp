@@ -8,7 +8,7 @@
 struct PBR_Material {
     float roughness = 0.0f;
     bool isMetal = false;
-    GM_Vec3 color = GM_Vec3(0.0f, 0.0f, 0.0f);
+    GM_Vec4 color = GM_Vec4(0.0f, 0.0f, 0.0f, 0.0f);
     GLTextureID albedo_map = 0;
     GLTextureID roughness_map = 0;
     GLTextureID metallic_map = 0;
@@ -44,8 +44,10 @@ static const char* texture_to_string[TEXTURE_COUNT] = {
 
 struct Material {
     std::string name;
-
-    GM_Vec4 color;
+    GM_Vec4 color = GM_Vec4(1);
+    GM_Vec4 ambient_color  = GM_Vec4(0);
+    GM_Vec4 diffuse_color  = GM_Vec4(0);
+    GM_Vec4 specular_color = GM_Vec4(0);
     float opacity = 1.0f;
     float alpha_test = 0.0f;
 

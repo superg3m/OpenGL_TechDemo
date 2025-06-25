@@ -44,7 +44,7 @@ struct Vertex {
     }
 
     Vertex(GM_Vec3 pos, GM_Vec3 norm, GM_Vec2 uv, GM_Vec3 tangent, GM_Vec3 bitangent, GM_Vec4 color, GM_Vec4 boneIDs, GM_Vec4 bone_weights) : Vertex(pos, norm, uv, tangent, bitangent, color) {
-        this->aBoneIDs = aBoneIDs;
+        this->aBoneIDs = boneIDs;
         this->aBoneWeights = bone_weights;
     }
 };

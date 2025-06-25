@@ -10,7 +10,7 @@ using GLTextureID = int;
 struct Shader {
     unsigned int id;
     const char* path;
-    int activeTextureCount;
+    int activeTextureCount = 0;
     Shader() = default;
     Shader(std::vector<const char*> shader_paths);
 
@@ -31,5 +31,5 @@ private:
     std::map<std::string, unsigned int> uniforms;
     void setTexture(const char* name, int value);
     int getUniformLocation(const char* name, unsigned int gl_type) const;
-    void checkCompileError(unsigned int shaderID, const char* type);
+    void checkCompileError(unsigned int shaderID, std::string type);
 };

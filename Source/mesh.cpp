@@ -27,9 +27,12 @@ Mesh::Mesh(Geometry geometry) {
     this->VAO = geometry.VAO;
     this->SSBOs[VERTEX_BUFFER] = geometry.VBO;
     this->SSBOs[INDEX_BUFFER] = geometry.EBO;
+
     this->position = GM_Vec3(0, 0, 0);
     this->orientation = GM_Quaternion::identity();
     this->scale = GM_Vec3(1, 1, 1);
+    this->should_render_aabb = false;
+
     this->materials.resize(1);
     this->meshes.resize(1);
 
@@ -55,7 +58,7 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> 
     this->loadMeshFromData(vertices, indices, flags);
 }
 
-Mesh::Mesh(const std::string &path, unsigned int assimp_flags) {
+Mesh::Mesh(const std::string &path, unsigned int texture_flags, unsigned int assimp_flags) {
     if (MeshLoader::meshes.count(path)) {
         *this = MeshLoader::getMesh(path);
         return;
@@ -64,11 +67,12 @@ Mesh::Mesh(const std::string &path, unsigned int assimp_flags) {
     this->position = GM_Vec3(0, 0, 0);
     this->orientation = GM_Quaternion::identity();
     this->scale = GM_Vec3(1, 1, 1);
+    this->texture_flags = texture_flags;
 
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, assimp_flags);
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        CKG_LOG_ERROR("ASSIMP ERROR: %s | File: %s\n", importer.GetErrorString(), path);
+        CKG_LOG_ERROR("ASSIMP ERROR: %s\n", importer.GetErrorString());
         return;
     }
 
@@ -105,43 +109,45 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
         indices.reserve(total_index_count);
     
         for (unsigned int i = 0 ; i < this->meshes.size() ; i++) {
-            const aiMesh* paiMesh = scene->mMeshes[i];
+            const aiMesh* ai_mesh = scene->mMeshes[i];
             const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
 
             Vertex v = Vertex();
-            for (unsigned int i = 0; i < paiMesh->mNumVertices; i++) {
-                const aiVector3D& position = paiMesh->mVertices[i];
+            for (unsigned int j = 0; j < ai_mesh->mNumVertices; j++) {
+                const aiVector3D& ai_position = ai_mesh->mVertices[j];
 
-                v.aPosition = GM_Vec3(position.x, position.y, position.z);
+                v.aPosition = GM_Vec3(ai_position.x, ai_position.y, ai_position.z);
 
-                if (paiMesh->mNormals) {
-                    const aiVector3D& pNormal = paiMesh->mNormals[i];
+                if (ai_mesh->mNormals) {
+                    const aiVector3D& pNormal = ai_mesh->mNormals[j];
                     v.aNormal = GM_Vec3(pNormal.x, pNormal.y, pNormal.z);
                 } else {
                     aiVector3D Normal(0.0f, 1.0f, 0.0f);
                     v.aNormal = GM_Vec3(Normal.x, Normal.y, Normal.z);
                 }
 
-                const aiVector3D& uv = paiMesh->HasTextureCoords(0) ? paiMesh->mTextureCoords[0][i] : Zero3D;
+                const aiVector3D& uv = ai_mesh->HasTextureCoords(0) ? ai_mesh->mTextureCoords[0][j] : Zero3D;
                 v.aTexCoord = GM_Vec2(uv.x, uv.y);
 
                 vertices.push_back(v);
             }
 
-            for (unsigned int i = 0; i < paiMesh->mNumFaces; i++) {
-                const aiFace& Face = paiMesh->mFaces[i];
-                indices.push_back(Face.mIndices[0]);
-                indices.push_back(Face.mIndices[1]);
-                indices.push_back(Face.mIndices[2]);
+            for (unsigned int j = 0; j < ai_mesh->mNumFaces; j++) {
+                const aiFace& Face = ai_mesh->mFaces[j];
+                if (Face.mNumIndices == 3) {
+                    indices.push_back(Face.mIndices[0]);
+                    indices.push_back(Face.mIndices[1]);
+                    indices.push_back(Face.mIndices[2]);
+                } else {
+                    CKG_LOG_ERROR("Mesh '%s' has non-triangular face with %d indices. Skipping.\n", ai_mesh->mName.C_Str(), Face.mNumIndices);
+                }
             }
         }    
-
         setup(VertexAttributeFlag::PNTBundle, vertices, indices);
     } // geometry end
 
     { // materials start
         std::string directory = path.substr(0, path.find_last_of('/'));
-
         for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             const aiMaterial* ai_material = scene->mMaterials[i];
 
@@ -194,22 +200,21 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
                 aiString str;
                 if (ai_material->GetTexture(ai_type, 0, &str, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
                     std::string texture_id_or_path = std::string(str.C_Str());
-
                     const aiTexture* ai_texture = scene->GetEmbeddedTexture(str.C_Str());
 
                     if (ai_texture) {
-                        int width, height, nrChannel = 0;
-                        u8* image_data = stbi_load_from_memory((u8*)ai_texture->pcData, ai_texture->mWidth, &width, &height, &nrChannel, 0);
-                        GLTextureID id = TextureLoader::loadTextureFromMemory(image_data, width, height, nrChannel);
-                        TextureLoader::registerTexture(texture_id_or_path, id);
+                        // int width, height, nrChannel = 0;
+                        // u8* image_data = stbi_load_from_memory((u8*)ai_texture->pcData, ai_texture->mWidth, &width, &height, &nrChannel, 0);
+                        // GLTextureID id = TextureLoader::loadTextureFromMemory(image_data, width, height, nrChannel);
+                        // TextureLoader::registerTexture(texture_id_or_path, id);
                         CKG_LOG_DEBUG("Loaded embedded Texture\n");
                     } else {
                         std::string filename = directory + '/' + texture_id_or_path;
+                        CKG_LOG_DEBUG("Material: %d | has external texture of type: %s\n", i, texture_to_string[type]);
                         if (TextureLoader::textures.count(filename) == 0) {
-                            TextureLoader::registerTexture(filename, filename.c_str());
+                            TextureLoader::registerTexture(filename, filename.c_str(), this->texture_flags);
                         }
                         this->materials[i].textures[type] = TextureLoader::textures.at(filename);
-                        CKG_LOG_DEBUG("Material: %d | has external texture of type: %s\n", i, texture_to_string[type]);
                     }
                 } else {
                     CKG_LOG_ERROR("Failed to get texture path for material: %d | type: %s\n", i, texture_to_string[type]);
@@ -222,25 +227,25 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
 void Mesh::loadMeshFromData(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags) {
     this->materials.resize(1);
     this->meshes.resize(1);
-    this->meshes[0].vertex_count = vertices.size();
-    this->meshes[0].index_count  = indices.size();
+    this->meshes[0].vertex_count = (unsigned int)vertices.size();
+    this->meshes[0].index_count  = (unsigned int)indices.size();
     this->meshes[0].base_vertex  = 0;
     this->meshes[0].base_index   = 0;
     this->meshes[0].material_index = 0;
 
-    setup(VertexAttributeFlag::PNTBundle, vertices, indices);
+    setup(flags, vertices, indices);
 }
 
-void Mesh::setPosition(GM_Vec3 position) {
-    this->position = position;
+void Mesh::setPosition(GM_Vec3 p) {
+    this->position = p;
 }
 
 void Mesh::setPosition(float x, float y, float z) {
     this->position = GM_Vec3(x, y, z);
 }
 
-void Mesh::setOrientation(GM_Quaternion orientation) {
-    this->orientation = orientation;
+void Mesh::setOrientation(GM_Quaternion orient) {
+    this->orientation = orient;
 }
 
 void Mesh::setEulerAngles(GM_Vec3 euler) {
@@ -251,12 +256,12 @@ void Mesh::setEulerAngles(float theta_x, float theta_y, float theta_z) {
     this->orientation = GM_Quaternion::fromEuler(GM_Vec3(theta_x, theta_y, theta_z));
 }
 
-void Mesh::setScale(float scale) {
-    this->scale = GM_Vec3(scale, scale, scale);
+void Mesh::setScale(float scalar) {
+    this->scale = GM_Vec3(scalar, scalar, scalar);
 }
 
-void Mesh::setScale(GM_Vec3 scale) {
-    this->scale = scale;
+void Mesh::setScale(GM_Vec3 s) {
+    this->scale = s;
 }
 
 void Mesh::setScale(float scale_x, float scale_y, float scale_z) {
@@ -296,16 +301,15 @@ void Mesh::setup(VertexAttributeFlag flags, const std::vector<Vertex>& vertices,
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->SSBOs[INDEX_BUFFER]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
-    bool hasPosition   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aPosition);
-    bool hasNormal     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aNormal);
-    bool hasTexCoord   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aTexCoord);
-    bool hasTanget     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aTangent);
-    bool hasBitanget   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBitangent);
-    bool hasColor      = hasVertexAttributeFlag(flags, VertexAttributeFlag::aColor);
-    bool hasBoneID     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneIDs);
-    bool hasBoneWeight = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneWeights);
+    // bool hasPosition   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aPosition);
+    // bool hasNormal     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aNormal);
+    // bool hasTexCoord   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aTexCoord);
+    // bool hasTanget     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aTangent);
+    // bool hasBitanget   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBitangent);
+    // bool hasColor      = hasVertexAttributeFlag(flags, VertexAttributeFlag::aColor);
+    // bool hasBoneID     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneIDs);
+    // bool hasBoneWeight = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneWeights);
     size_t offset = 0;
-
     for (const auto& desc : ALL_ATTRIBUTE_DESCRIPTORS) {
         if (hasVertexAttributeFlag(flags, desc.flag)) {
             glEnableVertexAttribArray(desc.location);
@@ -329,7 +333,7 @@ void Mesh::draw() {
     glBindVertexArray(this->VAO);
 
     for (unsigned int mesh_index = 0 ; mesh_index < this->meshes.size() ; mesh_index++) {
-        unsigned int material_index = this->meshes[mesh_index].material_index;
+        // unsigned int material_index = this->meshes[mesh_index].material_index;
 
         if (this->meshes[mesh_index].index_count > 0) {
             glDrawElementsBaseVertex(

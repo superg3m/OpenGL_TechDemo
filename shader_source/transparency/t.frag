@@ -15,5 +15,5 @@ void main() {
         result.a = uOpacity;
     }
 
-    FragColor = result;
+    FragColor = vec4(result);
 }

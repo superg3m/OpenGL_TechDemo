@@ -180,19 +180,17 @@ TextureAtlas::TextureAtlas(std::string key, const char *file, int texture_flags)
     ckg_assert_msg(ckg_io_path_exists(file), "Texture path: '%s' doesn't exist!\n", file);
     GLenum TEXTURE_VERTICAL_FLIP = GET_BIT(texture_flags, 1);
 
-    unsigned int texture;
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(TEXTURE_VERTICAL_FLIP);
-
     u8 *data = stbi_load(file, &width, &height, &nrChannels, 0);
 
-    GLenum format = 0;
+    GLenum l_format = 0;
     if (nrChannels == 1) {
-        format = GL_RED;
+        l_format = GL_RED;
     } else if (nrChannels == 3) {
-        format = GL_RGB;
+        l_format = GL_RGB;
     } else if (nrChannels == 4) {
-        format = GL_RGBA;
+        l_format = GL_RGBA;
     } else {
         CKG_LOG_ERROR("TextureLoader | Failed to pick a stb format, most likely related to assimp, try to link your libraries in a different order\n");
         ckg_assert(FALSE);
@@ -202,9 +200,7 @@ TextureAtlas::TextureAtlas(std::string key, const char *file, int texture_flags)
         this->atlasTexture = data;
         this->m_height = height;
         this->m_width = width;
-        this->format = format;
-
-
+        this->format = l_format;
     } else {
         CKG_LOG_ERROR("TextureLoader | Failed to load texture\n"); 
     }

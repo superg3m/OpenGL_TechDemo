@@ -154,6 +154,11 @@ void GameState::initalizeResources() {
         GM_Vec3(-1.3f,  1.0f, -1.5f)
     };
 
+    Mesh* villa = new Mesh("../../assets/rabbit/Rabbit_Low_Poly.fbx");
+    villa->setPosition(GM_Vec3(5.0f, 0.0f, 0.0f));
+    villa->setScale(5.0f);
+    villa->setEulerAngles(-90, 0, 0);
+    GameState::meshes.push_back(villa);
 
     GM_Vec3 backpackBasePosition = GM_Vec3(-10.0f, 0.0f, 100.0f);   
 
@@ -167,12 +172,6 @@ void GameState::initalizeResources() {
         backpack->setEulerAngles(0, 90, 0);
         GameState::meshes.push_back(backpack);
     }
-
-    Mesh* car = new Mesh("../../assets/car/car.glb", TEXTURE_VERTICAL_FLIP);
-    car->setPosition(GM_Vec3(10.0f, 0.0f, -3.0f));
-    car->setScale(0.01f);
-    car->setEulerAngles(0, 0, 0);
-    GameState::meshes.push_back(car);
 
     Mesh* window_transparent =  new Mesh(Geometry::Quad());
     window_transparent->setPosition(GM_Vec3(-3.0f,  0.0f, 2.0f));
@@ -357,6 +356,8 @@ void GameState::update(GLFWwindow* window, float dt) {
     int substeps = 8;
     float substep_dt = dt / (float)substeps;
     for (int step = 0; step < substeps; step++) {
+        (void)substep_dt;
+        (void)step;
         // physics
         // collisions
         // etc.
@@ -364,7 +365,7 @@ void GameState::update(GLFWwindow* window, float dt) {
 
     // sort entities based on camera and if its transparent or not!
     const auto sort_entities_by_camera = [](std::vector<Mesh*>& meshes) {
-        for (int i = 0; i < meshes.size() - 1; i++) {
+        for (int i = 0; i < meshes.size(); i++) {
             Mesh* meshA = meshes[i];
             float a_distance = GM_Vec3::distance(meshA->position, GameState::camera.position);
             for (int j = i + 1; j < meshes.size(); j++) {
@@ -418,7 +419,6 @@ void GameState::update(GLFWwindow* window, float dt) {
         }
     };
 
-
     if (GameState::selected_mesh && (IOD::getInputState(IOD_MOUSE_BUTTON_LEFT) == IOD_InputState::DOWN)) {
         GM_Matrix4 view = GameState::camera.get_view_matrix();
         GM_Vec4 objectViewSpace = view * GM_Vec4(GameState::selected_mesh->position, 1.0f);
@@ -427,7 +427,6 @@ void GameState::update(GLFWwindow* window, float dt) {
             GameState::selected_mesh->position.z = world_space.z;
             GameState::selected_mesh->position.y = world_space.y;
         } else {
-            GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
             GameState::selected_mesh->position.x = world_space.x;
             GameState::selected_mesh->position.y = world_space.y;
         }
@@ -452,12 +451,12 @@ void GameState::render() {
 
     // Render Skyboxes
     glDepthFunc(GL_LEQUAL);
-    GM_Matrix4 model = GM_Matrix4::identity();
+    GM_Matrix4 skybox_model = GM_Matrix4::identity();
     GM_Matrix4 withoutTranslationView = sourceView;
     withoutTranslationView.v[0].w = 0.0f;
     withoutTranslationView.v[1].w = 0.0f;
     withoutTranslationView.v[2].w = 0.0f;
-    this->skybox_shader.setMat4("uMVP", projection * withoutTranslationView * model);
+    this->skybox_shader.setMat4("uMVP", projection * withoutTranslationView * skybox_model);
     GameState::skybox->draw();
     glDepthFunc(GL_LESS);
 
@@ -472,7 +471,7 @@ void GameState::render() {
     //  point lights
     for (int i = 0; i < GameState::lights.size(); i++) {
         Mesh* light = GameState::lights[i];
-        GM_Matrix4 model = light->getTransform();
+        GM_Matrix4 light_model = light->getTransform();
         GM_Matrix4 view = sourceView;
 
         GM_Vec3 light_color = GM_Vec3(light->materials[0].color);
@@ -487,20 +486,19 @@ void GameState::render() {
         this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].quadratic").c_str(), 0.032f);
 
         this->light_shader.use();
-        this->light_shader.setMat4("uModel", model);
+        this->light_shader.setMat4("uModel", light_model);
         this->light_shader.setMat4("uView",view);
         this->light_shader.setMat4("uProjection", projection);
         this->light_shader.setVec4("uObjectColor", light->materials[0].color);
-
-        // don't do the draw here push the drawCommand
         light->draw();
+        this->light_shader.unbindTextures();
 
         if (light->should_render_aabb) {
-            model = light->getAABBTransform();
+            GM_Matrix4 aabb_model = light->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
             this->aabb_shader.use();
             this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
-            this->aabb_shader.setMat4("uMVP", projection * view * model);
+            this->aabb_shader.setMat4("uMVP", projection * view * aabb_model);
             aabb_mesh.draw();
         }
     }
@@ -518,11 +516,11 @@ void GameState::render() {
     this->basic_shader.setFloat("uSpotLight.outerCutOff", cosf((float)DEGREES_TO_RAD(15.0f)));
 
     for (Mesh* mesh : GameState::meshes) {
-        GM_Matrix4 model = mesh->getTransform();
+        GM_Matrix4 mesh_model = mesh->getTransform();
         GM_Matrix4 view = sourceView;
 
         this->basic_shader.use();
-        this->basic_shader.setMat4("uModel", model);
+        this->basic_shader.setMat4("uModel", mesh_model);
         this->basic_shader.setMat4("uView", view);
         this->basic_shader.setMat4("uProjection", projection);
         this->basic_shader.setVec3("uViewPosition", GameState::camera.position);
@@ -544,7 +542,7 @@ void GameState::render() {
         if (mesh->should_render_aabb) {
             glDisable(GL_DEPTH_TEST);
             this->outline_shader.use();
-            this->outline_shader.setMat4("uModel", model);
+            this->outline_shader.setMat4("uModel", mesh_model);
             this->outline_shader.setMat4("uView", view);
             this->outline_shader.setMat4("uProjection", projection);
             this->outline_shader.setFloat("uOutlineScale", 0.02f);
@@ -553,11 +551,11 @@ void GameState::render() {
             glStencilMask(0xFF);
             glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
-            model = mesh->getAABBTransform();
+            GM_Matrix4 aabb_model = mesh->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
             this->aabb_shader.use();
             this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
-            this->aabb_shader.setMat4("uMVP", projection * view * model);
+            this->aabb_shader.setMat4("uMVP", projection * view * aabb_model);
             aabb_mesh.draw();
         } else {
             glStencilMask(0xFF);
@@ -566,25 +564,26 @@ void GameState::render() {
     }
 
     glEnable(GL_BLEND);
-    for (int i = GameState::transparent_meshes.size() - 1; i >= 0; i--) {
+    for (int i = (int)GameState::transparent_meshes.size() - 1; i >= 0; i--) {
         Mesh* mesh = GameState::transparent_meshes[i];
-        GM_Matrix4 model = mesh->getTransform();
+        GM_Matrix4 transparent_model = mesh->getTransform();
         GM_Matrix4 view = sourceView;
 
         this->transparent_shader.use();
-        this->transparent_shader.setMat4("uModel", model);
+        this->transparent_shader.setMat4("uModel", transparent_model);
         this->transparent_shader.setMat4("uView", view);
         this->transparent_shader.setMat4("uProjection", projection);
         this->transparent_shader.setFloat("uOpacity", mesh->materials[0].opacity);
-        this->transparent_shader.bindTexture("uTexture", mesh->materials[0].textures[TEXTURE_TYPE_DIFFUSE]);
+        this->transparent_shader.bindTexture("uTexture", TextureLoader::getTexture(WINDOW));
         mesh->draw();
+        this->transparent_shader.unbindTextures();
 
         if (mesh->should_render_aabb) {
-            model = mesh->getAABBTransform();
+            GM_Matrix4 aabb_model = mesh->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
             this->aabb_shader.use();
             this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
-            this->aabb_shader.setMat4("uMVP", projection * view * model);
+            this->aabb_shader.setMat4("uMVP", projection * view * aabb_model);
             aabb_mesh.draw();
         }
     }

@@ -204,8 +204,8 @@ Geometry Geometry::Sphere(int segments) {
 }
 
 void Geometry::setup(VertexAttributeFlag flags, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
-    this->vertex_count = vertices.size();
-    this->index_count = indices.size();
+    this->vertex_count = (unsigned int)vertices.size();
+    this->index_count = (unsigned int)indices.size();
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -218,14 +218,14 @@ void Geometry::setup(VertexAttributeFlag flags, const std::vector<Vertex>& verti
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->index_count * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
-    bool hasPosition   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aPosition);
-    bool hasNormal     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aNormal);
-    bool hasTexCoord   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aTexCoord);
-    bool hasTanget     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aTangent);
-    bool hasBitanget   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBitangent);
-    bool hasColor      = hasVertexAttributeFlag(flags, VertexAttributeFlag::aColor);
-    bool hasBoneID     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneIDs);
-    bool hasBoneWeight = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneWeights);
+    // bool hasPosition   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aPosition);
+    // bool hasNormal     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aNormal);
+    // bool hasTexCoord   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aTexCoord);
+    // bool hasTanget     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aTangent);
+    // bool hasBitanget   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBitangent);
+    // bool hasColor      = hasVertexAttributeFlag(flags, VertexAttributeFlag::aColor);
+    // bool hasBoneID     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneIDs);
+    // bool hasBoneWeight = hasVertexAttributeFlag(flags, VertexAttributeFlag::aBoneWeights);
     size_t offset = 0;
 
     for (const auto& desc : ALL_ATTRIBUTE_DESCRIPTORS) {

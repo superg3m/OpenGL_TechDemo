@@ -22,7 +22,6 @@
 #define CRATE2_SPECULAR "Crate2_Specular"
 
 #define WINDOW "Window"
-#define WINDOW2 "Window2"
 
 /*
 struct DrawElementsCommand {

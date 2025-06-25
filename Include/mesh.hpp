@@ -7,6 +7,7 @@
 #include <Material.hpp>
 #include <Vertex.hpp>
 #include <Geometry.hpp>
+#include <TextureLoader.hpp>
 // TODO(Jovanni): Consider removing transform from Mesh, 
 // as entities typically have transforms, not meshes themselves.
 
@@ -34,6 +35,7 @@ struct Mesh {
     GM_Vec3 position;
     GM_Quaternion orientation;
     GM_Vec3 scale;
+    unsigned int texture_flags = TEXTURE_DEFAULT;
 
     std::vector<MeshEntry> meshes;
     std::vector<Material> materials;
@@ -44,19 +46,19 @@ struct Mesh {
     Mesh();
     Mesh(Geometry geometry);
     Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags = VertexAttributeFlag::PNTBundle);
-    Mesh(const std::string &path, unsigned int assimp_flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
+    Mesh(const std::string &path, unsigned int texture_flags = TEXTURE_DEFAULT, unsigned int assimp_flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
     void draw();
 
-    void setPosition(GM_Vec3 position);
+    void setPosition(GM_Vec3 p);
     void setPosition(float x, float y, float z);
 
-    void setOrientation(GM_Quaternion orientation);
+    void setOrientation(GM_Quaternion orient);
     void setEulerAngles(GM_Vec3 euler);
     void setEulerAngles(float theta_x, float theta_y, float theta_z);
 
-    void setScale(float scale);
-    void setScale(GM_Vec3 scale);
+    void setScale(float scalar);
+    void setScale(GM_Vec3 s);
     void setScale(float scale_x, float scale_y, float scale_z);
 
     GM_Matrix4 getTransform();

@@ -31,7 +31,7 @@ pc: ProjectConfig = ProjectConfig(
             name="IOD"
         )
     ],
-    project_debug_with_visual_studio = True,
+    project_debug_with_visual_studio = False,
     project_rebuild_project_dependencies = False,
     project_executable_names  = ["OpenGL_TechDemo.exe"]
 )
@@ -55,8 +55,8 @@ elif IS_LINUX() and not C_BUILD_IS_DEPENDENCY():
 
 # Do different things depending on the platform
 if cc.compiler_name == "cl":
-    cc.compiler_warning_level = "2"
-    cc.compiler_disable_specific_warnings = ["5105", "4668", "4820", "4996"]
+    cc.compiler_warning_level = "4"
+    cc.compiler_disable_specific_warnings = ["4244", "4100", "4458", "4201"]
 else:
     cc.compiler_warning_level = ""
     cc.compiler_disable_specific_warnings = [

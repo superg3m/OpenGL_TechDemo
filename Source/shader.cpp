@@ -15,21 +15,21 @@ typedef struct ShaderDescriptor {
     const char* path;
 } ShaderDescriptor;
 
-void Shader::checkCompileError(unsigned int shaderID, const char* type) {
+void Shader::checkCompileError(unsigned int shaderID, std::string type) {
     int success;
     char info_log[1024];
     if (type != "PROGRAM") {
         glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(shaderID, 1024, NULL, info_log);
-            CKG_LOG_ERROR("ERROR::SHADER_COMPILATION_ERROR {%s} of type: %s\n", this->path, type);
+            CKG_LOG_ERROR("ERROR::SHADER_COMPILATION_ERROR {%s} of type: %s\n", this->path, type.c_str());
             CKG_LOG_ERROR("%s -- --------------------------------------------------- --\n", info_log);
         }
     } else {
         glGetProgramiv(shaderID, GL_LINK_STATUS, &success);
         if (!success) {
             glGetProgramInfoLog(shaderID, 1024, NULL, info_log);
-            CKG_LOG_ERROR("ERROR::PROGRAM_LINKING_ERROR {%s}  of type: %s\n", this->path, type);
+            CKG_LOG_ERROR("ERROR::PROGRAM_LINKING_ERROR {%s}  of type: %s\n", this->path, type.c_str());
             CKG_LOG_ERROR("%s -- --------------------------------------------------- --\n", info_log);
         }
     }
@@ -56,14 +56,15 @@ internal ShaderType shaderTypeFromExtension(const char* shader_source_path) {
 Shader::Shader(std::vector<const char*> shader_paths) {
     this->id = glCreateProgram();
     this->path = shader_paths[0];
+    this->activeTextureCount = 0;
 
     std::vector<unsigned int> shaderIDs; 
     for (int i = 0; i < shader_paths.size(); i++) {
-        const char* path = shader_paths[i];
+        const char* l_path = shader_paths[i];
         size_t file_size = 0;
-        const GLchar* shader_source = (const GLchar*)ckg_io_read_entire_file(path, &file_size, NULLPTR);
+        const GLchar* shader_source = (const GLchar*)ckg_io_read_entire_file(l_path, &file_size, NULLPTR);
 
-        ShaderType type = shaderTypeFromExtension(path);
+        ShaderType type = shaderTypeFromExtension(l_path);
         unsigned int source_id;
         switch (type) {
             case VERTEX_SHADER: {

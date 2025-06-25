@@ -154,11 +154,17 @@ void GameState::initalizeResources() {
         GM_Vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    Mesh* villa = new Mesh("../../assets/rabbit/Rabbit_Low_Poly.fbx");
-    villa->setPosition(GM_Vec3(5.0f, 0.0f, 0.0f));
-    villa->setScale(5.0f);
-    villa->setEulerAngles(-90, 0, 0);
-    GameState::meshes.push_back(villa);
+    Mesh* rabbit = new Mesh("../../assets/rabbit/Rabbit_Low_Poly.fbx");
+    rabbit->setPosition(GM_Vec3(5.0f, 0.0f, 0.0f));
+    rabbit->setScale(5.0f);
+    rabbit->setEulerAngles(-90, 0, 0);
+    GameState::meshes.push_back(rabbit);
+
+    Mesh* knight = new Mesh("../../assets/knight/scene.gltf");
+    knight->setPosition(GM_Vec3(10.0f, 0.0f, 3.0f));
+    knight->setScale(1.0f);
+    knight->setEulerAngles(0, 0, 0);
+    GameState::meshes.push_back(knight);
 
     GM_Vec3 backpackBasePosition = GM_Vec3(-10.0f, 0.0f, 100.0f);   
 

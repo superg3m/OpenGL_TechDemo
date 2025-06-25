@@ -21,14 +21,10 @@ enum BufferType {
 #define INVALID_MATERIAL 0xFFFFFFFF
 
 struct MeshEntry {
-    GM_Vec3 position = GM_Vec3(0, 0, 0);
-    GM_Quaternion orientation = GM_Quaternion::identity();
-    GM_Vec3 scale = GM_Vec3(1, 1, 1);
-
-    unsigned int vertex_count;
-    unsigned int index_count;
-    unsigned int base_vertex = 0;
-    unsigned int base_index = 0;
+    unsigned int vertex_count = 0;
+    unsigned int index_count  = 0;
+    unsigned int base_vertex  = 0; // offset to next vertex in the vertex buffer
+    unsigned int base_index   = 0; // offset to next index in the index buffer
     unsigned int material_index = INVALID_MATERIAL;
 };
 
@@ -42,6 +38,8 @@ struct Mesh {
     std::vector<MeshEntry> meshes;
     std::vector<Material> materials;
     unsigned int SSBOs[BUFFER_COUNT];
+    bool should_render_aabb = false;
+    GLenum draw_type = GL_TRIANGLES; // GL_TRIANGLES, GL_LINES
 
     Mesh();
     Mesh(Geometry geometry);
@@ -62,12 +60,13 @@ struct Mesh {
     void setScale(float scale_x, float scale_y, float scale_z);
 
     GM_Matrix4 getTransform();
+    GM_Matrix4 getAABBTransform();
+    GM_AABB getAABB();
 
     static Mesh* Quad();
     static Mesh* AABB();
     static Mesh* Cube();
     static Mesh* Sphere(int segments);
-    // GM_AABB getAABB();
 private:
     GM_AABB base_aabb;
     void loadMeshFromScene(const std::string &path, const aiScene* scene);

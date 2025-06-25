@@ -12,6 +12,8 @@ Mesh* GameState::selected_mesh = nullptr;
 
 Mesh* GameState::skybox = nullptr;
 std::vector<Mesh*> GameState::meshes = {};
+std::vector<Mesh*> GameState::lights = {};
+std::vector<Mesh*> GameState::transparent_meshes = {};
 
 GameState::GameState(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) { 
     GameState::WINDOW_WIDTH = WINDOW_WIDTH;
@@ -136,8 +138,7 @@ void GameState::initalizeResources() {
     TextureLoader::registerTexture(WINDOW, "../../assets/blending_transparent_window.png");
 
     GameState::skybox = new Mesh(Geometry::Cube());
-    GameState::skybox->materials[0].textures[TEXTURE_UNIT_DIFFUSE] = TextureLoader::getTexture(SKYBOX);
-
+    GameState::skybox->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(SKYBOX);
 
     // positions all containers
     GM_Vec3 primitivePositions[] = {
@@ -153,6 +154,7 @@ void GameState::initalizeResources() {
         GM_Vec3(-1.3f,  1.0f, -1.5f)
     };
 
+
     GM_Vec3 backpackBasePosition = GM_Vec3(-10.0f, 0.0f, 100.0f);   
 
     for (int i = 0; i < 100; i++) {
@@ -166,32 +168,33 @@ void GameState::initalizeResources() {
         GameState::meshes.push_back(backpack);
     }
 
-    Mesh* window_transparent =  new Mesh(Geometry::Cube());
+    Mesh* window_transparent =  new Mesh(Geometry::Quad());
     window_transparent->setPosition(GM_Vec3(-3.0f,  0.0f, 2.0f));
     window_transparent->setScale(1.0f);
     window_transparent->setEulerAngles(0, 90, 0);
-    window_transparent->materials[0].textures[TEXTURE_UNIT_DIFFUSE] = TextureLoader::getTexture(WINDOW);
-    GameState::meshes.push_back(window_transparent);
+    window_transparent->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(WINDOW);
+    window_transparent->materials[0].opacity = 0.55f;
+    GameState::transparent_meshes.push_back(window_transparent);
 
-    Mesh* window_transparen2 = new Mesh(Geometry::Cube());
-    window_transparen2->setPosition(GM_Vec3(-3.0f,  0.0f, 2.0f));
-    window_transparen2->setScale(1.0f);
-    window_transparen2->setEulerAngles(0, 90, 0);
-    window_transparen2->materials[0].textures[TEXTURE_UNIT_DIFFUSE] = TextureLoader::getTexture(WINDOW);
-    GameState::meshes.push_back(window_transparen2);
-    
+    Mesh* window_transparent2 = new Mesh(Geometry::Quad());
+    window_transparent2->setPosition(GM_Vec3(0.0f,  0.0f, 5.0f));
+    window_transparent2->setScale(1.0f);
+    window_transparent2->setEulerAngles(0, 0, 0);
+    window_transparent2->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(WINDOW);
+    window_transparent2->materials[0].opacity = 0.25f;
+    GameState::transparent_meshes.push_back(window_transparent2);
+
     for (int i = 0; i < ArrayCount(primitivePositions); i++) {
         Mesh* cube = (rand() % 2 == 0) ? new Mesh(Geometry::Cube()) : new Mesh(Geometry::Sphere(16));
         cube->setScale(0.5f);
         cube->setPosition(primitivePositions[i]);
 
         cube->materials[0].color = GM_Vec4(0.14f, 1.0f, 0.84f, 1);
-        cube->materials[0].textures[TEXTURE_UNIT_DIFFUSE] = TextureLoader::getTexture(CRATE2);
-        cube->materials[0].textures[TEXTURE_UNIT_SPECULAR] = TextureLoader::getTexture(CRATE2_SPECULAR);
+        cube->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(CRATE2);
+        cube->materials[0].textures[TEXTURE_TYPE_SPECULAR] = TextureLoader::getTexture(CRATE2_SPECULAR);
         GameState::meshes.push_back(cube);
     }
 
-    /*
     // positions of the point lights
     GM_Vec3 pointLightPositions[] = {
         GM_Vec3( 0.7f,  0.2f,  2.0f),
@@ -208,14 +211,13 @@ void GameState::initalizeResources() {
     };
 
     for (int i = 0; i < ArrayCount(pointLightPositions); i++) {
-        Entity* light = new Entity(new Mesh(Geometry::Cube()));
-        light->mesh->material.color = pointLightColors[i];
+        Mesh* light = new Mesh(Geometry::Cube());
+        light->materials[0].color = pointLightColors[i];
         light->setPosition(pointLightPositions[i]);
         light->setScale(0.20f);
 
-        EntityLoader::registerLight("light" + std::to_string(i), light);
+        GameState::lights.push_back(light);
     }
-    */
 }
 
 void GameState::initalizeInputBindings() {
@@ -373,6 +375,8 @@ void GameState::update(GLFWwindow* window, float dt) {
     };
 
     sort_entities_by_camera(GameState::meshes);
+    sort_entities_by_camera(GameState::lights);
+    sort_entities_by_camera(GameState::transparent_meshes);
 
     if (GameState::selected_mesh && GameState::mouse_captured) {
         // GameState::selected_mesh->should_render_aabb = false;
@@ -381,7 +385,6 @@ void GameState::update(GLFWwindow* window, float dt) {
         GameState::picker.update(this->getProjectionMatrix(), GameState::camera.get_view_matrix());
     }
 
-    /*
     float smallest_distance = FLT_MAX;
     const auto intersection_test = [&smallest_distance](std::vector<Mesh*>& meshes) {
         for (Mesh* mesh : meshes) {
@@ -390,18 +393,18 @@ void GameState::update(GLFWwindow* window, float dt) {
             GM_Vec3 p1 = p0 + (GameState::picker.rayDirection.scale(ray_length));
             bool intersection = GM_AABB::intersection(mesh->getAABB(), p0, p1);
             if (!intersection) {
-                entity->should_render_aabb = false;
+                mesh->should_render_aabb = false;
                 continue;
             }
 
-            float current_distance = GM_Vec3::distance(entity->position, GameState::camera.position);
+            float current_distance = GM_Vec3::distance(mesh->position, GameState::camera.position);
             if (smallest_distance > current_distance) {
-                if (GameState::selected_entity) {
-                    GameState::selected_entity->should_render_aabb = false;
+                if (GameState::selected_mesh) {
+                    GameState::selected_mesh->should_render_aabb = false;
                 }
 
-                GameState::selected_entity = entity;
-                GameState::selected_entity->should_render_aabb = true;
+                GameState::selected_mesh = mesh;
+                GameState::selected_mesh->should_render_aabb = true;
                 smallest_distance = current_distance;
 
                 return;
@@ -409,29 +412,29 @@ void GameState::update(GLFWwindow* window, float dt) {
         }
     };
 
-    if (GameState::selected_entity && (IOD::getInputState(IOD_MOUSE_BUTTON_LEFT) == IOD_InputState::DOWN)) {
+
+    if (GameState::selected_mesh && (IOD::getInputState(IOD_MOUSE_BUTTON_LEFT) == IOD_InputState::DOWN)) {
         GM_Matrix4 view = GameState::camera.get_view_matrix();
-        GM_Vec4 objectViewSpace = view * GM_Vec4(GameState::selected_entity->position, 1.0f);
+        GM_Vec4 objectViewSpace = view * GM_Vec4(GameState::selected_mesh->position, 1.0f);
         GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
         if ((GM_Vec3::dot(picker.rayDirection, GM_Vec3(-1, 0, 0)) > 0.60f) || (GM_Vec3::dot(picker.rayDirection, GM_Vec3(1, 0, 0)) > 0.60f)) {
-            GameState::selected_entity->position.z = world_space.z;
-            GameState::selected_entity->position.y = world_space.y;
+            GameState::selected_mesh->position.z = world_space.z;
+            GameState::selected_mesh->position.y = world_space.y;
         } else {
             GM_Vec3 world_space = picker.getFromObjectZ(this->getProjectionMatrix(), view, objectViewSpace.z);
-            GameState::selected_entity->position.x = world_space.x;
-            GameState::selected_entity->position.y = world_space.y;
+            GameState::selected_mesh->position.x = world_space.x;
+            GameState::selected_mesh->position.y = world_space.y;
         }
     } else if (!GameState::mouse_captured) {
-        if (GameState::selected_entity) {
-            GameState::selected_entity->should_render_aabb = false;
+        if (GameState::selected_mesh) {
+            GameState::selected_mesh->should_render_aabb = false;
         }
 
-        GameState::selected_entity = nullptr;
-        intersection_test(EntityLoader::entity_keys);
-        intersection_test(EntityLoader::light_keys);
-        intersection_test(EntityLoader::transparent_keys);
+        GameState::selected_mesh = nullptr;
+        intersection_test(GameState::meshes);
+        intersection_test(GameState::lights);
+        intersection_test(GameState::transparent_meshes);
     }
-    */
 }
 
 void GameState::render() {
@@ -452,7 +455,6 @@ void GameState::render() {
     GameState::skybox->draw();
     glDepthFunc(GL_LESS);
 
-    /*
 
     // directional light
     this->basic_shader.use();
@@ -462,13 +464,12 @@ void GameState::render() {
     this->basic_shader.setVec3("uDirLight.specular", 0.5f, 0.5f, 0.5f);
 
     //  point lights
-    for (int i = 0; i < EntityLoader::light_keys.size(); i++) {
-        const std::string key = EntityLoader::light_keys[i];
-        Entity* light = EntityLoader::getEntity(key);
+    for (int i = 0; i < GameState::lights.size(); i++) {
+        Mesh* light = GameState::lights[i];
         GM_Matrix4 model = light->getTransform();
         GM_Matrix4 view = sourceView;
 
-        GM_Vec3 light_color = GM_Vec3(light->mesh->material.color);
+        GM_Vec3 light_color = GM_Vec3(light->materials[0].color);
 
         this->basic_shader.use();
         this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].position").c_str(), light->position);
@@ -483,10 +484,10 @@ void GameState::render() {
         this->light_shader.setMat4("uModel", model);
         this->light_shader.setMat4("uView",view);
         this->light_shader.setMat4("uProjection", projection);
-        this->light_shader.setVec4("uObjectColor", light->mesh->material.color);
+        this->light_shader.setVec4("uObjectColor", light->materials[0].color);
 
         // don't do the draw here push the drawCommand
-        light->draw(this->light_shader);
+        light->draw();
 
         if (light->should_render_aabb) {
             model = light->getAABBTransform();
@@ -494,7 +495,7 @@ void GameState::render() {
             this->aabb_shader.use();
             this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
             this->aabb_shader.setMat4("uMVP", projection * view * model);
-            aabb_mesh.draw(this->aabb_shader);
+            aabb_mesh.draw();
         }
     }
 
@@ -509,7 +510,6 @@ void GameState::render() {
     this->basic_shader.setFloat("uSpotLight.quadratic", 0.032f);
     this->basic_shader.setFloat("uSpotLight.cutOff", cosf((float)DEGREES_TO_RAD(12.5f)));
     this->basic_shader.setFloat("uSpotLight.outerCutOff", cosf((float)DEGREES_TO_RAD(15.0f)));
-    */
 
     for (Mesh* mesh : GameState::meshes) {
         GM_Matrix4 model = mesh->getTransform();
@@ -524,60 +524,63 @@ void GameState::render() {
         // material properties
         this->basic_shader.setFloat("uMaterial.shininess", 64.0f);
 
-        // glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        // glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
+        for (int i = 0; i < mesh->materials.size(); i++) {
+            this->basic_shader.bindTexture("uMaterial.diffuse", mesh->materials[i].textures[TEXTURE_TYPE_DIFFUSE]);
+            this->basic_shader.bindTexture("uMaterial.specular", mesh->materials[i].textures[TEXTURE_TYPE_SPECULAR]);
+        }
         mesh->draw();
-        // glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        // glStencilMask(0x00);
+        this->basic_shader.unbindTextures();
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
 
-        /*
-        if (entity->should_render_aabb) {
+        if (mesh->should_render_aabb) {
             glDisable(GL_DEPTH_TEST);
+            this->outline_shader.use();
             this->outline_shader.setMat4("uModel", model);
             this->outline_shader.setMat4("uView", view);
             this->outline_shader.setMat4("uProjection", projection);
             this->outline_shader.setFloat("uOutlineScale", 0.02f);
-            entity->draw(this->outline_shader, false);
+            mesh->draw();
             glEnable(GL_DEPTH_TEST);
             glStencilMask(0xFF);
             glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
-            model = entity->getAABBTransform();
+            model = mesh->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
             this->aabb_shader.use();
             this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
             this->aabb_shader.setMat4("uMVP", projection * view * model);
-            aabb_mesh.draw(this->aabb_shader, false);
+            aabb_mesh.draw();
         } else {
             glStencilMask(0xFF);
             glStencilFunc(GL_ALWAYS, 0, 0xFF);  
         }
-        */
     }
 
-    /*
     glEnable(GL_BLEND);
-    for (int i = EntityLoader::transparent_keys.size() - 1; i >= 0; i--) {
-        Entity* entity = EntityLoader::getEntity(EntityLoader::transparent_keys[i]);
-        GM_Matrix4 model = entity->getTransform();
+    for (int i = GameState::transparent_meshes.size() - 1; i >= 0; i--) {
+        Mesh* mesh = GameState::transparent_meshes[i];
+        GM_Matrix4 model = mesh->getTransform();
         GM_Matrix4 view = sourceView;
 
         this->transparent_shader.use();
         this->transparent_shader.setMat4("uModel", model);
         this->transparent_shader.setMat4("uView", view);
         this->transparent_shader.setMat4("uProjection", projection);
-        this->transparent_shader.setFloat("uOpacity", entity->mesh->material.opacity);
-        entity->draw(this->transparent_shader);
+        this->transparent_shader.setFloat("uOpacity", mesh->materials[0].opacity);
+        this->transparent_shader.bindTexture("uTexture", mesh->materials[0].textures[TEXTURE_TYPE_DIFFUSE]);
+        mesh->draw();
 
-        if (entity->should_render_aabb) {
-            model = entity->getAABBTransform();
+        if (mesh->should_render_aabb) {
+            model = mesh->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
             this->aabb_shader.use();
             this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
             this->aabb_shader.setMat4("uMVP", projection * view * model);
-            aabb_mesh.draw(this->aabb_shader, false);
+            aabb_mesh.draw();
         }
     }
     glDisable(GL_BLEND);
-    */
 }

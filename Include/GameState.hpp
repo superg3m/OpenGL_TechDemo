@@ -47,6 +47,8 @@ struct DrawElementsCommand {
     static Mesh* skybox;
     static Mesh* selected_mesh;
     static std::vector<Mesh*> meshes;
+    static std::vector<Mesh*> lights;
+    static std::vector<Mesh*> transparent_meshes;
 
     Shader basic_shader;
     Shader outline_shader;

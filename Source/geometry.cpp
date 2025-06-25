@@ -203,20 +203,6 @@ Geometry Geometry::Sphere(int segments) {
     return ret;
 }
 
-/*
-Geometry Geometry::Model(const char* path) {
-    if (GeometryLoader::geometry.count(RESERVED_SPHERE) != 0) {
-        return GeometryLoader::getGeometry(RESERVED_SPHERE);
-    }
-
-    Geometry ret;
-    ret.draw_type = GL_TRIANGLES;
-    ret.setup(VertexAttributeFlag::PNTBundle, model_vertices, model_indices);
-
-    return ret;
-}
-*/
-
 void Geometry::setup(VertexAttributeFlag flags, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
     this->vertex_count = vertices.size();
     this->index_count = indices.size();
@@ -228,11 +214,9 @@ void Geometry::setup(VertexAttributeFlag flags, const std::vector<Vertex>& verti
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, this->vertex_count * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
-    if (!indices.empty()) {
-        glGenBuffers(1, &EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->index_count * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-    }
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->index_count * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     bool hasPosition   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aPosition);
     bool hasNormal     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aNormal);

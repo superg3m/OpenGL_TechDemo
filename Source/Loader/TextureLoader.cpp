@@ -51,6 +51,44 @@ GLTextureID TextureLoader::loadTexture(const char *file, int texture_flags) {
     return texture;
 }
 
+GLTextureID TextureLoader::loadTextureFromMemory(const u8* data, int width, int height, int nrChannels, int texture_flags) {
+    if (!data || width <= 0 || height <= 0 || nrChannels == 0) {
+        CKG_LOG_ERROR("TextureLoader | Invalid input data for loadTextureFromMemory!\n");
+        return 0;
+    }
+
+    GLenum MIPMAP_TYPE = GET_BIT(texture_flags, 0) ? GL_NEAREST : GL_LINEAR;
+
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIPMAP_TYPE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MIPMAP_TYPE);
+
+    GLenum format = 0;
+    if (nrChannels == 1) {
+        format = GL_RED;
+    } else if (nrChannels == 3) {
+        format = GL_RGB;
+    } else if (nrChannels == 4) {
+        format = GL_RGBA;
+    } else {
+        CKG_LOG_ERROR("TextureLoader | Failed to pick a format for memory texture (channels: %d)\n", nrChannels);
+        return 0;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    if (texture == 0) {
+        CKG_LOG_ERROR("TextureLoader | id is invalid for memory texture!\n");
+    }
+
+    return texture;
+}
+
 void TextureLoader::registerTexture(std::string key, const char *file, int texture_flags) {
     ckg_assert_msg(ckg_io_path_exists(file), "Texture path: '%s' doesn't exist!\n", file);
 
@@ -62,7 +100,7 @@ void TextureLoader::registerTexture(std::string key, const char *file, int textu
     TextureLoader::textures[key] = TextureLoader::loadTexture(file, texture_flags);
 }
 
-void registerTexture(std::string key, GLTextureID id) {
+void TextureLoader::registerTexture(std::string key, GLTextureID id) {
     if (TextureLoader::textures.count(key)) {
         CKG_LOG_WARN("TextureLoader | Key: '%s' already exists\n", key.c_str());
         return;

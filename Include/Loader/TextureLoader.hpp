@@ -35,6 +35,7 @@ struct TextureLoader {
     static std::map<std::string, TextureAtlas*> atlas;
 
     static GLTextureID loadTexture(const char *file, int texture_flags = TEXTURE_DEFAULT);
+    static GLTextureID loadTextureFromMemory(const u8* data, int width, int height, int nrChannels, int texture_flags = TEXTURE_DEFAULT);
     static void registerTexture(std::string key, const char *file, int texture_flags = TEXTURE_DEFAULT);
     static void registerTexture(std::string key, GLTextureID id);
     static void loadCubemapTexture(std::string key, std::array<const char*, 6> cubeMapTextures);

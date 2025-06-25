@@ -168,6 +168,12 @@ void GameState::initalizeResources() {
         GameState::meshes.push_back(backpack);
     }
 
+    Mesh* car = new Mesh("../../assets/car/car.glb", TEXTURE_VERTICAL_FLIP);
+    car->setPosition(GM_Vec3(10.0f, 0.0f, -3.0f));
+    car->setScale(0.01f);
+    car->setEulerAngles(0, 0, 0);
+    GameState::meshes.push_back(car);
+
     Mesh* window_transparent =  new Mesh(Geometry::Quad());
     window_transparent->setPosition(GM_Vec3(-3.0f,  0.0f, 2.0f));
     window_transparent->setScale(1.0f);

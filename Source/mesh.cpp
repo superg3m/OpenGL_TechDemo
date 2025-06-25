@@ -82,137 +82,141 @@ Mesh::Mesh(const std::string &path, unsigned int assimp_flags) {
 }
 
 void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
-    this->meshes.resize(scene->mNumMeshes);
-    this->materials.resize(scene->mNumMaterials);
+    { // geometry
+        this->meshes.resize(scene->mNumMeshes);
+        this->materials.resize(scene->mNumMaterials);
 
-    unsigned int total_vertex_count = 0;
-    unsigned int total_index_count = 0;
-    for (unsigned int i = 0 ; i < this->meshes.size() ; i++) {
-        this->meshes[i].material_index = scene->mMeshes[i]->mMaterialIndex;
-        this->meshes[i].index_count = scene->mMeshes[i]->mNumFaces * 3;
-        this->meshes[i].base_vertex = total_vertex_count;
-        this->meshes[i].base_index = total_index_count;
+        unsigned int total_vertex_count = 0;
+        unsigned int total_index_count = 0;
+        for (unsigned int i = 0 ; i < this->meshes.size() ; i++) {
+            this->meshes[i].material_index = scene->mMeshes[i]->mMaterialIndex;
+            this->meshes[i].index_count = scene->mMeshes[i]->mNumFaces * 3;
+            this->meshes[i].base_vertex = total_vertex_count;
+            this->meshes[i].base_index = total_index_count;
 
-        total_vertex_count += scene->mMeshes[i]->mNumVertices;
-        total_index_count  += this->meshes[i].index_count;
-    }
-
-    std::vector<Vertex> vertices;
-    vertices.reserve(total_vertex_count);
-
-    std::vector<unsigned int> indices;
-    indices.reserve(total_index_count);
-
-    for (unsigned int i = 0 ; i < this->meshes.size() ; i++) {
-        const aiMesh* paiMesh = scene->mMeshes[i];
-        const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
-
-        Vertex v = Vertex();
-        for (unsigned int i = 0; i < paiMesh->mNumVertices; i++) {
-            const aiVector3D& position = paiMesh->mVertices[i];
-
-            v.aPosition = GM_Vec3(position.x, position.y, position.z);
-
-            if (paiMesh->mNormals) {
-                const aiVector3D& pNormal = paiMesh->mNormals[i];
-                v.aNormal = GM_Vec3(pNormal.x, pNormal.y, pNormal.z);
-            } else {
-                aiVector3D Normal(0.0f, 1.0f, 0.0f);
-                v.aNormal = GM_Vec3(Normal.x, Normal.y, Normal.z);
-            }
-
-            const aiVector3D& uv = paiMesh->HasTextureCoords(0) ? paiMesh->mTextureCoords[0][i] : Zero3D;
-            v.aTexCoord = GM_Vec2(uv.x, uv.y);
-
-            vertices.push_back(v);
+            total_vertex_count += scene->mMeshes[i]->mNumVertices;
+            total_index_count  += this->meshes[i].index_count;
         }
 
-        for (unsigned int i = 0; i < paiMesh->mNumFaces; i++) {
-            const aiFace& Face = paiMesh->mFaces[i];
-            indices.push_back(Face.mIndices[0]);
-            indices.push_back(Face.mIndices[1]);
-            indices.push_back(Face.mIndices[2]);
-        }
-    }
+        std::vector<Vertex> vertices;
+        vertices.reserve(total_vertex_count);
 
-    std::string directory = path.substr(0, path.find_last_of('/'));
-
-    for (unsigned int i = 0 ; i < scene->mNumMaterials ; i++) {
-        const aiMaterial* ai_material = scene->mMaterials[i];
-
-        aiColor4D ambient_color(0.0f, 0.0f, 0.0f, 0.0f);
-        GM_Vec4 white = GM_Vec4(1.0f);
-
-        int ShadingModel = 0;
-        if (ai_material->Get(AI_MATKEY_SHADING_MODEL, ShadingModel) == AI_SUCCESS) {
-            CKG_LOG_DEBUG("Shading model %d\n", ShadingModel);
-        }
-
-        if (ai_material->Get(AI_MATKEY_COLOR_AMBIENT, ambient_color) == AI_SUCCESS) {
-            CKG_LOG_DEBUG("Loaded ambient color [%f %f %f]\n", ambient_color.r, ambient_color.g, ambient_color.b);
-            this->materials[i].ambient_color.r = ambient_color.r;
-            this->materials[i].ambient_color.g = ambient_color.g;
-            this->materials[i].ambient_color.b = ambient_color.b;
-        } else {
-            this->materials[i].ambient_color = white;
-        }
-
-        aiColor3D diffuse_color(0.0f, 0.0f, 0.0f);
-
-        if (ai_material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse_color) == AI_SUCCESS) {
-            CKG_LOG_DEBUG("Loaded diffuse color [%f %f %f]\n", diffuse_color.r, diffuse_color.g, diffuse_color.b);
-            this->materials[i].diffuse_color.r = diffuse_color.r;
-            this->materials[i].diffuse_color.g = diffuse_color.g;
-            this->materials[i].diffuse_color.b = diffuse_color.b;
-        }
-
-        aiColor3D specular_color(0.0f, 0.0f, 0.0f);
-
-        if (ai_material->Get(AI_MATKEY_COLOR_SPECULAR, specular_color) == AI_SUCCESS) {
-            CKG_LOG_DEBUG("Loaded specular color [%f %f %f]\n", specular_color.r, specular_color.g, specular_color.b);
-            this->materials[i].specular_color.r = specular_color.r;
-            this->materials[i].specular_color.g = specular_color.g;
-            this->materials[i].specular_color.b = specular_color.b;
-        }
-
-        float opacity = 1.0f;
-        if (ai_material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
-            this->materials[i].opacity = opacity;
-        } else {
-            CKG_LOG_WARN("Mesh Failed opacity matkey?\n");
-        }
-
-        for (int type_int = 0; type_int < TEXTURE_COUNT; type_int++) {
-            TextureType type = static_cast<TextureType>(type_int);
-
-            if (textureTypeToAssimpType.count(type) == 0) {
-                //CKG_LOG_WARN("Skipping TextureUnitType: %s | Reason: has no Assimp mapping.\n", texture_to_string[type]);
-                continue;
-            }
+        std::vector<unsigned int> indices;
+        indices.reserve(total_index_count);
     
-            aiTextureType ai_type = textureTypeToAssimpType.at(type);
-            if (ai_material->GetTextureCount(ai_type) <= 0) {
-                //CKG_LOG_WARN("Material: %d | has no texture of type: %s\n", i, texture_to_string[type]);
-                continue;
-            }
+        for (unsigned int i = 0 ; i < this->meshes.size() ; i++) {
+            const aiMesh* paiMesh = scene->mMeshes[i];
+            const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
 
-            aiString str;
-            if (ai_material->GetTexture(ai_type, 0, &str, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
-                std::string filename = directory + '/' + std::string(str.C_Str());
+            Vertex v = Vertex();
+            for (unsigned int i = 0; i < paiMesh->mNumVertices; i++) {
+                const aiVector3D& position = paiMesh->mVertices[i];
 
-                if (TextureLoader::textures.count(filename) == 0) {
-                    TextureLoader::registerTexture(filename, filename.c_str());
+                v.aPosition = GM_Vec3(position.x, position.y, position.z);
+
+                if (paiMesh->mNormals) {
+                    const aiVector3D& pNormal = paiMesh->mNormals[i];
+                    v.aNormal = GM_Vec3(pNormal.x, pNormal.y, pNormal.z);
+                } else {
+                    aiVector3D Normal(0.0f, 1.0f, 0.0f);
+                    v.aNormal = GM_Vec3(Normal.x, Normal.y, Normal.z);
                 }
 
-                this->materials[i].textures[type] = TextureLoader::textures.at(filename);
-                CKG_LOG_DEBUG("Material: %d | has texture of type: %s\n", i, texture_to_string[type]);
+                const aiVector3D& uv = paiMesh->HasTextureCoords(0) ? paiMesh->mTextureCoords[0][i] : Zero3D;
+                v.aTexCoord = GM_Vec2(uv.x, uv.y);
+
+                vertices.push_back(v);
+            }
+
+            for (unsigned int i = 0; i < paiMesh->mNumFaces; i++) {
+                const aiFace& Face = paiMesh->mFaces[i];
+                indices.push_back(Face.mIndices[0]);
+                indices.push_back(Face.mIndices[1]);
+                indices.push_back(Face.mIndices[2]);
+            }
+        }    
+
+        setup(VertexAttributeFlag::PNTBundle, vertices, indices);
+    } // geometry end
+
+    { // materials start
+        std::string directory = path.substr(0, path.find_last_of('/'));
+
+        for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
+            const aiMaterial* ai_material = scene->mMaterials[i];
+
+            aiColor4D ambient_color(0.0f, 0.0f, 0.0f, 0.0f);
+            GM_Vec4 white = GM_Vec4(1.0f);
+
+            if (ai_material->Get(AI_MATKEY_COLOR_AMBIENT, ambient_color) == AI_SUCCESS) {
+                this->materials[i].ambient_color.r = ambient_color.r;
+                this->materials[i].ambient_color.g = ambient_color.g;
+                this->materials[i].ambient_color.b = ambient_color.b;
             } else {
-                CKG_LOG_ERROR("Failed to get texture path for material: %d | type: %s\n", i, texture_to_string[type]);
+                this->materials[i].ambient_color = white;
+            }
+
+            aiColor3D diffuse_color(0.0f, 0.0f, 0.0f);
+
+            if (ai_material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse_color) == AI_SUCCESS) {
+                this->materials[i].diffuse_color.r = diffuse_color.r;
+                this->materials[i].diffuse_color.g = diffuse_color.g;
+                this->materials[i].diffuse_color.b = diffuse_color.b;
+            }
+
+            aiColor3D specular_color(0.0f, 0.0f, 0.0f);
+
+            if (ai_material->Get(AI_MATKEY_COLOR_SPECULAR, specular_color) == AI_SUCCESS) {
+                this->materials[i].specular_color.r = specular_color.r;
+                this->materials[i].specular_color.g = specular_color.g;
+                this->materials[i].specular_color.b = specular_color.b;
+            }
+
+            float opacity = 1.0f;
+            if (ai_material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
+                this->materials[i].opacity = opacity;
+            } else {
+                CKG_LOG_WARN("Mesh Failed opacity matkey?\n");
+            }
+
+            for (int type_int = 0; type_int < TEXTURE_COUNT; type_int++) {
+                TextureType type = static_cast<TextureType>(type_int);
+
+                if (textureTypeToAssimpType.count(type) == 0) {
+                    continue;
+                }
+
+                aiTextureType ai_type = textureTypeToAssimpType.at(type);
+                if (ai_material->GetTextureCount(ai_type) <= 0) {
+                    continue;
+                }
+
+                aiString str;
+                if (ai_material->GetTexture(ai_type, 0, &str, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
+                    std::string texture_id_or_path = std::string(str.C_Str());
+
+                    const aiTexture* ai_texture = scene->GetEmbeddedTexture(str.C_Str());
+
+                    if (ai_texture) {
+                        int width, height, nrChannel = 0;
+                        u8* image_data = stbi_load_from_memory((u8*)ai_texture->pcData, ai_texture->mWidth, &width, &height, &nrChannel, 0);
+                        GLTextureID id = TextureLoader::loadTextureFromMemory(image_data, width, height, nrChannel);
+                        TextureLoader::registerTexture(texture_id_or_path, id);
+                        CKG_LOG_DEBUG("Loaded embedded Texture\n");
+                    } else {
+                        std::string filename = directory + '/' + texture_id_or_path;
+                        if (TextureLoader::textures.count(filename) == 0) {
+                            TextureLoader::registerTexture(filename, filename.c_str());
+                        }
+                        this->materials[i].textures[type] = TextureLoader::textures.at(filename);
+                        CKG_LOG_DEBUG("Material: %d | has external texture of type: %s\n", i, texture_to_string[type]);
+                    }
+                } else {
+                    CKG_LOG_ERROR("Failed to get texture path for material: %d | type: %s\n", i, texture_to_string[type]);
+                }
             }
         }
-    }
-
-    setup(VertexAttributeFlag::PNTBundle, vertices, indices);
+    } // materials end
 }
 
 void Mesh::loadMeshFromData(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags) {

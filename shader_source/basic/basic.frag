@@ -85,11 +85,14 @@ void main() {
 // calculates the color when using a directional light.
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
     vec3 lightDir = normalize(-light.direction);
+    
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
+    
     // specular shading
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(normal, halfwayDir), 0.0), uMaterial.shininess);
+    
     // combine results
     vec3 ambient = light.ambient * vec3(texture(uMaterial.diffuse, TexCoords));
     vec3 diffuse = light.diffuse * diff * vec3(texture(uMaterial.diffuse, TexCoords));
@@ -100,14 +103,18 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 // calculates the color when using a point light.
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 lightDir = normalize(light.position - fragPos);
+    
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
+    
     // specular shading
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(normal, halfwayDir), 0.0), uMaterial.shininess);
+    
     // attenuation
     float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
+    
     // combine results
     vec3 ambient = light.ambient * vec3(texture(uMaterial.diffuse, TexCoords));
     vec3 diffuse = light.diffuse * diff * vec3(texture(uMaterial.diffuse, TexCoords));
@@ -123,16 +130,20 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 lightDir = normalize(light.position - fragPos);
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
+    
     // specular shading
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(normal, halfwayDir), 0.0), uMaterial.shininess);
+    
     // attenuation
     float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
+   
     // spotlight intensity
     float theta = dot(lightDir, normalize(-light.direction)); 
     float epsilon = light.cutOff - light.outerCutOff;
     float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+    
     // combine results
     vec3 ambient = light.ambient * vec3(texture(uMaterial.diffuse, TexCoords));
     vec3 diffuse = light.diffuse * diff * vec3(texture(uMaterial.diffuse, TexCoords));

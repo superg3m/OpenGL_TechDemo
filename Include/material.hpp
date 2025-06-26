@@ -5,6 +5,7 @@
 #include <Shader.hpp>
 #include <gm.hpp>
 
+using GLTextureID = int;
 struct PBR_Material {
     float roughness = 0.0f;
     bool isMetal = false;

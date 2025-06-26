@@ -14,7 +14,6 @@ enum TextureFlag {
     TEXTURE_PIXEL_PERFECT = 0x1,
     TEXTURE_VERTICAL_FLIP = 0x2
 };
-
 using GLTextureID = int;
 struct TextureAtlas {
     u8* atlasTexture;

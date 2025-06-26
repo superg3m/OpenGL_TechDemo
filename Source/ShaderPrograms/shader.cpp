@@ -1,5 +1,4 @@
 #include <shader.hpp>
-#include <glad/glad.h>
 #include <ckg.h>
 
 void shader_check_compile_error(unsigned int source_id, const char* path) {
@@ -13,7 +12,7 @@ void shader_check_compile_error(unsigned int source_id, const char* path) {
     }
 }
 
-unsigned int shader_type_from_path(const char* shader_source_path) {
+GLenum shader_type_from_path(const char* shader_source_path) {
     u64 shader_path_length = ckg_cstr_length(shader_source_path);
     s64 extension_index = ckg_str_last_index_of(shader_source_path, shader_path_length, CKG_LIT_ARG("."));
     ckg_assert_msg(extension_index != -1, "Missing extension (.vert, .frag)\n");

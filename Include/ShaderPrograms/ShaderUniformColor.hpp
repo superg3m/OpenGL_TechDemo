@@ -14,7 +14,7 @@ struct ShaderUniformColor {
     void setView(GM_Matrix4 &view);
     void setProjection(GM_Matrix4 &projection);
 
-    void setMaterial(Material &material);
+    void setColor(GM_Vec3 &color);
 private:
     // Vertex Uniforms
     unsigned int uModel_Location;
@@ -22,7 +22,7 @@ private:
     unsigned int uProjection_Location;
 
     // Fragment Uniforms
-    unsigned int uMaterial_Location;
+    unsigned int uColor_Location;
 
     int getUniformLocation(const char* name, const char* path) const;
 };

@@ -487,14 +487,14 @@ void GameState::render() {
 
         GM_Vec3 light_color = GM_Vec3(light->materials[0].color);
         this->model_shader.use();
-        this->model_shader.setLightPosition(light->position, i)
-        this->basic_shader.setVec3(std::string("uLightColors[" + std::to_string(i) + "]").c_str(), light_color);
+        this->model_shader.setLightPosition(light->position, i);
+        this->model_shader.setLightColor(light_color, i);
 
-        this->light_shader.use();
-        this->light_shader.setMat4("uModel", light_model);
-        this->light_shader.setMat4("uView",view);
-        this->light_shader.setMat4("uProjection", projection);
-        this->light_shader.setVec4("uObjectColor", light->materials[0].color);
+        this->uniform_shader.use();
+        this->uniform_shader.setModel(light_model);
+        this->uniform_shader.setView(view);
+        this->uniform_shader.setProjection(projection);
+        this->uniform_shader.setColor(light->materials[0].color);
         light->draw();
         for (int i = 0; i < 32; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
@@ -505,9 +505,11 @@ void GameState::render() {
         if (light->should_render_aabb) {
             GM_Matrix4 aabb_model = light->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
-            this->aabb_shader.use();
-            this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
-            this->aabb_shader.setMat4("uMVP", projection * view * aabb_model);
+            this->uniform_shader.use();
+            this->uniform_shader.setModel(aabb_model);
+            this->uniform_shader.setView(view);
+            this->uniform_shader.setProjection(projection);
+            this->uniform_shader.setColor(GM_Vec3(0, 1, 0));
             aabb_mesh.draw();
         }
     }
@@ -516,11 +518,11 @@ void GameState::render() {
         GM_Matrix4 mesh_model = mesh->getTransform();
         GM_Matrix4 view = sourceView;
 
-        this->basic_shader.use();
-        this->basic_shader.setMat4("uModel", mesh_model);
-        this->basic_shader.setMat4("uView", view);
-        this->basic_shader.setMat4("uProjection", projection);
-        this->basic_shader.setVec3("uViewPosition", GameState::camera.position);
+        this->model_shader.use();
+        this->uniform_shader.setModel(mesh_model);
+        this->uniform_shader.setView(view);
+        this->uniform_shader.setProjection(projection);
+        this->model_shader.setVec3("uViewPosition", GameState::camera.position);
 
         // material properties
         // this->basic_shader.setFloat("uMaterial.shininess", 64.0f);
@@ -554,9 +556,11 @@ void GameState::render() {
 
             GM_Matrix4 aabb_model = mesh->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
-            this->aabb_shader.use();
-            this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
-            this->aabb_shader.setMat4("uMVP", projection * view * aabb_model);
+            this->uniform_shader.use();
+            this->uniform_shader.setModel(aabb_model);
+            this->uniform_shader.setView(view);
+            this->uniform_shader.setProjection(projection);
+            this->uniform_shader.setColor(GM_Vec3(0, 1, 0));
             aabb_mesh.draw();
         } else {
             glStencilMask(0xFF);
@@ -586,9 +590,11 @@ void GameState::render() {
         if (mesh->should_render_aabb) {
             GM_Matrix4 aabb_model = mesh->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
-            this->aabb_shader.use();
-            this->aabb_shader.setVec4("uColor", GM_Vec4(0, 1, 0, 1));
-            this->aabb_shader.setMat4("uMVP", projection * view * aabb_model);
+            this->uniform_shader.use();
+            this->uniform_shader.setModel(aabb_model);
+            this->uniform_shader.setView(view);
+            this->uniform_shader.setProjection(projection);
+            this->uniform_shader.setColor(GM_Vec3(0, 1, 0));
             aabb_mesh.draw();
         }
     }

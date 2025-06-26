@@ -31,8 +31,8 @@ void ShaderUniformColor::setProjection(GM_Matrix4 &projection) {
     glUniformMatrix4fv(this->uProjection_Location, 1, GL_TRUE, &projection.v[0].x);
 }
 
-void ShaderUniformColor::setMaterial(Material &material) {
+void ShaderUniformColor::setColor(GM_Vec3 &color) {
     this->use();
 
-    glUniform4fv(this->uMaterial_Location, 1, &material.color.x);
+    glUniform3fv(this->uColor_Location, 1, &color.r);
 }

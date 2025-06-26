@@ -7,15 +7,14 @@ uniform bool uGeometryShader;
 uniform mat4 uView;
 uniform mat4 uProjection;
 
-in VS_OUT {
-    vec3 FragPos;
-    vec3 Normal;
-    vec2 texCoords;
-} gs_in[];
 
-out vec3 FragPos;
-out vec3 Normal;
-out vec2 TexCoords;
+in vec3 v_FragPos;
+in vec3 v_Normal;
+in vec2 v_texCoords;
+
+out vec3 g_FragPos;
+out vec3 g_Normal;
+out vec2 g_TexCoords;
 
 vec3 explode(vec3 position, vec3 normal) {
     float magnitude = 2.0;

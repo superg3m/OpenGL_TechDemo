@@ -23,6 +23,20 @@ GameState::GameState(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT) {
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
+GM_Vec3 pointLightPositions[] = {
+    GM_Vec3( 0.0f,  0.2f,  1.0f),
+    GM_Vec3( 2.3f, -3.3f, -4.0f),
+    GM_Vec3(-4.0f,  2.0f, -12.0f),
+    GM_Vec3( 0.0f,  0.0f, -3.0f)
+};
+
+GM_Vec3 pointLightColors[] = {
+    GM_Vec3(0.7f, 0.2f,  1.0f),
+    GM_Vec3(0.3f, 0.5f,  0.2f),
+    GM_Vec3(1.0f, 1.0f,  1.0f),
+    GM_Vec3(0.5f, 0.1f,  0.3f)
+};
+
 GLFWwindow* GameState::initalizeWindow() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -116,7 +130,8 @@ u64 GameState::getReferenceID() {
 void GameState::initalizeResources() {
     srand(time(0));
 
-    this->basic_shader = Shader({"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag", "../../shader_source/basic/basic.gs"});
+    // "../../shader_source/basic/basic.gs"s
+    this->basic_shader = Shader({"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"});
     this->outline_shader = Shader({"../../shader_source/outline/outline.vert", "../../shader_source/outline/outline.frag"});
     this->skybox_shader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
     this->aabb_shader = Shader({"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"});
@@ -132,10 +147,10 @@ void GameState::initalizeResources() {
     };
 
     TextureLoader::loadCubemapTexture(SKYBOX, cubemap_faces);
-    TextureLoader::registerTexture(CRATE, "../../assets/container.jpg");
-    TextureLoader::registerTexture(CRATE2, "../../assets/container2.png");
-    TextureLoader::registerTexture(CRATE2_SPECULAR, "../../assets/container2_specular.png");
-    TextureLoader::registerTexture(WINDOW, "../../assets/blending_transparent_window.png");
+    TextureLoader::registerTexture(CRATE, "../../assets/container.jpg", true);
+    TextureLoader::registerTexture(CRATE2, "../../assets/container2.png", true);
+    TextureLoader::registerTexture(CRATE2_SPECULAR, "../../assets/container2_specular.png", true);
+    TextureLoader::registerTexture(WINDOW, "../../assets/blending_transparent_window.png", true);
 
     GameState::skybox = new Mesh(Geometry::Cube());
     GameState::skybox->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(SKYBOX);
@@ -154,6 +169,7 @@ void GameState::initalizeResources() {
         GM_Vec3(-1.3f,  1.0f, -1.5f)
     };
 
+    /*
     Mesh* rabbit = new Mesh("../../assets/rabbit/Rabbit_Low_Poly.fbx");
     rabbit->setPosition(GM_Vec3(5.0f, 0.0f, 0.0f));
     rabbit->setScale(5.0f);
@@ -165,6 +181,7 @@ void GameState::initalizeResources() {
     knight->setScale(1.0f);
     knight->setEulerAngles(0, 0, 0);
     GameState::meshes.push_back(knight);
+    */
 
     GM_Vec3 backpackBasePosition = GM_Vec3(-10.0f, 0.0f, 100.0f);   
 
@@ -206,24 +223,9 @@ void GameState::initalizeResources() {
         GameState::meshes.push_back(cube);
     }
 
-    // positions of the point lights
-    GM_Vec3 pointLightPositions[] = {
-        GM_Vec3( 0.7f,  0.2f,  2.0f),
-        GM_Vec3( 2.3f, -3.3f, -4.0f),
-        GM_Vec3(-4.0f,  2.0f, -12.0f),
-        GM_Vec3( 0.0f,  0.0f, -3.0f)
-    };
-
-    GM_Vec4 pointLightColors[] = {
-        GM_Vec4(0.7f, 0.2f,  1.0f, 1.0f),
-        GM_Vec4(0.3f, 0.5f,  0.2f, 1.0f),
-        GM_Vec4(1.0f, 1.0f,  1.0f, 1.0f),
-        GM_Vec4(0.5f, 0.1f,  0.3f, 1.0f)
-    };
-
     for (int i = 0; i < ArrayCount(pointLightPositions); i++) {
         Mesh* light = new Mesh(Geometry::Cube());
-        light->materials[0].color = pointLightColors[i];
+        light->materials[0].color = GM_Vec4(pointLightColors[i], 1.0f);
         light->setPosition(pointLightPositions[i]);
         light->setScale(0.20f);
 
@@ -267,10 +269,14 @@ void GameState::initalizeInputBindings() {
 
     // Date: June 17, 2025
     // TODO(Jovanni): Investigate why glfwSetInputMode is failing in the lambda?
-    profile->bind(IOD_KEY_C, IOD_InputState::PRESSED,
-        []() {
+    profile->bind(IOD_KEY_G, IOD_InputState::PRESSED,
+        [&]() {
             // GameState::mouse_captured = !GameState::mouse_captured;
             // glfwSetInputMode((GLFWwindow*)IOD::glfw_window_instance, GLFW_CURSOR, GameState::mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+
+            local_persist bool useGamma = true;
+            this->basic_shader.setBool("uGamma", useGamma);
+            useGamma = !useGamma;
         }
     );
     
@@ -312,13 +318,13 @@ void GameState::initalizeInputBindings() {
 
     profile->bind(IOD_KEY_F, IOD_InputState::PRESSED|IOD_InputState::DOWN,
         [&]() {
-            this->basic_shader.setBool("uUseFlashlight", true);
+            // this->basic_shader.setBool("uUseFlashlight", true);
         }
     );
 
     profile->bind(IOD_KEY_F, IOD_InputState::RELEASED|IOD_InputState::UP,
         [&]() {
-            this->basic_shader.setBool("uUseFlashlight", false);
+            // this->basic_shader.setBool("uUseFlashlight", false);
         }
     );
 
@@ -449,7 +455,7 @@ void GameState::update(GLFWwindow* window, float dt) {
 }
 
 void GameState::render() {
-    glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+    glClearColor(pow(0.25f, 1.0f / 2.2f), pow(0.25f, 1.0f / 2.2f), pow(0.25f, 1.0f / 2.2f), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
     GM_Matrix4 sourceView = camera.get_view_matrix();
@@ -467,12 +473,8 @@ void GameState::render() {
     glDepthFunc(GL_LESS);
 
 
-    // directional light
-    this->basic_shader.use();
-    this->basic_shader.setVec3("uDirLight.direction", -0.2f, -1.0f, -0.3f);
-    this->basic_shader.setVec3("uDirLight.ambient", 0.35f, 0.35f, 0.35f);
-    this->basic_shader.setVec3("uDirLight.diffuse", 0.4f, 0.4f, 0.4f);
-    this->basic_shader.setVec3("uDirLight.specular", 0.5f, 0.5f, 0.5f);
+    //this->basic_shader.setVec3("uLightPositions", &pointLightPositions[0], ArrayCount(pointLightPositions));
+    //this->basic_shader.setVec3("uLightColors", &pointLightColors[0], ArrayCount(pointLightColors));
 
     //  point lights
     for (int i = 0; i < GameState::lights.size(); i++) {
@@ -481,15 +483,9 @@ void GameState::render() {
         GM_Matrix4 view = sourceView;
 
         GM_Vec3 light_color = GM_Vec3(light->materials[0].color);
-
         this->basic_shader.use();
-        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].position").c_str(), light->position);
-        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].ambient").c_str(), light_color.scale(0.35f));
-        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].diffuse").c_str(), light_color.scale(0.5f));
-        this->basic_shader.setVec3(std::string("uPointLights[" + std::to_string(i) + "].specular").c_str(), light_color.scale(1.0f));
-        this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].constant").c_str(), 1.0f);
-        this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].linear").c_str(), 0.09f);
-        this->basic_shader.setFloat(std::string("uPointLights[" + std::to_string(i) + "].quadratic").c_str(), 0.032f);
+        this->basic_shader.setVec3(std::string("uLightPositions[" + std::to_string(i) + "]").c_str(), light->position);
+        this->basic_shader.setVec3(std::string("uLightColors[" + std::to_string(i) + "]").c_str(), light_color);
 
         this->light_shader.use();
         this->light_shader.setMat4("uModel", light_model);
@@ -509,18 +505,6 @@ void GameState::render() {
         }
     }
 
-    // spotLight
-    this->basic_shader.setVec3("uSpotLight.position", GameState::camera.position);
-    this->basic_shader.setVec3("uSpotLight.direction", GameState::camera.front);
-    this->basic_shader.setVec3("uSpotLight.ambient", 0.0f, 0.0f, 0.0f);
-    this->basic_shader.setVec3("uSpotLight.diffuse", 1.0f, 1.0f, 1.0f);
-    this->basic_shader.setVec3("uSpotLight.specular", 1.0f, 1.0f, 1.0f);
-    this->basic_shader.setFloat("uSpotLight.constant", 1.0f);
-    this->basic_shader.setFloat("uSpotLight.linear", 0.09f);
-    this->basic_shader.setFloat("uSpotLight.quadratic", 0.032f);
-    this->basic_shader.setFloat("uSpotLight.cutOff", cosf((float)DEGREES_TO_RAD(12.5f)));
-    this->basic_shader.setFloat("uSpotLight.outerCutOff", cosf((float)DEGREES_TO_RAD(15.0f)));
-
     for (Mesh* mesh : GameState::meshes) {
         GM_Matrix4 mesh_model = mesh->getTransform();
         GM_Matrix4 view = sourceView;
@@ -532,13 +516,13 @@ void GameState::render() {
         this->basic_shader.setVec3("uViewPosition", GameState::camera.position);
 
         // material properties
-        this->basic_shader.setFloat("uMaterial.shininess", 64.0f);
+        // this->basic_shader.setFloat("uMaterial.shininess", 64.0f);
 
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);
         for (int i = 0; i < mesh->materials.size(); i++) {
-            this->basic_shader.bindTexture("uMaterial.diffuse", mesh->materials[i].textures[TEXTURE_TYPE_DIFFUSE]);
-            this->basic_shader.bindTexture("uMaterial.specular", mesh->materials[i].textures[TEXTURE_TYPE_SPECULAR]);
+            this->basic_shader.setTexture("uMaterial.diffuse", mesh->materials[i].textures[TEXTURE_TYPE_DIFFUSE]);
+            // this->basic_shader.setTexture("uMaterial.specular", mesh->materials[i].textures[TEXTURE_TYPE_SPECULAR]);
         }
         mesh->draw();
         this->basic_shader.unbindTextures();
@@ -580,7 +564,7 @@ void GameState::render() {
         this->transparent_shader.setMat4("uView", view);
         this->transparent_shader.setMat4("uProjection", projection);
         this->transparent_shader.setFloat("uOpacity", mesh->materials[0].opacity);
-        this->transparent_shader.bindTexture("uTexture", TextureLoader::getTexture(WINDOW));
+        this->transparent_shader.setTexture("uTexture", TextureLoader::getTexture(WINDOW));
         mesh->draw();
         this->transparent_shader.unbindTextures();
 

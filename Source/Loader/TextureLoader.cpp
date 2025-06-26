@@ -3,7 +3,7 @@
 std::map<std::string, GLTextureID> TextureLoader::textures;
 std::map<std::string, TextureAtlas*> TextureLoader::atlas;
 
-GLTextureID TextureLoader::loadTexture(const char *file, int texture_flags) {
+GLTextureID TextureLoader::loadTexture(const char *file, int texture_flags, bool gammaCorrected) {
     ckg_assert_msg(ckg_io_path_exists(file), "Texture path: '%s' doesn't exist!\n", file);
 
     GLenum MIPMAP_TYPE = GET_BIT(texture_flags, 0) ? GL_NEAREST : GL_LINEAR;
@@ -22,20 +22,24 @@ GLTextureID TextureLoader::loadTexture(const char *file, int texture_flags) {
 
     u8 *data = stbi_load(file, &width, &height, &nrChannels, 0);
 
-    GLenum format = 0;
+    GLenum internal_format = 0;
+    GLenum pixel_format = 0;
     if (nrChannels == 1) {
-        format = GL_RED;
+        internal_format = GL_RED;
+        pixel_format = GL_RED;
     } else if (nrChannels == 3) {
-        format = GL_RGB;
+        internal_format = gammaCorrected ? GL_SRGB : GL_RGB;
+        pixel_format = GL_RGB;
     } else if (nrChannels == 4) {
-        format = GL_RGBA;
+        internal_format = gammaCorrected ? GL_SRGB_ALPHA : GL_RGBA;
+        pixel_format = GL_RGBA;
     } else {
         CKG_LOG_ERROR("TextureLoader | Failed to pick a stb format, most likely related to assimp, try to link your libraries in a different order\n");
         ckg_assert(FALSE);
     }
 
     if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, pixel_format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
         CKG_LOG_ERROR("TextureLoader | Failed to load texture\n");
@@ -51,7 +55,7 @@ GLTextureID TextureLoader::loadTexture(const char *file, int texture_flags) {
     return texture;
 }
 
-GLTextureID TextureLoader::loadTextureFromMemory(const u8* data, int width, int height, int nrChannels, int texture_flags) {
+GLTextureID TextureLoader::loadTextureFromMemory(const u8* data, int width, int height, int nrChannels, int texture_flags, bool gammaCorrected) {
     if (!data || width <= 0 || height <= 0 || nrChannels == 0) {
         CKG_LOG_ERROR("TextureLoader | Invalid input data for loadTextureFromMemory!\n");
         return 0;
@@ -89,7 +93,7 @@ GLTextureID TextureLoader::loadTextureFromMemory(const u8* data, int width, int 
     return texture;
 }
 
-void TextureLoader::registerTexture(std::string key, const char *file, int texture_flags) {
+void TextureLoader::registerTexture(std::string key, const char *file, int texture_flags, bool gammaCorrected) {
     ckg_assert_msg(ckg_io_path_exists(file), "Texture path: '%s' doesn't exist!\n", file);
 
     if (TextureLoader::textures.count(key)) {
@@ -97,7 +101,7 @@ void TextureLoader::registerTexture(std::string key, const char *file, int textu
         return;
     }
 
-    TextureLoader::textures[key] = TextureLoader::loadTexture(file, texture_flags);
+    TextureLoader::textures[key] = TextureLoader::loadTexture(file, texture_flags, gammaCorrected);
 }
 
 void TextureLoader::registerTexture(std::string key, GLTextureID id) {

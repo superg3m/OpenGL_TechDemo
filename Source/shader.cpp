@@ -136,7 +136,7 @@ int Shader::getUniformLocation(const char* name, unsigned int gl_type) const {
         CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
     }
 
-    if (location != -1 && this->uniforms.at(name) != gl_type) {
+    if (location != -1 && this->uniforms.count(name) != 0 && this->uniforms.at(name) != gl_type) {
         CKG_LOG_ERROR("Shader {%s} Uniform: '%s' Is the wrong type!\nExpected: %d | Got: %d\n", this->path, name, gl_type, this->uniforms.at(name));
     }
 
@@ -154,12 +154,6 @@ void Shader::setInt(const char* name, int value) {
     glUniform1i(this->getUniformLocation(name, GL_INT), value); 
 }
 
-void Shader::setTexture(const char* name, int value) { 
-    this->use();
-    GLenum gl_type = this->uniforms.at(name);
-    glUniform1i(this->getUniformLocation(name, gl_type), value); 
-}
-
 void Shader::setFloat(const char* name, float value) { 
     this->use();
     glUniform1f(this->getUniformLocation(name, GL_FLOAT), value); 
@@ -175,6 +169,11 @@ void Shader::setVec3(const char* name, const GM_Vec3 &value) {
     glUniform3fv(this->getUniformLocation(name, GL_FLOAT_VEC3), 1, &value.x);
 }
 
+void Shader::setVec3(const char* name, const GM_Vec3* value, int count) {
+    this->use();
+    glUniform3fv(this->getUniformLocation(name, GL_FLOAT_VEC3), count, &value->x);
+}
+
 void Shader::setVec3(const char* name, float x, float y, float z) {
     this->use();
     GM_Vec3 temp = GM_Vec3(x, y, z);
@@ -184,6 +183,11 @@ void Shader::setVec3(const char* name, float x, float y, float z) {
 void Shader::setVec4(const char* name, const GM_Vec4 &value) {
     this->use();
     glUniform4fv(this->getUniformLocation(name, GL_FLOAT_VEC4), 1, &value.x);
+}
+
+void Shader::setVec4(const char* name, const GM_Vec4* value, int count) {
+    this->use();
+    glUniform4fv(this->getUniformLocation(name, GL_FLOAT_VEC4), count, &value->x);
 }
 
 void Shader::setIVec4(const char* name, const GM_Vec4 &value) {
@@ -198,7 +202,7 @@ void Shader::setMat4(const char* name, const GM_Matrix4 &mat) {
     glUniformMatrix4fv(this->getUniformLocation(name, GL_FLOAT_MAT4), 1, GL_TRUE, &mat.v[0].x);
 }
 
-void Shader::bindTexture(std::string name, GLTextureID textureID) {
+void Shader::setTexture(std::string name, GLTextureID textureID) {
     this->use();
 
     if (this->uniforms.count(name) == 0) {
@@ -215,7 +219,10 @@ void Shader::bindTexture(std::string name, GLTextureID textureID) {
     GLenum texture_type = sampler_type == GL_SAMPLER_2D ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP;
     glActiveTexture(GL_TEXTURE0 + this->activeTextureCount);
     glBindTexture(texture_type, textureID);
-    this->setTexture(name.c_str(), this->activeTextureCount);
+
+    GLenum gl_type = this->uniforms.at(name);
+    glUniform1i(this->getUniformLocation(name.c_str(), gl_type), this->activeTextureCount); 
+
     this->activeTextureCount += 1;
 }
 

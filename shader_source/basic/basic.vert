@@ -2,7 +2,7 @@
 
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNormal;
-layout(location = 2) in vec2 aTexCoords;
+layout(location = 2) in vec2 aTexCoord;
 layout(location = 3) in vec3 aTangent;
 layout(location = 4) in vec3 aBitangent;
 layout(location = 5) in vec4 aColor;
@@ -22,16 +22,14 @@ uniform mat4 uProjection;
 #define HAS_COLOR_BIT      (1 << 5)
 #define HAS_BONES_BIT      ((1 << 7) | (1 << 6))
 
-out VS_OUT {
-    vec3 FragPos;  // Pass fragment position to GS
-    vec3 Normal;   // Pass normal to GS
-    vec2 texCoords; // Pass texture coordinates to GS
-} vs_out;
+out vec3 v_FragPos;
+out vec3 v_Normal;
+out vec2 v_TexCoord;
 
 void main() {
-    vs_out.FragPos = vec3(uModel * vec4(aPos, 1.0));
-    vs_out.Normal = mat3(transpose(inverse(uModel))) * aNormal;
-    vs_out.texCoords = aTexCoords;
+    v_FragPos = vec3(uModel * vec4(aPos, 1.0));
+    v_Normal = mat3(transpose(inverse(uModel))) * aNormal;
+    v_TexCoord = aTexCoord;
     
-    gl_Position = uProjection * uView * vec4(vs_out.FragPos, 1.0);
+    gl_Position = uProjection * uView * vec4(v_FragPos, 1.0);
 }

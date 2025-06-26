@@ -54,5 +54,6 @@ struct Material {
     GLTextureID textures[TEXTURE_COUNT];
 
     Material();
-    void bindTexture(TextureType type, GLTextureID id);
+
+    void assignTexture(TextureType type, GLTextureID id);
 };

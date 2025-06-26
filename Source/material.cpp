@@ -7,6 +7,6 @@ Material::Material() {
     ckg_memory_fill(this->textures, ArrayCount(this->textures), 0);
 }
 
-void Material::bindTexture(TextureType type, GLTextureID id) {
+void Material::assignTexture(TextureType type, GLTextureID id) {
     this->textures[type] = id;
 }

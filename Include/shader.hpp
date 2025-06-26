@@ -20,16 +20,17 @@ struct Shader {
     void setFloat(const char*name, float value);
     void setVec2(const char*name, const GM_Vec2 &value);
     void setVec3(const char*name, const GM_Vec3 &value);
+    void setVec3(const char* name, const GM_Vec3* value, int count);
     void setVec3(const char* name, float x, float y, float z);
     void setVec4(const char*name, const GM_Vec4 &value);
+    void setVec4(const char* name, const GM_Vec4* value, int count);
     void setIVec4(const char*name, const GM_Vec4 &value);
     void setMat4(const char*name, const GM_Matrix4 &mat);
 
-    void bindTexture(std::string name, GLTextureID textureID);
+    void setTexture(std::string name, GLTextureID textureID);
     void unbindTextures();
 private:
     std::map<std::string, unsigned int> uniforms;
-    void setTexture(const char* name, int value);
     int getUniformLocation(const char* name, unsigned int gl_type) const;
     void checkCompileError(unsigned int shaderID, std::string type);
 };

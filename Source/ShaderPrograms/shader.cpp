@@ -1,6 +1,15 @@
 #include <shader.hpp>
 #include <ckg.h>
 
+unsigned int shader_get_uniform_location(unsigned int program_id, std::string name, const char* path) {
+    GLint location = glGetUniformLocation(program_id, name.c_str());
+    if (location == -1) {
+        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", path, name.c_str());
+    }
+
+    return location;
+}
+
 void shader_check_compile_error(unsigned int source_id, const char* path) {
     int success;
     char info_log[1024];

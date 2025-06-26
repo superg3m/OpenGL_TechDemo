@@ -97,12 +97,14 @@ procedures_config = {
         source_files = [
             "../../Source/*.cpp",
             "../../Source/Loader/*.cpp",
+            "../../Source/ShaderPrograms/*.cpp",
             "../../Libraries/glad/src/glad.c"
         ],
         additional_libs = libs,
         include_paths = [
             "../../Include", 
-            "../../Include/Loader", 
+            "../../Include/Loader",
+            "../../Include/ShaderPrograms",
             "../../ckg",
             "../../GameMath",
             "../../IOD",

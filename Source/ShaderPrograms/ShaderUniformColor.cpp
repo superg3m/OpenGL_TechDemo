@@ -1,23 +1,14 @@
 #include <ShaderUniformColor.hpp>
 
-int ShaderUniformColor::getUniformLocation(const char* name, const char* path) const {
-    GLint location = glGetUniformLocation(this->program_id, name);
-    if (location == -1) {
-        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", path, name);
-    }
-
-    return location;
-}
-
 ShaderUniformColor::ShaderUniformColor() {
     std::vector<const char*> shader_paths = {"../../shader_source/model/model.vert", "../../shader_source/model/model.frag"};
     this->program_id = create_shader_program(shader_paths);
 
-    this->uModel_Location = this->getUniformLocation("uModel", shader_paths[0]);
-    this->uView_Location = this->getUniformLocation("uView", shader_paths[0]);
-    this->uProjection_Location = this->getUniformLocation("uProjection", shader_paths[0]);
+    this->uModel_Location = shader_get_uniform_location(this->program_id, "uModel", shader_paths[0]);
+    this->uView_Location = shader_get_uniform_location(this->program_id, "uView", shader_paths[0]);
+    this->uProjection_Location = shader_get_uniform_location(this->program_id, "uProjection", shader_paths[0]);
 
-    this->uMaterial_Location = this->getUniformLocation("uMaterial", shader_paths[0]);
+    this->uMaterial_Location = shader_get_uniform_location(this->program_id, "uMaterial", shader_paths[0]);
 }
 
 void ShaderUniformColor::use() {

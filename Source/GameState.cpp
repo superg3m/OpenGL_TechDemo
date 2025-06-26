@@ -468,7 +468,10 @@ void GameState::render() {
     withoutTranslationView.v[0].w = 0.0f;
     withoutTranslationView.v[1].w = 0.0f;
     withoutTranslationView.v[2].w = 0.0f;
-    this->skybox_shader.setMat4("uMVP", projection * withoutTranslationView * skybox_model);
+
+    this->skybox_shader.use();
+    this->skybox_shader.setProjection(projection);
+    this->skybox_shader.setView(withoutTranslationView);
     GameState::skybox->draw();
     glDepthFunc(GL_LESS);
 
@@ -483,8 +486,8 @@ void GameState::render() {
         GM_Matrix4 view = sourceView;
 
         GM_Vec3 light_color = GM_Vec3(light->materials[0].color);
-        this->basic_shader.use();
-        this->basic_shader.setVec3(std::string("uLightPositions[" + std::to_string(i) + "]").c_str(), light->position);
+        this->model_shader.use();
+        this->model_shader.setLightPosition(light->position, i)
         this->basic_shader.setVec3(std::string("uLightColors[" + std::to_string(i) + "]").c_str(), light_color);
 
         this->light_shader.use();

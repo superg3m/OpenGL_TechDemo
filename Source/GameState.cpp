@@ -493,7 +493,11 @@ void GameState::render() {
         this->light_shader.setMat4("uProjection", projection);
         this->light_shader.setVec4("uObjectColor", light->materials[0].color);
         light->draw();
-        this->light_shader.unbindTextures();
+        for (int i = 0; i < 32; i++) {
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        }
 
         if (light->should_render_aabb) {
             GM_Matrix4 aabb_model = light->getAABBTransform();
@@ -525,7 +529,11 @@ void GameState::render() {
             // this->basic_shader.setTexture("uMaterial.specular", mesh->materials[i].textures[TEXTURE_TYPE_SPECULAR]);
         }
         mesh->draw();
-        this->basic_shader.unbindTextures();
+        for (int i = 0; i < 32; i++) {
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        }
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilMask(0x00);
 
@@ -566,7 +574,11 @@ void GameState::render() {
         this->transparent_shader.setFloat("uOpacity", mesh->materials[0].opacity);
         this->transparent_shader.setTexture("uTexture", TextureLoader::getTexture(WINDOW));
         mesh->draw();
-        this->transparent_shader.unbindTextures();
+        for (int i = 0; i < 32; i++) {
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        }
 
         if (mesh->should_render_aabb) {
             GM_Matrix4 aabb_model = mesh->getAABBTransform();

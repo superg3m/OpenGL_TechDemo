@@ -8,7 +8,8 @@
 #include <glad/glad.h>
 
 struct ShaderBase {
-    unsigned int program_id;
+    unsigned int program_id = 0;
+    virtual void init() = 0;
 
     void use() const;
 
@@ -21,7 +22,7 @@ struct ShaderBase {
     void setMaterial(Material &material) const;
     void unbindTextureUnits() const;
 protected:
-    ShaderBase();
+    ShaderBase() = default;
     GLenum typeFromPath(const char* path);
     void checkCompileError(unsigned int source_id, const char* path);
     unsigned int shaderSourceCompile(const char* path);

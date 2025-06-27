@@ -151,7 +151,7 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
             const aiMaterial* ai_material = scene->mMaterials[i];
 
             aiColor4D ambient_color(0.0f, 0.0f, 0.0f, 0.0f);
-            GM_Vec4 white = GM_Vec4(1.0f);
+            GM_Vec3 white = GM_Vec3(1.0f);
 
             if (ai_material->Get(AI_MATKEY_COLOR_AMBIENT, ambient_color) == AI_SUCCESS) {
                 this->materials[i].ambient_color.r = ambient_color.r;
@@ -328,12 +328,12 @@ void Mesh::setup(VertexAttributeFlag flags, const std::vector<Vertex>& vertices,
     glBindVertexArray(0);
 }
 
-void Mesh::draw(ShaderBase &shader) {
+void Mesh::draw(ShaderBase* shader) {
     glBindVertexArray(this->VAO);
 
     for (unsigned int mesh_index = 0 ; mesh_index < this->meshes.size() ; mesh_index++) {
         unsigned int material_index = this->meshes[mesh_index].material_index;
-        shader.setMaterial(this->materials[material_index]);
+        shader->setMaterial(this->materials[material_index]);
 
         if (this->meshes[mesh_index].index_count > 0) {
             glDrawElementsBaseVertex(
@@ -350,7 +350,7 @@ void Mesh::draw(ShaderBase &shader) {
             );
         }
 
-        shader.unbindTextureUnits();
+        shader->unbindTextureUnits();
     }
 
     // Make sure the VAO is not changed from the outside

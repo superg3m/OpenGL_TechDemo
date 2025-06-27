@@ -1,6 +1,6 @@
 #include <ShaderSkybox.hpp>
 
-ShaderSkybox::ShaderSkybox() {
+void ShaderSkybox::init() {
     std::vector<const char*> shader_paths = {"../../shader_source/outline/outline.vert", "../../shader_source/outline/outline.frag"};
     this->program_id = this->createShaderProgram(shader_paths);
 }

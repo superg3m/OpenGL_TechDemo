@@ -3,8 +3,9 @@
 #define LIGHT_COUNT 4
 
 struct ShaderModel : public ShaderBase {
-    ShaderModel();
-
+    ShaderModel() = default;
+    void init() override;
+    
     // Fragment Uniforms
     void setLightPosition(GM_Vec3 &position, int index) const;
     void setLightColor(GM_Vec3 &color, int index) const;

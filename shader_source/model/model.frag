@@ -7,56 +7,27 @@ in vec3 v_FragPos;
 in vec3 v_Normal;
 in vec2 v_TexCoord;
 
-struct Material {
-    sampler2D diffuse;
-    sampler2D specular;
-    float shininess;
-    vec4 color;
-}; 
+#include "../common/blinn_phong_lighting.glsl"
 
-uniform Material uMaterial;
-uniform vec3 uLightPositions[4];
-uniform vec3 uLightColors[4];
-uniform vec3 uViewPosition;
-uniform bool uGamma;
+#define NR_POINT_LIGHTS 4
+PointLight uPointLights[NR_POINT_LIGHTS];
 
-vec3 BlinnPhong(vec3 normal, vec3 fragPos, vec3 lightPos, vec3 lightColor) {
-    // diffuse
-    vec3 lightDir = normalize(lightPos - fragPos);
-    float diff = max(dot(lightDir, normal), 0.0);
-    vec3 diffuse = diff * lightColor;
-    // specular
-    vec3 viewDir = normalize(uViewPosition - fragPos);
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = 0.0;
-    vec3 halfwayDir = normalize(lightDir + viewDir);  
-    spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
-    vec3 specular = spec * lightColor;    
-    // simple attenuation
-    float max_distance = 1.5;
-    float distance = length(lightPos - fragPos);
-    float attenuation = 1.0 / (uGamma ? distance * distance : distance);
+void main() {    
+    // properties
+
+    vec3 norm = normalize(Normal);
+    vec3 viewDir = normalize(uViewPosition - FragPos);
     
-    diffuse *= attenuation;
-    specular *= attenuation;
+    // phase 1: directional lighting
+    vec3 result = CalcDirLight(uDirLight, norm, viewDir);
+    // phase 2: point lights
+    for(int i = 0; i < NR_POINT_LIGHTS; i++) {
+        result += CalcPointLight(uPointLights[i], norm, FragPos, viewDir);    
+    }
+    // phase 3: spot light
+    if (uUseFlashlight) {
+        result += CalcSpotLight(uSpotLight, norm, FragPos, viewDir);    
+    }
     
-    return diffuse + specular;
-}
-
-void main() {           
-    vec3 color = texture(uMaterial.diffuse, v_TexCoord).rgb;
-
-    vec3 lighting = vec3(0.0);
-    for(int i = 0; i < 1; ++i) {
-        lighting += BlinnPhong(normalize(v_Normal), v_FragPos, uLightPositions[i], uLightColors[i]);
-    }
-
-    color *= lighting;
-    FragColor = vec4(color, 1.0);
-    return;
-
-    color *= lighting;
-    if(uGamma) {
-        color = pow(color, vec3(1.0/2.2));
-    }
+    FragColor = vec4(result, uMaterial.opacity);
 }

@@ -47,7 +47,7 @@ unsigned int ShaderBase::shaderSourceCompile(const char* path) {
 unsigned int ShaderBase::getUniformLocation(std::string name) const {
     GLint location = glGetUniformLocation(this->program_id, name.c_str());
     if (location == -1) {
-        CKG_LOG_ERROR("Shader Uniform: '%s' does not exists\n", name.c_str());
+        // CKG_LOG_ERROR("Shader Uniform: '%s' does not exists\n", name.c_str());
     }
 
     return location;
@@ -69,7 +69,8 @@ unsigned int ShaderBase::createShaderProgram(std::vector<const char*> shader_pat
     if (!success) {
         char info_log[1028] = {0};
         glGetProgramInfoLog(program_id, 512, NULL, info_log);
-        CKG_LOG_ERROR("LINKING_FAILED\n");
+        CKG_LOG_ERROR("LINKING_FAILED {%s}\n", shader_paths[0]);
+        CKG_LOG_ERROR("%s -- --------------------------------------------------- --\n", info_log);
     }
 
     for (int i = 0; i < shader_sourceIDs.size(); i++) {
@@ -103,11 +104,11 @@ void ShaderBase::setMaterial(Material &material) const {
 
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D, material.textures[TEXTURE_TYPE_DIFFUSE]);
-    glUniform1i(this->getUniformLocation("uMaterial.diffuse"), 0);
+    glUniform1i(this->getUniformLocation("uMaterial.diffuse_map"), 0);
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, material.textures[TEXTURE_TYPE_SPECULAR]);
-    glUniform1i(this->getUniformLocation("uMaterial.specular"), 1);
+    glUniform1i(this->getUniformLocation("uMaterial.specular_map"), 1);
 
     glUniform4fv(this->getUniformLocation("uMaterial.color"), 1, &material.color.r);
     glUniform1f(this->getUniformLocation("uMaterial.shininess"), material.shininess);

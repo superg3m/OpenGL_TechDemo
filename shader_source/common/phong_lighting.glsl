@@ -1,6 +1,3 @@
-#ifndef PHONG_LIGHTING_H
-#define PHONG_LIGHTING_H
-
 struct DirLight {
     vec3 direction;
 
@@ -11,6 +8,10 @@ struct DirLight {
 
 struct PointLight {
     vec3 position;
+
+    float constant;
+    float linear;
+    float quadratic;
 	
     vec3 ambient;
     vec3 diffuse;
@@ -22,6 +23,10 @@ struct SpotLight {
     vec3 direction;
     float cutOff;
     float outerCutOff;
+
+    float constant;
+    float linear;
+    float quadratic;
   
     vec3 ambient;
     vec3 diffuse;
@@ -42,12 +47,12 @@ struct Material {
 uniform Material material;
 
 vec3 getDiffuseColor(vec2 texCoords) {
-    vec3 color = texture(material.diffus_map, texCoords).rgb;
+    vec3 color = texture(material.diffuse_map, texCoords).rgb;
     return color;
 }
 
 vec3 getSpecularColor(vec2 texCoords) {
-    vec3 color = texture(material.specula_map, texCoords).rgb;
+    vec3 color = texture(material.specular_map, texCoords).rgb;
     return color;
 }
 
@@ -83,7 +88,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec3 fragPos, v
     float specular_factor = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
     float distance = length(light.position - fragPos);
-    float attenuation = 1.0 / (1.0 + light.linear * distance + light.quadratic * (distance * distance)); // Removed 'f'
+    float attenuation = 1.0 / (1.0 + light.linear * distance + light.quadratic * (distance * distance));
 
     vec3 diffuse_color = getDiffuseColor(textCoords);
     vec3 specular_color = getSpecularColor(textCoords);
@@ -127,4 +132,3 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 viewDir, vec3 fragPos, vec
 
     return (ambient + diffuse + specular);
 }
-#endif // PHONG_LIGHTING_H

@@ -39,7 +39,7 @@ struct Material {
     float     opacity;
 };
 
-uniform Material material; // Declare the material uniform
+uniform Material material;
 
 vec3 getDiffuseColor(vec2 texCoords) {
     vec3 color = texture(material.diffus_map, texCoords).rgb;

@@ -12,6 +12,12 @@
 #include <MousePicker.hpp>
 #include <Camera.hpp>
 
+#include <ShaderModel.hpp>
+#include <ShaderSkybox.hpp>
+#include <ShaderUniformColor.hpp>
+#include <ShaderTransparency.hpp>
+#include <ShaderStencilOutline.hpp>
+
 // #include <glm/glm.hpp>
 // #include <glm/gtc/matrix_transform.hpp>
 // #include <glm/gtc/type_ptr.hpp>
@@ -49,14 +55,13 @@ struct DrawElementsCommand {
     static std::vector<Mesh*> lights;
     static std::vector<Mesh*> transparent_meshes;
 
-    Shader basic_shader;
-    Shader outline_shader;
-    Shader skybox_shader;
-    Shader aabb_shader;
-    Shader light_shader;
-    Shader particle_shader;
-    Shader pbr_shader;
-    Shader transparent_shader;
+    static bool use_flashlight;
+
+    ShaderModel model_shader;
+    ShaderSkybox skybox_shader;
+    ShaderUniformColor uniform_shader; // aabb and lights
+    ShaderStencilOutline outline_shader;
+    ShaderTransparency transparent_shader;
 
     GameState(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
 

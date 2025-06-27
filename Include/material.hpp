@@ -1,10 +1,9 @@
 #pragma once
 
-#include <vector>
-
-#include <Shader.hpp>
+#include <string>
 #include <gm.hpp>
 
+using GLTextureID = int;
 struct PBR_Material {
     float roughness = 0.0f;
     bool isMetal = false;
@@ -44,14 +43,14 @@ static const char* texture_to_string[TEXTURE_COUNT] = {
 
 struct Material {
     std::string name;
-    GM_Vec4 color = GM_Vec4(1);
-    GM_Vec4 ambient_color  = GM_Vec4(0);
-    GM_Vec4 diffuse_color  = GM_Vec4(0);
-    GM_Vec4 specular_color = GM_Vec4(0);
-    float opacity = 1.0f;
-    float alpha_test = 0.0f;
-
     GLTextureID textures[TEXTURE_COUNT];
+    GM_Vec3 color = GM_Vec3(1);
+    float shininess = 32.0f;
+    float opacity = 1.0f;
+
+    GM_Vec3 ambient_color  = GM_Vec3(0);
+    GM_Vec3 diffuse_color  = GM_Vec3(0);
+    GM_Vec3 specular_color = GM_Vec3(0);
 
     Material();
 

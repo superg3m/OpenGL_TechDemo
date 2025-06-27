@@ -4,9 +4,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <Material.hpp>
 #include <Vertex.hpp>
 #include <Geometry.hpp>
+#include <ShaderBase.hpp>
 #include <TextureLoader.hpp>
 // TODO(Jovanni): Consider removing transform from Mesh, 
 // as entities typically have transforms, not meshes themselves.
@@ -27,6 +27,7 @@ struct MeshEntry {
     unsigned int base_vertex  = 0; // offset to next vertex in the vertex buffer
     unsigned int base_index   = 0; // offset to next index in the index buffer
     unsigned int material_index = INVALID_MATERIAL;
+    GM_Matrix4 absolute_transform;
 };
 
 struct Mesh {
@@ -39,7 +40,7 @@ struct Mesh {
 
     std::vector<MeshEntry> meshes;
     std::vector<Material> materials;
-    unsigned int SSBOs[BUFFER_COUNT];
+    unsigned int buffers[BUFFER_COUNT];
     bool should_render_aabb = false;
     GLenum draw_type = GL_TRIANGLES; // GL_TRIANGLES, GL_LINES
 
@@ -48,7 +49,7 @@ struct Mesh {
     Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags = VertexAttributeFlag::PNTBundle);
     Mesh(const std::string &path, unsigned int texture_flags = TEXTURE_DEFAULT, unsigned int assimp_flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
-    void draw();
+    void draw(ShaderBase &shader, bool useMaterial = false);
 
     void setPosition(GM_Vec3 p);
     void setPosition(float x, float y, float z);

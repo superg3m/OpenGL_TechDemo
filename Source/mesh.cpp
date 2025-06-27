@@ -5,14 +5,13 @@
 static std::map<TextureType, aiTextureType> textureTypeToAssimpType = {
     { TEXTURE_TYPE_DIFFUSE, aiTextureType_DIFFUSE },
     { TEXTURE_TYPE_SPECULAR, aiTextureType_SPECULAR },
-    { TEXTURE_TYPE_NORMAL, aiTextureType_NORMALS }, // Standard normal maps
+    { TEXTURE_TYPE_NORMAL, aiTextureType_NORMALS },
     { TEXTURE_TYPE_METALNESS, aiTextureType_METALNESS },
     { TEXTURE_TYPE_EMISSIVE, aiTextureType_EMISSIVE },
-    { TEXTURE_TYPE_NORMAL_CAMERA, aiTextureType_NORMAL_CAMERA }, // Direct match in newer Assimp
-    { TEXTURE_TYPE_EMISSION_COLOR, aiTextureType_EMISSION_COLOR }, // Direct match in newer Assimp
-    { TEXTURE_TYPE_ROUGHNESS, aiTextureType_DIFFUSE_ROUGHNESS }, // Common for PBR roughness
+    { TEXTURE_TYPE_NORMAL_CAMERA, aiTextureType_NORMAL_CAMERA },
+    { TEXTURE_TYPE_EMISSION_COLOR, aiTextureType_EMISSION_COLOR },
+    { TEXTURE_TYPE_ROUGHNESS, aiTextureType_DIFFUSE_ROUGHNESS },
     { TEXTURE_TYPE_AMBIENT_OCCLUSION, aiTextureType_AMBIENT_OCCLUSION }
-    // TEXTURE_COUNT does not map to an Assimp texture type
 };
 
 Mesh::Mesh() {
@@ -25,8 +24,8 @@ Mesh::Mesh() {
 
 Mesh::Mesh(Geometry geometry) {
     this->VAO = geometry.VAO;
-    this->SSBOs[VERTEX_BUFFER] = geometry.VBO;
-    this->SSBOs[INDEX_BUFFER] = geometry.EBO;
+    this->buffers[VERTEX_BUFFER] = geometry.VBO;
+    this->buffers[INDEX_BUFFER] = geometry.EBO;
 
     this->position = GM_Vec3(0, 0, 0);
     this->orientation = GM_Quaternion::identity();
@@ -53,7 +52,7 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> 
 
     glGenVertexArrays(1, &this->VAO);
     glBindVertexArray(this->VAO);
-    glGenBuffers(ArrayCount(this->SSBOs), this->SSBOs);
+    glGenBuffers(ArrayCount(this->buffers), this->buffers);
 
     this->loadMeshFromData(vertices, indices, flags);
 }
@@ -78,7 +77,7 @@ Mesh::Mesh(const std::string &path, unsigned int texture_flags, unsigned int ass
 
     glGenVertexArrays(1, &this->VAO);
     glBindVertexArray(this->VAO);
-    glGenBuffers(ArrayCount(this->SSBOs), this->SSBOs);
+    glGenBuffers(ArrayCount(this->buffers), this->buffers);
 
     CKG_LOG_DEBUG("Loading: %s\n", path.c_str());
     this->loadMeshFromScene(path, scene);
@@ -152,7 +151,7 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
             const aiMaterial* ai_material = scene->mMaterials[i];
 
             aiColor4D ambient_color(0.0f, 0.0f, 0.0f, 0.0f);
-            GM_Vec4 white = GM_Vec4(1.0f);
+            GM_Vec3 white = GM_Vec3(1.0f);
 
             if (ai_material->Get(AI_MATKEY_COLOR_AMBIENT, ambient_color) == AI_SUCCESS) {
                 this->materials[i].ambient_color.r = ambient_color.r;
@@ -199,17 +198,20 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
 
                 aiString str;
                 if (ai_material->GetTexture(ai_type, 0, &str, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
-                    std::string texture_id_or_path = std::string(str.C_Str());
+                    std::string filename = directory + '/' + std::string(str.C_Str());
                     const aiTexture* ai_texture = scene->GetEmbeddedTexture(str.C_Str());
 
                     if (ai_texture) {
-                        // int width, height, nrChannel = 0;
-                        // u8* image_data = stbi_load_from_memory((u8*)ai_texture->pcData, ai_texture->mWidth, &width, &height, &nrChannel, 0);
-                        // GLTextureID id = TextureLoader::loadTextureFromMemory(image_data, width, height, nrChannel);
-                        // TextureLoader::registerTexture(texture_id_or_path, id);
-                        CKG_LOG_DEBUG("Loaded embedded Texture\n");
+                        int width, height, nrChannel = 0;
+                        u8* image_data = stbi_load_from_memory((u8*)ai_texture->pcData, ai_texture->mWidth, &width, &height, &nrChannel, 0);
+                        GLTextureID id = TextureLoader::loadTextureFromMemory(image_data, width, height, nrChannel);
+                        if (TextureLoader::textures.count(filename) == 0) {
+                            TextureLoader::registerTexture(filename, id);
+                        }
+
+                        CKG_LOG_DEBUG("Material: %d | has embedded Texture of type: %s\n", i, texture_to_string[type]);
+                        this->materials[i].textures[type] = TextureLoader::textures.at(filename);
                     } else {
-                        std::string filename = directory + '/' + texture_id_or_path;
                         CKG_LOG_DEBUG("Material: %d | has external texture of type: %s\n", i, texture_to_string[type]);
                         if (TextureLoader::textures.count(filename) == 0) {
                             TextureLoader::registerTexture(filename, filename.c_str(), this->texture_flags);
@@ -295,10 +297,10 @@ GM_AABB Mesh::getAABB() {
 }
 
 void Mesh::setup(VertexAttributeFlag flags, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
-    glBindBuffer(GL_ARRAY_BUFFER, this->SSBOs[VERTEX_BUFFER]);
+    glBindBuffer(GL_ARRAY_BUFFER, this->buffers[VERTEX_BUFFER]);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->SSBOs[INDEX_BUFFER]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->buffers[INDEX_BUFFER]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     // bool hasPosition   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aPosition);
@@ -329,11 +331,14 @@ void Mesh::setup(VertexAttributeFlag flags, const std::vector<Vertex>& vertices,
     glBindVertexArray(0);
 }
 
-void Mesh::draw() {
+void Mesh::draw(ShaderBase &shader, bool useMaterial) {
     glBindVertexArray(this->VAO);
 
     for (unsigned int mesh_index = 0 ; mesh_index < this->meshes.size() ; mesh_index++) {
-        // unsigned int material_index = this->meshes[mesh_index].material_index;
+        if (useMaterial) {
+            unsigned int material_index = this->meshes[mesh_index].material_index;
+            shader.setMaterial(this->materials[material_index]);
+        }
 
         if (this->meshes[mesh_index].index_count > 0) {
             glDrawElementsBaseVertex(

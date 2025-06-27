@@ -56,7 +56,7 @@ elif IS_LINUX() and not C_BUILD_IS_DEPENDENCY():
 # Do different things depending on the platform
 if cc.compiler_name == "cl":
     cc.compiler_warning_level = "4"
-    cc.compiler_disable_specific_warnings = ["4244", "4100", "4458", "4201"]
+    cc.compiler_disable_specific_warnings = ["4244", "4100", "4458", "4201", "4116"]
 else:
     cc.compiler_warning_level = ""
     cc.compiler_disable_specific_warnings = [
@@ -97,12 +97,14 @@ procedures_config = {
         source_files = [
             "../../Source/*.cpp",
             "../../Source/Loader/*.cpp",
+            "../../Source/ShaderPrograms/*.cpp",
             "../../Libraries/glad/src/glad.c"
         ],
         additional_libs = libs,
         include_paths = [
             "../../Include", 
-            "../../Include/Loader", 
+            "../../Include/Loader",
+            "../../Include/ShaderPrograms",
             "../../ckg",
             "../../GameMath",
             "../../IOD",

@@ -176,7 +176,7 @@ void GameState::initalizeResources() {
     // rabbit->setEulerAngles(-90, 0, 0);
     // GameState::meshes.push_back(rabbit);
     
-    Mesh* map = new Mesh("../../assets/church/church.glb");
+    Mesh* map = new Mesh("../../assets/map/the_billiards_room.glb");
     map->setPosition(GM_Vec3(0.0f, 0.0f, 0.0f));
     map->setScale(0.5f);
     map->setEulerAngles(-90, 0, 0);

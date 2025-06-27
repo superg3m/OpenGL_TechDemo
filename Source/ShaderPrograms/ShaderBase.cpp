@@ -53,6 +53,15 @@ unsigned int ShaderBase::getUniformLocation(std::string name) const {
     return location;
 }
 
+unsigned int ShaderBase::getUniformLocation(const char* name) const {
+    GLint location = glGetUniformLocation(this->program_id, name);
+    if (location == -1) {
+        CKG_LOG_ERROR("Shader Uniform: '%s' does not exists\n", name);
+    }
+
+    return location;
+}
+
 unsigned int ShaderBase::createShaderProgram(std::vector<const char*> shader_paths) {
     unsigned int program_id = glCreateProgram();
 
@@ -112,14 +121,4 @@ void ShaderBase::setMaterial(Material &material) const {
 
     glUniform1f(this->getUniformLocation("uMaterial.shininess"), material.shininess);
     glUniform1f(this->getUniformLocation("uMaterial.opacity"), material.opacity);
-}
-
-void ShaderBase::unbindTextureUnits() const {
-    #define TEXTURE_MAX 32
-
-    for (int i = 0; i < TEXTURE_MAX; i++) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-    }
 }

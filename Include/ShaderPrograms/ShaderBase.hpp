@@ -20,12 +20,12 @@ struct ShaderBase {
 
     // Fragment Uniforms
     void setMaterial(Material &material) const;
-    void unbindTextureUnits() const;
 protected:
     ShaderBase() = default;
     GLenum typeFromPath(const char* path);
     void checkCompileError(unsigned int source_id, const char* path);
     unsigned int shaderSourceCompile(const char* path);
+    unsigned int getUniformLocation(const char* name) const;
     unsigned int getUniformLocation(std::string name) const;
     unsigned int createShaderProgram(std::vector<const char*> shader_paths);
 };

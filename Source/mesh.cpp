@@ -351,8 +351,6 @@ void Mesh::draw(ShaderBase &shader, bool useMaterial) {
                 this->meshes[mesh_index].vertex_count
             );
         }
-
-        shader.unbindTextureUnits();
     }
 
     // Make sure the VAO is not changed from the outside

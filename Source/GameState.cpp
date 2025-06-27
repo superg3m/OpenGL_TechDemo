@@ -5,7 +5,7 @@ unsigned int GameState::WINDOW_WIDTH;
 unsigned int GameState::WINDOW_HEIGHT;
 bool GameState::mouse_captured = true;
 float GameState::timeScale = 1.0f;
-Camera GameState::camera = Camera(0, 0, 5);
+Camera GameState::camera = Camera(0, 0, 6);
 float GameState::deltaTime = 0.0f;
 MousePicker GameState::picker = MousePicker();
 Mesh* GameState::selected_mesh = nullptr;
@@ -36,7 +36,7 @@ GM_Vec3 pointLightColors[] = {
     GM_Vec3(1.0f, 0.0f,  1.0f),
     GM_Vec3(1.0f, 0.0f,  0.0f),
     GM_Vec3(0.0f, 1.0f,  0.0f),
-    GM_Vec3(0.5f, 0.0f,  1.0f)
+    GM_Vec3(0.1f, 1.0f,  1.0f)
 };
 
 GLFWwindow* GameState::initalizeWindow() {
@@ -176,10 +176,10 @@ void GameState::initalizeResources() {
     // rabbit->setEulerAngles(-90, 0, 0);
     // GameState::meshes.push_back(rabbit);
     
-    Mesh* map = new Mesh("../../assets/map/the_billiards_room.glb");
-    map->setPosition(GM_Vec3(0.0f, 0.0f, 0.0f));
-    map->setScale(0.5f);
-    map->setEulerAngles(-90, 0, 0);
+    Mesh* map = new Mesh("../../assets/map/church.glb");
+    map->setPosition(GM_Vec3(0.0f, 5.0f, 0.0f));
+    map->setScale(1.0f);
+    map->setEulerAngles(90, 90, 0);
     GameState::meshes.push_back(map);
 
     /*
@@ -467,6 +467,7 @@ void GameState::render() {
     withoutTranslationView.v[2].w = 0.0f;
 
     this->skybox_shader.use();
+    this->skybox_shader.setModel(skybox_model);
     this->skybox_shader.setProjection(projection);
     this->skybox_shader.setView(withoutTranslationView);
     GameState::skybox->draw(skybox_shader);

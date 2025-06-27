@@ -47,7 +47,7 @@ unsigned int ShaderBase::shaderSourceCompile(const char* path) {
 unsigned int ShaderBase::getUniformLocation(std::string name) const {
     GLint location = glGetUniformLocation(this->program_id, name.c_str());
     if (location == -1) {
-        CKG_LOG_ERROR("Shader Uniform: '%s' does not exists\n", name.c_str());
+        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name.c_str());
     }
 
     return location;
@@ -56,7 +56,7 @@ unsigned int ShaderBase::getUniformLocation(std::string name) const {
 unsigned int ShaderBase::getUniformLocation(const char* name) const {
     GLint location = glGetUniformLocation(this->program_id, name);
     if (location == -1) {
-        CKG_LOG_ERROR("Shader Uniform: '%s' does not exists\n", name);
+        CKG_LOG_ERROR("Shader {%s} Uniform: '%s' does not exists\n", this->path, name);
     }
 
     return location;
@@ -64,6 +64,7 @@ unsigned int ShaderBase::getUniformLocation(const char* name) const {
 
 unsigned int ShaderBase::createShaderProgram(std::vector<const char*> shader_paths) {
     unsigned int program_id = glCreateProgram();
+    this->path = shader_paths[0];
 
     std::vector<unsigned int> shader_sourceIDs; 
     for (const char* path : shader_paths) {

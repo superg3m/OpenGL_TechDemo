@@ -39,12 +39,12 @@ struct Material {
     sampler2D diffuse_map;
     sampler2D specular_map;
 
-    vec3        ambient_color;
-    vec3        diffuse_color;
-    vec3        specular_color;
+    vec3 ambient_color;
+    vec3 diffuse_color;
+    vec3 specular_color;
     
-    float       shininess;
-    float       opacity;
+    float shininess;
+    float opacity;
 };
 
 #define NR_POINT_LIGHTS 4
@@ -86,7 +86,7 @@ void main() {
 
     // Phase 3: spot light (flashlight)
     if (uUseFlashlight) {
-        totalLightResult += CalcSpotLight(uSpotLight, norm, v_FragPos, viewDir, v_TexCoord);         
+        totalLightResult += CalcSpotLight(uSpotLight, norm, v_FragPos, viewDir, v_TexCoord);       
     }
     
     FragColor = vec4(totalLightResult, uMaterial.opacity);

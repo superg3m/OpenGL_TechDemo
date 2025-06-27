@@ -16,6 +16,7 @@
 #include <ShaderSkybox.hpp>
 #include <ShaderUniformColor.hpp>
 #include <ShaderTransparency.hpp>
+#include <ShaderStencilOutline.hpp>
 
 // #include <glm/glm.hpp>
 // #include <glm/gtc/matrix_transform.hpp>
@@ -54,10 +55,12 @@ struct DrawElementsCommand {
     static std::vector<Mesh*> lights;
     static std::vector<Mesh*> transparent_meshes;
 
+    static bool use_flashlight;
+
     ShaderModel model_shader;
     ShaderSkybox skybox_shader;
     ShaderUniformColor uniform_shader; // aabb and lights
-    // ShaderStencilOutline outline_shader;
+    ShaderStencilOutline outline_shader;
     ShaderTransparency transparent_shader;
 
     GameState(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);

@@ -4,6 +4,22 @@ void ShaderModel::init() {
     std::vector<const char*> shader_paths = {"../../shader_source/model/model.vert", "../../shader_source/model/model.frag"};
     this->program_id = this->createShaderProgram(shader_paths);
 
+    this->uSpotLight_Location.position = this->getUniformLocation("uSpotLight.position");
+    this->uSpotLight_Location.direction = this->getUniformLocation("uSpotLight.direction");
+    this->uSpotLight_Location.cutOff = this->getUniformLocation("uSpotLight.cutOff");
+    this->uSpotLight_Location.outerCutOff = this->getUniformLocation("uSpotLight.outerCutOff");
+    this->uSpotLight_Location.constant = this->getUniformLocation("uSpotLight.constant");
+    this->uSpotLight_Location.linear = this->getUniformLocation("uSpotLight.linear");
+    this->uSpotLight_Location.diffuse = this->getUniformLocation("uSpotLight.quadratic");
+    this->uSpotLight_Location.ambient = this->getUniformLocation("uSpotLight.ambient");
+    this->uSpotLight_Location.diffuse = this->getUniformLocation("uSpotLight.diffuse");
+    this->uSpotLight_Location.specular = this->getUniformLocation("uSpotLight.specular");
+
+    this->uDirectionalLight_Location.direction = this->getUniformLocation("uDirLight.direction");
+    this->uDirectionalLight_Location.ambient = this->getUniformLocation("uDirLight.ambient");
+    this->uDirectionalLight_Location.diffuse = this->getUniformLocation("uDirLight.diffuse");
+    this->uDirectionalLight_Location.specular = this->getUniformLocation("uDirLight.specular");
+
     for (int i = 0; i < LIGHT_COUNT; i++) {
         this->uPointLight_Locations[i].position = this->getUniformLocation("uPointLights["+ std::to_string(i) + "].position");
 
@@ -17,6 +33,34 @@ void ShaderModel::init() {
     }
 
     this->uViewPosition_Location = this->getUniformLocation("uViewPosition");
+    this->uUseFlashlight_Location = this->getUniformLocation("uUseFlashlight");
+}
+
+void ShaderModel::setSpotLight(SpotLight &spot_light) const {
+    this->use();
+
+    glUniform3fv(this->uSpotLight_Location.position, 1, &spot_light.position.x);
+    glUniform3fv(this->uSpotLight_Location.direction, 1, &spot_light.direction.x);
+    glUniform1f(this->uSpotLight_Location.cutOff, spot_light.cutOff);
+    glUniform1f(this->uSpotLight_Location.outerCutOff, spot_light.outerCutOff);
+
+    glUniform1f(this->uSpotLight_Location.constant, spot_light.constant);
+    glUniform1f(this->uSpotLight_Location.linear, spot_light.linear);
+    glUniform1f(this->uSpotLight_Location.quadratic, spot_light.quadratic);
+
+    glUniform3fv(this->uSpotLight_Location.ambient, 1, &spot_light.ambient.x);
+    glUniform3fv(this->uSpotLight_Location.diffuse, 1, &spot_light.diffuse.x);
+    glUniform3fv(this->uSpotLight_Location.specular, 1, &spot_light.specular.x);
+}
+
+void ShaderModel::setDirectionalLight(DirectionalLight &directional_light) const {
+    this->use();
+
+    glUniform3fv(this->uDirectionalLight_Location.direction, 1, &directional_light.direction.x);
+
+    glUniform3fv(this->uDirectionalLight_Location.ambient, 1, &directional_light.ambient.x);
+    glUniform3fv(this->uDirectionalLight_Location.diffuse, 1, &directional_light.diffuse.x);
+    glUniform3fv(this->uDirectionalLight_Location.specular, 1, &directional_light.specular.x);
 }
 
 void ShaderModel::setPointLight(PointLight &point_light, int index) const {
@@ -37,4 +81,10 @@ void ShaderModel::setViewPosition(GM_Vec3 &view_position) const {
     this->use();
 
     glUniform3fv(this->uViewPosition_Location, 1, &view_position.x);
+}
+
+void ShaderModel::setUseFlashlight(bool useFlashlight) const {
+    this->use();
+
+    glUniform1i(this->uUseFlashlight_Location, (int)useFlashlight);
 }

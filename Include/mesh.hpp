@@ -48,7 +48,7 @@ struct Mesh {
     Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags = VertexAttributeFlag::PNTBundle);
     Mesh(const std::string &path, unsigned int texture_flags = TEXTURE_DEFAULT, unsigned int assimp_flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
-    void draw(ShaderBase &shader, bool useMaterial = true);
+    void draw(ShaderBase &shader, bool useMaterial = false);
 
     void setPosition(GM_Vec3 p);
     void setPosition(float x, float y, float z);

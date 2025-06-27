@@ -43,6 +43,8 @@ uniform Material material; // Declare the material uniform
 
 vec3 getDiffuseColor(vec2 texCoords) {
     vec3 color = texture(material.diffus_map, texCoords).rgb;
+    // return pow(color, vec3(2.2)); This is if you want to apply gamma correction
+
     return color;
 }
 

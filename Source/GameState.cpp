@@ -130,13 +130,6 @@ u64 GameState::getReferenceID() {
 void GameState::initalizeResources() {
     srand(time(0));
 
-    // "../../shader_source/basic/basic.gs"s
-    this->basic_shader = Shader({"../../shader_source/basic/basic.vert", "../../shader_source/basic/basic.frag"});
-    this->outline_shader = Shader({"../../shader_source/outline/outline.vert", "../../shader_source/outline/outline.frag"});
-    this->skybox_shader = Shader({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
-    this->aabb_shader = Shader({"../../shader_source/aabb/aabb.vert", "../../shader_source/aabb/aabb.frag"});
-    this->light_shader = Shader({"../../shader_source/light/light.vert", "../../shader_source/light/light.frag"});
-    this->transparent_shader = Shader({"../../shader_source/transparency/t.vert", "../../shader_source/transparency/t.frag"});
     std::array<const char*, 6> cubemap_faces = {
         "../../assets/city_skybox/right.jpg",
         "../../assets/city_skybox/left.jpg",
@@ -217,7 +210,7 @@ void GameState::initalizeResources() {
         cube->setScale(0.5f);
         cube->setPosition(primitivePositions[i]);
 
-        cube->materials[0].color = GM_Vec4(0.14f, 1.0f, 0.84f, 1);
+        cube->materials[0].color = GM_Vec3(0.14f, 1.0f, 0.84f);
         cube->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(CRATE2);
         cube->materials[0].textures[TEXTURE_TYPE_SPECULAR] = TextureLoader::getTexture(CRATE2_SPECULAR);
         GameState::meshes.push_back(cube);
@@ -472,12 +465,9 @@ void GameState::render() {
     this->skybox_shader.use();
     this->skybox_shader.setProjection(projection);
     this->skybox_shader.setView(withoutTranslationView);
-    GameState::skybox->draw();
+    GameState::skybox->draw(skybox_shader);
     glDepthFunc(GL_LESS);
 
-
-    //this->basic_shader.setVec3("uLightPositions", &pointLightPositions[0], ArrayCount(pointLightPositions));
-    //this->basic_shader.setVec3("uLightColors", &pointLightColors[0], ArrayCount(pointLightColors));
 
     //  point lights
     for (int i = 0; i < GameState::lights.size(); i++) {
@@ -495,7 +485,7 @@ void GameState::render() {
         this->uniform_shader.setView(view);
         this->uniform_shader.setProjection(projection);
         this->uniform_shader.setColor(light->materials[0].color);
-        light->draw();
+        light->draw(this->uniform_shader);
         for (int i = 0; i < 32; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, 0);
@@ -510,7 +500,7 @@ void GameState::render() {
             this->uniform_shader.setView(view);
             this->uniform_shader.setProjection(projection);
             this->uniform_shader.setColor(GM_Vec3(0, 1, 0));
-            aabb_mesh.draw();
+            aabb_mesh.draw(this->uniform_shader);
         }
     }
 
@@ -519,40 +509,29 @@ void GameState::render() {
         GM_Matrix4 view = sourceView;
 
         this->model_shader.use();
-        this->uniform_shader.setModel(mesh_model);
-        this->uniform_shader.setView(view);
-        this->uniform_shader.setProjection(projection);
-        this->model_shader.setVec3("uViewPosition", GameState::camera.position);
-
-        // material properties
+        this->model_shader.setModel(mesh_model);
+        this->model_shader.setView(view);
+        this->model_shader.setProjection(projection);
+        this->model_shader.setViewPosition(GameState::camera.position);
         // this->basic_shader.setFloat("uMaterial.shininess", 64.0f);
 
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0xFF);
-        for (int i = 0; i < mesh->materials.size(); i++) {
-            this->basic_shader.setTexture("uMaterial.diffuse", mesh->materials[i].textures[TEXTURE_TYPE_DIFFUSE]);
-            // this->basic_shader.setTexture("uMaterial.specular", mesh->materials[i].textures[TEXTURE_TYPE_SPECULAR]);
-        }
-        mesh->draw();
-        for (int i = 0; i < 32; i++) {
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, 0);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-        }
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00);
+        // glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        // glStencilMask(0xFF);
+        mesh->draw(this->model_shader);
+        // glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        // glStencilMask(0x00);
 
         if (mesh->should_render_aabb) {
-            glDisable(GL_DEPTH_TEST);
-            this->outline_shader.use();
-            this->outline_shader.setMat4("uModel", mesh_model);
-            this->outline_shader.setMat4("uView", view);
-            this->outline_shader.setMat4("uProjection", projection);
-            this->outline_shader.setFloat("uOutlineScale", 0.02f);
-            mesh->draw();
-            glEnable(GL_DEPTH_TEST);
-            glStencilMask(0xFF);
-            glStencilFunc(GL_ALWAYS, 0, 0xFF);
+            // glDisable(GL_DEPTH_TEST);
+            // this->outline_shader.use();
+            // this->outline_shader.setMat4("uModel", mesh_model);
+            // this->outline_shader.setMat4("uView", view);
+            // this->outline_shader.setMat4("uProjection", projection);
+            // this->outline_shader.setFloat("uOutlineScale", 0.02f);
+            // mesh->draw();
+            // glEnable(GL_DEPTH_TEST);
+            // glStencilMask(0xFF);
+            // glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
             GM_Matrix4 aabb_model = mesh->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
@@ -563,8 +542,8 @@ void GameState::render() {
             this->uniform_shader.setColor(GM_Vec3(0, 1, 0));
             aabb_mesh.draw();
         } else {
-            glStencilMask(0xFF);
-            glStencilFunc(GL_ALWAYS, 0, 0xFF);  
+            // glStencilMask(0xFF);
+            // glStencilFunc(GL_ALWAYS, 0, 0xFF);  
         }
     }
 

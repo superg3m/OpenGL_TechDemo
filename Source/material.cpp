@@ -3,7 +3,7 @@
 
 Material::Material() {
     this->opacity = 1.0f;
-    this->color = GM_Vec4(1, 1, 1, 1);
+    this->color = GM_Vec3(1, 1, 1);
     ckg_memory_fill(this->textures, ArrayCount(this->textures), 0);
 }
 

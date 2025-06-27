@@ -1,49 +1,16 @@
 #include <ShaderModel.hpp>
-#include <shader.hpp>
 
 ShaderModel::ShaderModel() {
     std::vector<const char*> shader_paths = {"../../shader_source/model/model.vert", "../../shader_source/model/model.frag"};
-    this->program_id = create_shader_program(shader_paths);
-
-    this->uModel_Location = this->getUniformLocation("uModel", shader_paths[0]);
-    this->uView_Location = this->getUniformLocation("uView", shader_paths[0]);
-    this->uProjection_Location = this->getUniformLocation("uProjection", shader_paths[0]);
-
-    this->uMaterial_Location = this->getUniformLocation("uMaterial", shader_paths[0]);
+    this->program_id = this->createShaderProgram(shader_paths);
 
     for (int i = 0; i < LIGHT_COUNT; i++) {
-        this->uLightPosition_Locations[i] = this->getUniformLocation("lightPositions["+ std::to_string(i) + "]", shader_paths[0]);
-        this->uLightColor_Locations[i] = this->getUniformLocation("lightColors["+ std::to_string(i) + "]", shader_paths[0]);
+        this->uLightPosition_Locations[i] = this->getUniformLocation("lightPositions["+ std::to_string(i) + "]");
+        this->uLightColor_Locations[i] =this->getUniformLocation("lightColors["+ std::to_string(i) + "]");
     }
 
-    this->uViewPosition_Location = this->getUniformLocation("viewPosition", shader_paths[0]);
-    this->uGamma_Location = this->getUniformLocation("gamma", shader_paths[0]);
-}
-
-void ShaderModel::use() const {
-    glUseProgram(this->program_id);
-}
-
-void ShaderModel::setModel(GM_Matrix4 &model) const {
-    this->use();
-    glUniformMatrix4fv(this->uModel_Location, 1, GL_TRUE, &model.v[0].x);
-}
-
-void ShaderModel::setView(GM_Matrix4 &view) const {
-    this->use();
-    glUniformMatrix4fv(this->uView_Location, 1, GL_TRUE, &view.v[0].x);
-}
-
-void ShaderModel::setProjection(GM_Matrix4 &projection) const {
-    this->use();
-
-    glUniformMatrix4fv(this->uProjection_Location, 1, GL_TRUE, &projection.v[0].x);
-}
-
-void ShaderModel::setMaterial(Material &material) const {
-    this->use();
-
-    glUniform4fv(this->uMaterial_Location, 1, &material.color.x);
+    this->uViewPosition_Location = this->getUniformLocation("viewPosition");
+    this->uGamma_Location = this->getUniformLocation("gamma");
 }
 
 void ShaderModel::setLightPosition(GM_Vec3 &position, int index) const {

@@ -56,7 +56,7 @@ elif IS_LINUX() and not C_BUILD_IS_DEPENDENCY():
 # Do different things depending on the platform
 if cc.compiler_name == "cl":
     cc.compiler_warning_level = "4"
-    cc.compiler_disable_specific_warnings = ["4244", "4100", "4458", "4201"]
+    cc.compiler_disable_specific_warnings = ["4244", "4100", "4458", "4201", "4116"]
 else:
     cc.compiler_warning_level = ""
     cc.compiler_disable_specific_warnings = [

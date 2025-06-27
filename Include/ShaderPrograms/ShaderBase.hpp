@@ -1,0 +1,30 @@
+#pragma once
+
+#include <vector>
+#include <string>
+#include <Material.hpp>
+#include <gm.hpp>
+
+#include <glad/glad.h>
+
+struct ShaderBase {
+    unsigned int program_id;
+
+    void use() const;
+
+    // Vertex Uniforms
+    void setModel(GM_Matrix4 &model) const;
+    void setView(GM_Matrix4 &view) const;
+    void setProjection(GM_Matrix4 &projection) const;
+
+    // Fragment Uniforms
+    void setMaterial(Material &material) const;
+    void unbindTextureUnits() const;
+protected:
+    ShaderBase();
+    GLenum typeFromPath(const char* path);
+    void checkCompileError(unsigned int source_id, const char* path);
+    unsigned int shaderSourceCompile(const char* path);
+    unsigned int getUniformLocation(std::string name) const;
+    unsigned int createShaderProgram(std::vector<const char*> shader_paths);
+};

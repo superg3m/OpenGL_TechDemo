@@ -10,8 +10,9 @@ in vec2 v_TexCoord;
 struct Material {
     sampler2D diffuse;
     sampler2D specular;
-    float shininess;
     vec4 color;
+    float shininess;
+    float opacity;
 }; 
 
 uniform Material uMaterial;

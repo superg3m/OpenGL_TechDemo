@@ -15,6 +15,7 @@
 #include <ShaderModel.hpp>
 #include <ShaderSkybox.hpp>
 #include <ShaderUniformColor.hpp>
+#include <ShaderTransparency.hpp>
 
 // #include <glm/glm.hpp>
 // #include <glm/gtc/matrix_transform.hpp>
@@ -57,7 +58,7 @@ struct DrawElementsCommand {
     ShaderSkybox skybox_shader;
     ShaderUniformColor uniform_shader; // aabb and lights
     // ShaderStencilOutline outline_shader;
-    // ShaderTransparency transparent_shader;
+    ShaderTransparency transparent_shader;
 
     GameState(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
 

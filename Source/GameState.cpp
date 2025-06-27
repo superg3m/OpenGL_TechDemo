@@ -133,6 +133,7 @@ void GameState::initalizeResources() {
     this->model_shader.init();
     this->uniform_shader.init();
     this->skybox_shader.init();
+    this->transparent_shader.init();
 
     std::array<const char*, 6> cubemap_faces = {
         "../../assets/city_skybox/right.jpg",
@@ -555,7 +556,6 @@ void GameState::render() {
         }
     }
 
-    /*
     glEnable(GL_BLEND);
     for (int i = (int)GameState::transparent_meshes.size() - 1; i >= 0; i--) {
         Mesh* mesh = GameState::transparent_meshes[i];
@@ -563,12 +563,12 @@ void GameState::render() {
         GM_Matrix4 view = sourceView;
 
         this->transparent_shader.use();
-        this->transparent_shader.setMat4("uModel", transparent_model);
-        this->transparent_shader.setMat4("uView", view);
-        this->transparent_shader.setMat4("uProjection", projection);
-        this->transparent_shader.setFloat("uOpacity", mesh->materials[0].opacity);
-        this->transparent_shader.setTexture("uTexture", TextureLoader::getTexture(WINDOW));
-        mesh->draw(this->transparent_shader);
+        this->transparent_shader.setModel(transparent_model);
+        this->transparent_shader.setView(view);
+        this->transparent_shader.setProjection(projection);
+        this->transparent_shader.setOpacity(mesh->materials[0].opacity);
+        this->transparent_shader.setTexture(TextureLoader::getTexture(WINDOW));
+        mesh->draw(this->transparent_shader, false);
 
         if (mesh->should_render_aabb) {
             GM_Matrix4 aabb_model = mesh->getAABBTransform();
@@ -578,9 +578,8 @@ void GameState::render() {
             this->uniform_shader.setView(view);
             this->uniform_shader.setProjection(projection);
             this->uniform_shader.setColor(GM_Vec3(0, 1, 0));
-            aabb_mesh.draw();
+            aabb_mesh.draw(this->uniform_shader, false);
         }
     }
     glDisable(GL_BLEND);
-    */
 }

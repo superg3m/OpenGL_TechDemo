@@ -33,10 +33,10 @@ GM_Vec3 pointLightPositions[] = {
 };
 
 GM_Vec3 pointLightColors[] = {
-    GM_Vec3(0.7f, 0.2f,  1.0f),
-    GM_Vec3(0.3f, 0.5f,  0.2f),
-    GM_Vec3(1.0f, 1.0f,  1.0f),
-    GM_Vec3(0.5f, 0.1f,  0.3f)
+    GM_Vec3(1.0f, 0.0f,  1.0f),
+    GM_Vec3(1.0f, 0.0f,  0.0f),
+    GM_Vec3(0.0f, 1.0f,  0.0f),
+    GM_Vec3(0.5f, 0.0f,  1.0f)
 };
 
 GLFWwindow* GameState::initalizeWindow() {

@@ -97,7 +97,7 @@ Shader::Shader(std::vector<const char*> shader_paths) {
     }
     glLinkProgram(this->id);
 
-    GLint success = FALSE;
+    GLint success = false;
     glGetProgramiv(this->id, GL_LINK_STATUS, &success);
     if (!success) {
         char info_log[1028] = {0};

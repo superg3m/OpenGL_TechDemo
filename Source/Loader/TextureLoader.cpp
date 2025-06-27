@@ -35,7 +35,7 @@ GLTextureID TextureLoader::loadTexture(const char *file, int texture_flags, bool
         pixel_format = GL_RGBA;
     } else {
         CKG_LOG_ERROR("TextureLoader | Failed to pick a stb format, most likely related to assimp, try to link your libraries in a different order\n");
-        ckg_assert(FALSE);
+        ckg_assert(false);
     }
 
     if (data) {
@@ -46,7 +46,7 @@ GLTextureID TextureLoader::loadTexture(const char *file, int texture_flags, bool
     }
 
     stbi_image_free(data);
-    stbi_set_flip_vertically_on_load(FALSE);
+    stbi_set_flip_vertically_on_load(false);
 
     if (texture == 0) {
         CKG_LOG_ERROR("TextureLoader | id is invalid!\n");
@@ -197,7 +197,7 @@ TextureAtlas::TextureAtlas(std::string key, const char *file, int texture_flags)
         l_format = GL_RGBA;
     } else {
         CKG_LOG_ERROR("TextureLoader | Failed to pick a stb format, most likely related to assimp, try to link your libraries in a different order\n");
-        ckg_assert(FALSE);
+        ckg_assert(false);
     }
 
     if (data) {
@@ -209,7 +209,7 @@ TextureAtlas::TextureAtlas(std::string key, const char *file, int texture_flags)
         CKG_LOG_ERROR("TextureLoader | Failed to load texture\n"); 
     }
 
-    stbi_set_flip_vertically_on_load(FALSE);
+    stbi_set_flip_vertically_on_load(false);
 }
 
 void TextureAtlas::bindPartitionedTexture(std::string key, int start_x, int start_y, int t_width, int t_height, int texture_flags) {

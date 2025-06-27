@@ -119,7 +119,7 @@ GM_Matrix4 GameState::getProjectionMatrix() {
     float fov = GameState::camera.zoom;
     float aspect = (float)GameState::WINDOW_WIDTH / (float)GameState::WINDOW_HEIGHT;
     float near_plane = 0.1f;
-    float far_plane = 100.0f;
+    float far_plane = 1000.0f;
 
     return GM_Matrix4::perspective(fov, aspect, near_plane, far_plane);
 }
@@ -170,20 +170,26 @@ void GameState::initalizeResources() {
         GM_Vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    /*
-    Mesh* rabbit = new Mesh("../../assets/rabbit/Rabbit_Low_Poly.fbx");
-    rabbit->setPosition(GM_Vec3(5.0f, 0.0f, 0.0f));
-    rabbit->setScale(5.0f);
-    rabbit->setEulerAngles(-90, 0, 0);
-    GameState::meshes.push_back(rabbit);
+    // Mesh* rabbit = new Mesh("../../assets/rabbit/Rabbit_Low_Poly.fbx");
+    // rabbit->setPosition(GM_Vec3(5.0f, 0.0f, 0.0f));
+    // rabbit->setScale(5.0f);
+    // rabbit->setEulerAngles(-90, 0, 0);
+    // GameState::meshes.push_back(rabbit);
+    
+    Mesh* map = new Mesh("../../assets/church/church.glb");
+    map->setPosition(GM_Vec3(0.0f, 0.0f, 0.0f));
+    map->setScale(0.5f);
+    map->setEulerAngles(-90, 0, 0);
+    GameState::meshes.push_back(map);
 
+    /*
     Mesh* knight = new Mesh("../../assets/knight/scene.gltf");
     knight->setPosition(GM_Vec3(10.0f, 0.0f, 3.0f));
     knight->setScale(1.0f);
     knight->setEulerAngles(0, 0, 0);
     GameState::meshes.push_back(knight);
     */
-
+   
     GM_Vec3 backpackBasePosition = GM_Vec3(-10.0f, 0.0f, 100.0f);   
 
     for (int i = 0; i < 100; i++) {
@@ -194,7 +200,7 @@ void GameState::initalizeResources() {
         backpack->setPosition(cannonicalPosition);
         backpack->setScale(0.5f);
         backpack->setEulerAngles(0, 90, 0);
-        GameState::meshes.push_back(backpack);
+        // GameState::meshes.push_back(backpack);
     }
 
     Mesh* window_transparent =  new Mesh(Geometry::Quad());
@@ -203,7 +209,7 @@ void GameState::initalizeResources() {
     window_transparent->setEulerAngles(0, 90, 0);
     window_transparent->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(WINDOW);
     window_transparent->materials[0].opacity = 0.55f;
-    GameState::transparent_meshes.push_back(window_transparent);
+    // GameState::transparent_meshes.push_back(window_transparent);
 
     Mesh* window_transparent2 = new Mesh(Geometry::Quad());
     window_transparent2->setPosition(GM_Vec3(0.0f,  0.0f, 5.0f));
@@ -211,7 +217,7 @@ void GameState::initalizeResources() {
     window_transparent2->setEulerAngles(0, 0, 0);
     window_transparent2->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(WINDOW);
     window_transparent2->materials[0].opacity = 0.25f;
-    GameState::transparent_meshes.push_back(window_transparent2);
+    // GameState::transparent_meshes.push_back(window_transparent2);
 
     for (int i = 0; i < ArrayCount(primitivePositions); i++) {
         Mesh* cube = (rand() % 2 == 0) ? new Mesh(Geometry::Cube()) : new Mesh(Geometry::Sphere(16));
@@ -221,7 +227,7 @@ void GameState::initalizeResources() {
         cube->materials[0].color = GM_Vec3(0.14f, 1.0f, 0.84f);
         cube->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(CRATE2);
         cube->materials[0].textures[TEXTURE_TYPE_SPECULAR] = TextureLoader::getTexture(CRATE2_SPECULAR);
-        GameState::meshes.push_back(cube);
+        // GameState::meshes.push_back(cube);
     }
 
     for (int i = 0; i < ArrayCount(pointLightPositions); i++) {

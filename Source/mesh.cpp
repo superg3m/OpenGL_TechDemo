@@ -198,17 +198,20 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
 
                 aiString str;
                 if (ai_material->GetTexture(ai_type, 0, &str, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
-                    std::string texture_id_or_path = std::string(str.C_Str());
+                    std::string filename = directory + '/' + std::string(str.C_Str());
                     const aiTexture* ai_texture = scene->GetEmbeddedTexture(str.C_Str());
 
                     if (ai_texture) {
-                        // int width, height, nrChannel = 0;
-                        // u8* image_data = stbi_load_from_memory((u8*)ai_texture->pcData, ai_texture->mWidth, &width, &height, &nrChannel, 0);
-                        // GLTextureID id = TextureLoader::loadTextureFromMemory(image_data, width, height, nrChannel);
-                        // TextureLoader::registerTexture(texture_id_or_path, id);
-                        CKG_LOG_DEBUG("Loaded embedded Texture\n");
+                        int width, height, nrChannel = 0;
+                        u8* image_data = stbi_load_from_memory((u8*)ai_texture->pcData, ai_texture->mWidth, &width, &height, &nrChannel, 0);
+                        GLTextureID id = TextureLoader::loadTextureFromMemory(image_data, width, height, nrChannel);
+                        if (TextureLoader::textures.count(filename) == 0) {
+                            TextureLoader::registerTexture(filename, id);
+                        }
+
+                        CKG_LOG_DEBUG("Material: %d | has embedded Texture of type: %s\n", i, texture_to_string[type]);
+                        this->materials[i].textures[type] = TextureLoader::textures.at(filename);
                     } else {
-                        std::string filename = directory + '/' + texture_id_or_path;
                         CKG_LOG_DEBUG("Material: %d | has external texture of type: %s\n", i, texture_to_string[type]);
                         if (TextureLoader::textures.count(filename) == 0) {
                             TextureLoader::registerTexture(filename, filename.c_str(), this->texture_flags);

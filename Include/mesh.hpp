@@ -8,8 +8,6 @@
 #include <Geometry.hpp>
 #include <ShaderBase.hpp>
 #include <TextureLoader.hpp>
-// TODO(Jovanni): Consider removing transform from Mesh, 
-// as entities typically have transforms, not meshes themselves.
 
 enum BufferType {
     INDEX_BUFFER = 0,
@@ -71,9 +69,14 @@ struct Mesh {
     static Mesh* Cube();
     static Mesh* Sphere(int segments);
 private:
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
     GM_AABB base_aabb;
     void loadMeshFromScene(const std::string &path, const aiScene* scene);
     void loadMeshFromData(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags);
 
-    void setup(VertexAttributeFlag flags, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+    MeshEntry processMesh(aiMesh *mesh, const aiScene *scene, GM_Matrix4 absolute_transform);
+    void processNode(aiNode* node, const aiScene* scene, GM_Matrix4 parent_transform);
+
+    void setup(VertexAttributeFlag flags);
 };

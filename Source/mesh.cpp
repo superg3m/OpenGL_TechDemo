@@ -54,7 +54,16 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> 
     glBindVertexArray(this->VAO);
     glGenBuffers(ArrayCount(this->buffers), this->buffers);
 
+    this->vertices = vertices;
+    this->indices = indices;
+
     this->loadMeshFromData(vertices, indices, flags);
+
+    this->vertices.clear();
+    this->vertices.shrink_to_fit();
+    
+    this->indices.clear();
+    this->indices.shrink_to_fit();
 }
 
 Mesh::Mesh(const std::string &path, unsigned int texture_flags, unsigned int assimp_flags) {
@@ -84,66 +93,92 @@ Mesh::Mesh(const std::string &path, unsigned int texture_flags, unsigned int ass
     MeshLoader::registerMesh(path, *this);
 }
 
+MeshEntry Mesh::processMesh(aiMesh* ai_mesh, const aiScene* scene, GM_Matrix4 absolute_transform) {
+    MeshEntry entry;
+    entry.base_vertex = (unsigned int)this->vertices.size();
+    entry.base_index = (unsigned int)this->indices.size();
+    entry.material_index = ai_mesh->mMaterialIndex;
+    entry.index_count = ai_mesh->mNumFaces * 3;
+    entry.vertex_count = ai_mesh->mNumVertices;
+    this->meshes.push_back(entry);
+    
+    { // Geometry Start
+        const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
+        Vertex v = Vertex();
+        for (unsigned int j = 0; j < ai_mesh->mNumVertices; j++) {
+            const aiVector3D& ai_position = ai_mesh->mVertices[j];
+
+            GM_Vec4 transformed_position = absolute_transform * GM_Vec4(ai_position.x, ai_position.y, ai_position.z, 1.0f);
+            v.aPosition = GM_Vec3(transformed_position.x, transformed_position.y, transformed_position.z);
+
+            if (ai_mesh->mNormals) {
+                const aiVector3D& pNormal = ai_mesh->mNormals[j];
+                GM_Vec4 transformed_normal = absolute_transform * GM_Vec4(pNormal.x, pNormal.y, pNormal.z, 0.0f); // W component is 0 for vectors
+                v.aNormal = GM_Vec3(transformed_normal.x, transformed_normal.y, transformed_normal.z).normalize(); // Normalize after transform
+            } else {
+                aiVector3D Normal(0.0f, 1.0f, 0.0f);
+                v.aNormal = GM_Vec3(Normal.x, Normal.y, Normal.z);
+            }
+
+            const aiVector3D& uv = ai_mesh->HasTextureCoords(0) ? ai_mesh->mTextureCoords[0][j] : Zero3D;
+            v.aTexCoord = GM_Vec2(uv.x, uv.y);
+
+            this->vertices.push_back(v);
+        }
+
+        for (unsigned int j = 0; j < ai_mesh->mNumFaces; j++) {
+            const aiFace& Face = ai_mesh->mFaces[j];
+            if (Face.mNumIndices == 3) {
+                this->indices.push_back(Face.mIndices[0]);
+                this->indices.push_back(Face.mIndices[1]);
+                this->indices.push_back(Face.mIndices[2]);
+            } else {
+                CKG_LOG_ERROR("Mesh '%s' has non-triangular face with %d indices. Skipping.\n", ai_mesh->mName.C_Str(), Face.mNumIndices);
+            }
+        }
+    } // Geometry End
+
+    return entry;
+}
+
+GM_Matrix4 convertAssimpMatrixToGM(aiMatrix4x4 ai_matrix) {
+    GM_Matrix4 ret;
+
+    ret.v[0].x = ai_matrix.a1; ret.v[1].x = ai_matrix.b1; ret.v[2].x = ai_matrix.c1; ret.v[3].x = ai_matrix.d1; 
+    ret.v[0].y = ai_matrix.a2; ret.v[1].y = ai_matrix.b2; ret.v[2].y = ai_matrix.c2; ret.v[3].y = ai_matrix.d2;
+    ret.v[0].z = ai_matrix.a3; ret.v[1].z = ai_matrix.b3; ret.v[2].z = ai_matrix.c3; ret.v[3].z = ai_matrix.d3;
+    ret.v[0].w = ai_matrix.a4; ret.v[1].w = ai_matrix.b4; ret.v[2].w = ai_matrix.c4; ret.v[3].w = ai_matrix.d4;
+
+    return ret;
+}
+
+void Mesh::processNode(aiNode* node, const aiScene* scene, GM_Matrix4 parent_transform) {
+    for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+        this->meshes.push_back(processMesh(mesh, scene, parent_transform));
+    }
+
+    GM_Matrix4 new_parent_transform = parent_transform * convertAssimpMatrixToGM(node->mTransformation);
+    for (unsigned int i = 0; i < node->mNumChildren; i++) {
+        processNode(node->mChildren[i], scene, new_parent_transform);
+    }
+}
+
 void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
-    { // geometry
-        this->meshes.resize(scene->mNumMeshes);
+    { // Precompute Memory
+        this->meshes.reserve(scene->mNumMeshes);
         this->materials.resize(scene->mNumMaterials);
 
         unsigned int total_vertex_count = 0;
         unsigned int total_index_count = 0;
         for (unsigned int i = 0 ; i < this->meshes.size() ; i++) {
-            this->meshes[i].material_index = scene->mMeshes[i]->mMaterialIndex;
-            this->meshes[i].index_count = scene->mMeshes[i]->mNumFaces * 3;
-            this->meshes[i].base_vertex = total_vertex_count;
-            this->meshes[i].base_index = total_index_count;
-
             total_vertex_count += scene->mMeshes[i]->mNumVertices;
-            total_index_count  += this->meshes[i].index_count;
+            total_index_count  += scene->mMeshes[i]->mNumFaces * 3;
         }
 
-        std::vector<Vertex> vertices;
-        vertices.reserve(total_vertex_count);
-
-        std::vector<unsigned int> indices;
-        indices.reserve(total_index_count);
-    
-        for (unsigned int i = 0 ; i < this->meshes.size() ; i++) {
-            const aiMesh* ai_mesh = scene->mMeshes[i];
-            const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
-
-            Vertex v = Vertex();
-            for (unsigned int j = 0; j < ai_mesh->mNumVertices; j++) {
-                const aiVector3D& ai_position = ai_mesh->mVertices[j];
-
-                v.aPosition = GM_Vec3(ai_position.x, ai_position.y, ai_position.z);
-
-                if (ai_mesh->mNormals) {
-                    const aiVector3D& pNormal = ai_mesh->mNormals[j];
-                    v.aNormal = GM_Vec3(pNormal.x, pNormal.y, pNormal.z);
-                } else {
-                    aiVector3D Normal(0.0f, 1.0f, 0.0f);
-                    v.aNormal = GM_Vec3(Normal.x, Normal.y, Normal.z);
-                }
-
-                const aiVector3D& uv = ai_mesh->HasTextureCoords(0) ? ai_mesh->mTextureCoords[0][j] : Zero3D;
-                v.aTexCoord = GM_Vec2(uv.x, uv.y);
-
-                vertices.push_back(v);
-            }
-
-            for (unsigned int j = 0; j < ai_mesh->mNumFaces; j++) {
-                const aiFace& Face = ai_mesh->mFaces[j];
-                if (Face.mNumIndices == 3) {
-                    indices.push_back(Face.mIndices[0]);
-                    indices.push_back(Face.mIndices[1]);
-                    indices.push_back(Face.mIndices[2]);
-                } else {
-                    CKG_LOG_ERROR("Mesh '%s' has non-triangular face with %d indices. Skipping.\n", ai_mesh->mName.C_Str(), Face.mNumIndices);
-                }
-            }
-        }    
-        setup(VertexAttributeFlag::PNTBundle, vertices, indices);
-    } // geometry end
+        this->vertices.reserve(total_vertex_count);
+        this->indices.reserve(total_index_count);
+    } // Precompute Memory
 
     { // materials start
         std::string directory = path.substr(0, path.find_last_of('/'));
@@ -224,6 +259,15 @@ void Mesh::loadMeshFromScene(const std::string &path, const aiScene* scene) {
             }
         }
     } // materials end
+
+    processNode(scene->mRootNode, scene, convertAssimpMatrixToGM(scene->mRootNode->mTransformation));
+    setup(VertexAttributeFlag::PNTBundle);
+
+    this->vertices.clear();
+    this->vertices.shrink_to_fit();
+
+    this->indices.clear();
+    this->indices.shrink_to_fit();
 }
 
 void Mesh::loadMeshFromData(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, VertexAttributeFlag flags) {
@@ -235,7 +279,10 @@ void Mesh::loadMeshFromData(const std::vector<Vertex> &vertices, const std::vect
     this->meshes[0].base_index   = 0;
     this->meshes[0].material_index = 0;
 
-    setup(flags, vertices, indices);
+    this->vertices = vertices;
+    this->indices = indices;
+
+    setup(flags);
 }
 
 void Mesh::setPosition(GM_Vec3 p) {
@@ -279,8 +326,6 @@ GM_Matrix4 Mesh::getTransform() {
     return transform;
 }
 
-
-
 GM_Matrix4 Mesh::getAABBTransform() {
     GM_AABB aabb = this->getAABB();
     GM_Matrix4 transform = GM_Matrix4::identity();
@@ -296,12 +341,12 @@ GM_AABB Mesh::getAABB() {
     return GM_AABB::fromCenterExtents(this->position, this->scale);
 }
 
-void Mesh::setup(VertexAttributeFlag flags, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
+void Mesh::setup(VertexAttributeFlag flags) {
     glBindBuffer(GL_ARRAY_BUFFER, this->buffers[VERTEX_BUFFER]);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex), this->vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->buffers[INDEX_BUFFER]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(unsigned int), this->indices.data(), GL_STATIC_DRAW);
 
     // bool hasPosition   = hasVertexAttributeFlag(flags, VertexAttributeFlag::aPosition);
     // bool hasNormal     = hasVertexAttributeFlag(flags, VertexAttributeFlag::aNormal);
@@ -335,23 +380,26 @@ void Mesh::draw(ShaderBase &shader, bool useMaterial) {
     glBindVertexArray(this->VAO);
 
     for (unsigned int mesh_index = 0 ; mesh_index < this->meshes.size() ; mesh_index++) {
+        MeshEntry entry = this->meshes[mesh_index];
+
+
         if (useMaterial) {
-            unsigned int material_index = this->meshes[mesh_index].material_index;
+            unsigned int material_index = entry.material_index;
             shader.setMaterial(this->materials[material_index]);
         }
 
-        if (this->meshes[mesh_index].index_count > 0) {
+        if (entry.index_count > 0) {
             glDrawElementsBaseVertex(
-                draw_type, this->meshes[mesh_index].index_count, 
+                draw_type, entry.index_count, 
                 GL_UNSIGNED_INT, 
-                (void*)(sizeof(unsigned int) * this->meshes[mesh_index].base_index), 
-                this->meshes[mesh_index].base_vertex
+                (void*)(sizeof(unsigned int) * entry.base_index), 
+                entry.base_vertex
             );
         } else {
             glDrawArrays(
                 draw_type,
-                this->meshes[mesh_index].base_vertex,
-                this->meshes[mesh_index].vertex_count
+                entry.base_vertex,
+                entry.vertex_count
             );
         }
     }

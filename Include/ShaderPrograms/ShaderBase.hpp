@@ -21,6 +21,8 @@ struct ShaderBase {
     // Fragment Uniforms
     void setMaterial(Material &material) const;
 protected:
+    const char* path;
+
     ShaderBase() = default;
     GLenum typeFromPath(const char* path);
     void checkCompileError(unsigned int source_id, const char* path);

@@ -5,34 +5,36 @@ void ShaderModel::init() {
     this->program_id = this->createShaderProgram(shader_paths);
 
     for (int i = 0; i < LIGHT_COUNT; i++) {
-        this->uLightPosition_Locations[i] = this->getUniformLocation("lightPositions["+ std::to_string(i) + "]");
-        this->uLightColor_Locations[i] =this->getUniformLocation("lightColors["+ std::to_string(i) + "]");
+        this->uPointLight_Locations[i].position = this->getUniformLocation("uPointLights["+ std::to_string(i) + "].position");
+
+        this->uPointLight_Locations[i].constant = this->getUniformLocation("uPointLights["+ std::to_string(i) + "].constant");
+        this->uPointLight_Locations[i].linear = this->getUniformLocation("uPointLights["+ std::to_string(i) + "].linear");
+        this->uPointLight_Locations[i].quadratic = this->getUniformLocation("uPointLights["+ std::to_string(i) + "].quadratic");
+
+        this->uPointLight_Locations[i].ambient = this->getUniformLocation("uPointLights["+ std::to_string(i) + "].ambient");
+        this->uPointLight_Locations[i].diffuse = this->getUniformLocation("uPointLights["+ std::to_string(i) + "].diffuse");
+        this->uPointLight_Locations[i].specular = this->getUniformLocation("uPointLights["+ std::to_string(i) + "].specular");
     }
 
-    this->uViewPosition_Location = this->getUniformLocation("viewPosition");
-    this->uGamma_Location = this->getUniformLocation("gamma");
+    this->uViewPosition_Location = this->getUniformLocation("uViewPosition");
 }
 
-void ShaderModel::setLightPosition(GM_Vec3 &position, int index) const {
+void ShaderModel::setPointLight(PointLight &point_light, int index) const {
     this->use();
 
-    glUniform3fv(this->uLightPosition_Locations[index], 1, &position.x);
-}
+    glUniform3fv(this->uPointLight_Locations[index].position, 1, &point_light.position.x);
 
-void ShaderModel::setLightColor(GM_Vec3 &color, int index) const {
-    this->use();
+    glUniform1f(this->uPointLight_Locations[index].constant, point_light.constant);
+    glUniform1f(this->uPointLight_Locations[index].linear, point_light.linear);
+    glUniform1f(this->uPointLight_Locations[index].quadratic, point_light.quadratic);
 
-    glUniform3fv(this->uLightColor_Locations[index], 1, &color.x);
+    glUniform3fv(this->uPointLight_Locations[index].ambient, 1, &point_light.ambient.x);
+    glUniform3fv(this->uPointLight_Locations[index].diffuse, 1, &point_light.diffuse.x);
+    glUniform3fv(this->uPointLight_Locations[index].specular, 1, &point_light.specular.x);
 }
 
 void ShaderModel::setViewPosition(GM_Vec3 &view_position) const {
     this->use();
 
     glUniform3fv(this->uViewPosition_Location, 1, &view_position.x);
-}
-
-void ShaderModel::setGamma(bool &gamma) const {
-    this->use();
-
-    glUniform1i(this->uGamma_Location, (int)gamma);
 }

@@ -130,13 +130,9 @@ u64 GameState::getReferenceID() {
 void GameState::initalizeResources() {
     srand(time(0));
 
-    this->model_shader = new ShaderModel();
-    this->uniform_shader = new ShaderUniformColor();
-    this->skybox_shader = new ShaderSkybox();
-
-    this->model_shader->init();
-    this->uniform_shader->init();
-    this->skybox_shader->init();
+    this->model_shader.init();
+    this->uniform_shader.init();
+    this->skybox_shader.init();
 
     std::array<const char*, 6> cubemap_faces = {
         "../../assets/city_skybox/right.jpg",
@@ -470,10 +466,10 @@ void GameState::render() {
     withoutTranslationView.v[1].w = 0.0f;
     withoutTranslationView.v[2].w = 0.0f;
 
-    this->skybox_shader->use();
-    this->skybox_shader->setProjection(projection);
-    this->skybox_shader->setView(withoutTranslationView);
-    GameState::skybox->draw(skybox_shader);
+    this->skybox_shader.use();
+    this->skybox_shader.setProjection(projection);
+    this->skybox_shader.setView(withoutTranslationView);
+    GameState::skybox->draw(skybox_shader, false);
     glDepthFunc(GL_LESS);
 
 
@@ -483,40 +479,49 @@ void GameState::render() {
         GM_Matrix4 light_model = light->getTransform();
         GM_Matrix4 view = sourceView;
 
-        GM_Vec3 light_color = GM_Vec3(light->materials[0].color);
-        this->model_shader->use();
-        this->model_shader->setLightPosition(light->position, i);
-        this->model_shader->setLightColor(light_color, i);
+        GM_Vec3 light_color = light->materials[0].color;
 
-        this->uniform_shader->use();
-        this->uniform_shader->setModel(light_model);
-        this->uniform_shader->setView(view);
-        this->uniform_shader->setProjection(projection);
-        this->uniform_shader->setColor(light->materials[0].color);
-        light->draw(this->uniform_shader);
+        PointLight p;
+        p.position = light->position;
+        p.constant = 1.0f;
+        p.linear = 0.09f;
+        p.quadratic = 0.032f;
+        p.ambient = light_color * GM_Vec3(0.2f);
+        p.diffuse = light_color * GM_Vec3(0.5f);
+        p.specular = light_color * GM_Vec3(1.0f);
+
+        this->model_shader.use();
+        this->model_shader.setPointLight(p, i);
+
+        this->uniform_shader.use();
+        this->uniform_shader.setModel(light_model);
+        this->uniform_shader.setView(view);
+        this->uniform_shader.setProjection(projection);
+        this->uniform_shader.setColor(light_color);
+        light->draw(this->uniform_shader, false);
 
         if (light->should_render_aabb) {
             GM_Matrix4 aabb_model = light->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
-            this->uniform_shader->use();
-            this->uniform_shader->setModel(aabb_model);
-            this->uniform_shader->setView(view);
-            this->uniform_shader->setProjection(projection);
-            this->uniform_shader->setColor(GM_Vec3(0, 1, 0));
-            aabb_mesh.draw(this->uniform_shader);
+            this->uniform_shader.use();
+            this->uniform_shader.setModel(aabb_model);
+            this->uniform_shader.setView(view);
+            this->uniform_shader.setProjection(projection);
+            this->uniform_shader.setColor(GM_Vec3(0, 1, 0));
+            aabb_mesh.draw(this->uniform_shader, false);
         }
     }
+
 
     for (Mesh* mesh : GameState::meshes) {
         GM_Matrix4 mesh_model = mesh->getTransform();
         GM_Matrix4 view = sourceView;
 
-        this->model_shader->use();
-        this->model_shader->setModel(mesh_model);
-        this->model_shader->setView(view);
-        this->model_shader->setProjection(projection);
-        this->model_shader->setViewPosition(GameState::camera.position);
-        // this->basic_shader.setFloat("uMaterial.shininess", 64.0f);
+        this->model_shader.use();
+        this->model_shader.setModel(mesh_model);
+        this->model_shader.setView(view);
+        this->model_shader.setProjection(projection);
+        this->model_shader.setViewPosition(GameState::camera.position);
 
         // glStencilFunc(GL_ALWAYS, 1, 0xFF);
         // glStencilMask(0xFF);
@@ -538,12 +543,12 @@ void GameState::render() {
 
             GM_Matrix4 aabb_model = mesh->getAABBTransform();
             Mesh aabb_mesh = Mesh(Geometry::AABB());
-            this->uniform_shader->use();
-            this->uniform_shader->setModel(aabb_model);
-            this->uniform_shader->setView(view);
-            this->uniform_shader->setProjection(projection);
-            this->uniform_shader->setColor(GM_Vec3(0, 1, 0));
-            aabb_mesh.draw(this->uniform_shader);
+            this->uniform_shader.use();
+            this->uniform_shader.setModel(aabb_model);
+            this->uniform_shader.setView(view);
+            this->uniform_shader.setProjection(projection);
+            this->uniform_shader.setColor(GM_Vec3(0, 1, 0));
+            aabb_mesh.draw(this->uniform_shader, false);
         } else {
             // glStencilMask(0xFF);
             // glStencilFunc(GL_ALWAYS, 0, 0xFF);  

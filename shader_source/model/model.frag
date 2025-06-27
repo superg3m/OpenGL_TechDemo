@@ -38,9 +38,11 @@ struct SpotLight {
 struct Material {
     sampler2D diffuse_map;
     sampler2D specular_map;
+
     vec3        ambient_color;
     vec3        diffuse_color;
     vec3        specular_color;
+    
     float       shininess;
     float       opacity;
 };

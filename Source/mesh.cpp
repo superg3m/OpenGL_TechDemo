@@ -328,12 +328,14 @@ void Mesh::setup(VertexAttributeFlag flags, const std::vector<Vertex>& vertices,
     glBindVertexArray(0);
 }
 
-void Mesh::draw(ShaderBase* shader) {
+void Mesh::draw(ShaderBase &shader, bool useMaterial) {
     glBindVertexArray(this->VAO);
 
     for (unsigned int mesh_index = 0 ; mesh_index < this->meshes.size() ; mesh_index++) {
-        unsigned int material_index = this->meshes[mesh_index].material_index;
-        shader->setMaterial(this->materials[material_index]);
+        if (useMaterial) {
+            unsigned int material_index = this->meshes[mesh_index].material_index;
+            shader.setMaterial(this->materials[material_index]);
+        }
 
         if (this->meshes[mesh_index].index_count > 0) {
             glDrawElementsBaseVertex(
@@ -350,7 +352,7 @@ void Mesh::draw(ShaderBase* shader) {
             );
         }
 
-        shader->unbindTextureUnits();
+        shader.unbindTextureUnits();
     }
 
     // Make sure the VAO is not changed from the outside

@@ -53,11 +53,11 @@ struct DrawElementsCommand {
     static std::vector<Mesh*> lights;
     static std::vector<Mesh*> transparent_meshes;
 
-    ShaderModel* model_shader;
-    ShaderSkybox* skybox_shader;
-    ShaderUniformColor* uniform_shader; // aabb and lights
-    // ShaderStencilOutline* outline_shader;
-    // ShaderTransparency* transparent_shader;
+    ShaderModel model_shader;
+    ShaderSkybox skybox_shader;
+    ShaderUniformColor uniform_shader; // aabb and lights
+    // ShaderStencilOutline outline_shader;
+    // ShaderTransparency transparent_shader;
 
     GameState(unsigned int WINDOW_WIDTH, unsigned int WINDOW_HEIGHT);
 

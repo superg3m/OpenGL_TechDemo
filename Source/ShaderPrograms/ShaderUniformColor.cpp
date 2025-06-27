@@ -1,8 +1,12 @@
 #include <ShaderUniformColor.hpp>
 
-void ShaderUniformColor::init() {
-    std::vector<const char*> shader_paths = {"../../shader_source/uniform/uniform.vert", "../../shader_source/uniform/uniform.frag"};
-    this->program_id = this->createShaderProgram(shader_paths);
+ShaderUniformColor::ShaderUniformColor(std::vector<const char*> shader_paths) {
+    this->shader_paths = shader_paths;
+    this->compile();
+}
+
+void ShaderUniformColor::compile() {
+    this->program_id = this->createShaderProgram(this->shader_paths);
     this->uColor_Location = getUniformLocation("uColor");
 }
 

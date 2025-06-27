@@ -1,8 +1,12 @@
 #include <ShaderModel.hpp>
 
-void ShaderModel::init() {
-    std::vector<const char*> shader_paths = {"../../shader_source/model/model.vert", "../../shader_source/model/model.frag"};
-    this->program_id = this->createShaderProgram(shader_paths);
+ShaderModel::ShaderModel(std::vector<const char*> shader_paths) {
+    this->shader_paths = shader_paths;
+    this->compile();
+}
+
+void ShaderModel::compile() {
+    this->program_id = this->createShaderProgram(this->shader_paths);
 
     this->uSpotLight_Location.position = this->getUniformLocation("uSpotLight.position");
     this->uSpotLight_Location.direction = this->getUniformLocation("uSpotLight.direction");

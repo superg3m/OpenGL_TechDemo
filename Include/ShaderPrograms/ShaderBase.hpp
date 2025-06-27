@@ -9,7 +9,7 @@
 
 struct ShaderBase {
     unsigned int program_id = 0;
-    virtual void init() = 0;
+    virtual void compile() = 0;
 
     void use() const;
 
@@ -21,8 +21,7 @@ struct ShaderBase {
     // Fragment Uniforms
     void setMaterial(Material &material) const;
 protected:
-    const char* path;
-
+    std::vector<const char*> shader_paths;
     ShaderBase() = default;
     GLenum typeFromPath(const char* path);
     void checkCompileError(unsigned int source_id, const char* path);

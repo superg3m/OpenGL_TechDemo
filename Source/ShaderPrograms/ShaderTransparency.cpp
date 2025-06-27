@@ -1,7 +1,11 @@
 #include <ShaderTransparency.hpp>
 
-void ShaderTransparency::init() {
-    std::vector<const char*> shader_paths = {"../../shader_source/transparency/t.vert", "../../shader_source/transparency/t.frag"};
+ShaderTransparency::ShaderTransparency(std::vector<const char*> shader_paths) {
+    this->shader_paths = shader_paths;
+    this->compile();
+}
+
+void ShaderTransparency::compile() {
     this->program_id = this->createShaderProgram(shader_paths);
 }
 

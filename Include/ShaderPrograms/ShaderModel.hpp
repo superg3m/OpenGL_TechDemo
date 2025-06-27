@@ -74,7 +74,8 @@ struct PointLight {
 
 struct ShaderModel : public ShaderBase {
     ShaderModel() = default;
-    void init() override;
+    ShaderModel(std::vector<const char*> shader_paths);
+    void compile() override;
     
     // Fragment Uniforms
     void setSpotLight(SpotLight &spot_light) const;

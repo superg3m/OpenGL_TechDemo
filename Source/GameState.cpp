@@ -132,11 +132,11 @@ u64 GameState::getReferenceID() {
 void GameState::initalizeResources() {
     srand(time(0));
 
-    this->model_shader.init();
-    this->uniform_shader.init();
-    this->skybox_shader.init();
-    this->transparent_shader.init();
-    this->outline_shader.init();
+    this->model_shader = ShaderModel({"../../shader_source/model/model.vert", "../../shader_source/model/model.frag"});
+    this->uniform_shader = ShaderUniformColor({"../../shader_source/uniform/uniform.vert", "../../shader_source/uniform/uniform.frag"});
+    this->skybox_shader = ShaderSkybox({"../../shader_source/skybox/skybox.vert", "../../shader_source/skybox/skybox.frag"});
+    this->transparent_shader = ShaderTransparency({"../../shader_source/transparency/t.vert", "../../shader_source/transparency/t.frag"});
+    this->outline_shader = ShaderStencilOutline({"../../shader_source/outline/outline.vert", "../../shader_source/outline/outline.frag"});
 
     std::array<const char*, 6> cubemap_faces = {
         "../../assets/city_skybox/right.jpg",
@@ -284,6 +284,16 @@ void GameState::initalizeInputBindings() {
             // local_persist bool useGamma = true;
             // this->basic_shader.setBool("uGamma", useGamma);
             // useGamma = !useGamma;
+        }
+    );
+
+    profile->bind(IOD_KEY_R, IOD_InputState::PRESSED,
+        [&]() {
+            this->model_shader.compile();
+            this->outline_shader.compile();
+            this->transparent_shader.compile();
+            this->skybox_shader.compile();
+            this->uniform_shader.compile();
         }
     );
     

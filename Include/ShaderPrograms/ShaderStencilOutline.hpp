@@ -3,8 +3,9 @@
 #include <ShaderBase.hpp>
 
 struct ShaderStencilOutline : public ShaderBase {
-    ShaderStencilOutline() = default;;
-    void init() override;
+    ShaderStencilOutline() = default;
+    ShaderStencilOutline(std::vector<const char*> shader_paths);
+    void compile() override;
     
     void setOutlineScale(float s) const;
 

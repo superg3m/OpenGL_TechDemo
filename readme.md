@@ -25,3 +25,6 @@ Things that I should probably improve but won't is:
 - rule of 5 (I don't agree with this but I know its dogma)
 
 ============================================================================================================
+
+assests:
+    - https://sketchfab.com/3d-models/old-church-modeling-interior-scene-eb6cf543aa7d45e3acee49887ae3135c

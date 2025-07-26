@@ -381,8 +381,6 @@ void Mesh::draw(ShaderBase &shader, bool useMaterial) {
 
     for (unsigned int mesh_index = 0 ; mesh_index < this->meshes.size() ; mesh_index++) {
         MeshEntry entry = this->meshes[mesh_index];
-
-
         if (useMaterial) {
             unsigned int material_index = entry.material_index;
             shader.setMaterial(this->materials[material_index]);

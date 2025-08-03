@@ -42,7 +42,7 @@ void ResourceLoader::loadTexture(std::string key, const char *file, int texture_
         format = GL_RGBA;
     } else {
         CKG_LOG_ERROR("ResourceLoader | Failed to pick a stb format, most likely related to assimp, try to link your libraries in a different order\n");
-        ckg_assert(FALSE);
+        ckg_assert(false);
     }
 
     if (data) {
@@ -53,7 +53,7 @@ void ResourceLoader::loadTexture(std::string key, const char *file, int texture_
     }
 
     stbi_image_free(data);
-    stbi_set_flip_vertically_on_load(FALSE);
+    stbi_set_flip_vertically_on_load(false);
 
     ResourceLoader::textures[key] = texture;
 }
@@ -99,7 +99,6 @@ TextureAtlas::TextureAtlas(std::string key, const char *file, int texture_flags)
     ckg_assert_msg(ckg_io_path_exists(file), "Texture path: '%s' doesn't exist!\n", file);
     GLenum TEXTURE_VERTICAL_FLIP = GET_BIT(texture_flags, 1);
 
-    unsigned int texture;
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(TEXTURE_VERTICAL_FLIP);
 
@@ -114,7 +113,7 @@ TextureAtlas::TextureAtlas(std::string key, const char *file, int texture_flags)
         format = GL_RGBA;
     } else {
         CKG_LOG_ERROR("ResourceLoader | Failed to pick a stb format, most likely related to assimp, try to link your libraries in a different order\n");
-        ckg_assert(FALSE);
+        ckg_assert(false);
     }
 
     if (data) {
@@ -128,7 +127,7 @@ TextureAtlas::TextureAtlas(std::string key, const char *file, int texture_flags)
         CKG_LOG_ERROR("ResourceLoader | Failed to load texture\n"); 
     }
 
-    stbi_set_flip_vertically_on_load(FALSE);
+    stbi_set_flip_vertically_on_load(false);
 }
 
 void TextureAtlas::bindPartitionedTexture(std::string key, int start_x, int start_y, int t_width, int t_height, int texture_flags) {

@@ -55,7 +55,7 @@ GLFWwindow* Game::initalizeWindow() {
 }
 
 GM_Matrix4 Game::getProjectionMatrix() {
-    float aspect_ratio = (float)this->WINDOW_WIDTH / (float)this->WINDOW_HEIGHT;
+    // float aspect_ratio = (float)this->WINDOW_WIDTH / (float)this->WINDOW_HEIGHT;
     float l = 0.0f; 
     float r = (float)this->WINDOW_WIDTH; 
     float b = (float)this->WINDOW_HEIGHT;
@@ -343,8 +343,7 @@ void Game::update(GLFWwindow* window, float dt) {
         };
     }
 
-    int special_break_index = rand() % Game::level.brick_entity_references.size();
-    for (int i = 0; i < Game::level.brick_entity_references.size(); i++) {
+    for (u32 i = 0; i < Game::level.brick_entity_references.size(); i++) {
         Entity* brick = Game::level.brick_entity_references[i];
         if (brick->dead) continue;
 

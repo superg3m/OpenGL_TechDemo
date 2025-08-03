@@ -17,7 +17,7 @@ typedef struct ShaderDescriptor {
 internal void checkCompileError(unsigned int shaderID, const char* type) {
     int success;
     char info_log[1024];
-    if (type != "PROGRAM") {
+    if (!ckg_str_equal(type, ckg_cstr_length(type), CKG_LIT_ARG("PROGRAM"))) {
         glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(shaderID, 1024, NULL, info_log);
@@ -54,7 +54,7 @@ Shader::Shader(std::vector<const char*> shader_paths) {
     this->id = glCreateProgram();
 
     std::vector<unsigned int> shaderIDs; 
-    for (int i = 0; i < shader_paths.size(); i++) {
+    for (u32 i = 0; i < shader_paths.size(); i++) {
         const char* path = shader_paths[i];
         size_t file_size = 0;
         const GLchar* shader_source = (const GLchar*)ckg_io_read_entire_file(path, &file_size, NULLPTR);
@@ -84,7 +84,7 @@ Shader::Shader(std::vector<const char*> shader_paths) {
     }
     glLinkProgram(this->id);
 
-    GLint success = FALSE;
+    GLint success = false;
     glGetProgramiv(this->id, GL_LINK_STATUS, &success);
     if (!success) {
         char info_log[1028] = {0};
@@ -92,7 +92,7 @@ Shader::Shader(std::vector<const char*> shader_paths) {
         CKG_LOG_ERROR("LINKING_FAILED\n");
     }
 
-    for (int i = 0; i < shaderIDs.size(); i++) {
+    for (u32 i = 0; i < shaderIDs.size(); i++) {
         glDeleteShader(shaderIDs[i]);
     }
 }

@@ -44,19 +44,25 @@ cc: CompilerConfig = CompilerConfig(
 )
 
 if IS_WINDOWS() and not C_BUILD_IS_DEPENDENCY():
-    cc.compiler_name = "cl"
+    cc.compiler_name = "g++"
 elif IS_DARWIN() and not C_BUILD_IS_DEPENDENCY():
-    cc.compiler_name = "clang"
+    cc.compiler_name = "clang++"
 elif IS_LINUX() and not C_BUILD_IS_DEPENDENCY():
-    cc.compiler_name = "gcc"
+    cc.compiler_name = "g++"
 
 # Do different things depending on the platform
 if cc.compiler_name == "cl":
     cc.compiler_warning_level = "2"
-    cc.compiler_disable_specific_warnings = ["5105", "4668", "4820", "4996"]
+    cc.compiler_disable_specific_warnings = ["5105", "4668", "4820", "4996", "4116"]
 else:
     cc.compiler_warning_level = "all"
-    cc.compiler_disable_specific_warnings = ["deprecated", "parentheses"]
+    cc.compiler_disable_specific_warnings = [
+        "deprecated", 
+        "parentheses", 
+        "implicit-fallthrough",
+        "switch",
+        "unused-but-set-variable"
+    ]
 
 
 glfw_lib_path = "../../Libraries/glfw/" 
@@ -102,3 +108,8 @@ procedures_config = {
 manager: Manager = Manager(cc, pc, procedures_config)
 manager.build_project()
 # ------------------------------------------------------------------------------------
+
+# --     
+COPY_FILE_TO_DIR("./Libraries/glfw/lib-static-ucrt", "glfw3.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
+COPY_FILE_TO_DIR("./Libraries/assimp/bin/Debug", "assimp-vc143-mtd.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
+# --

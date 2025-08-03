@@ -22,7 +22,6 @@ Entity* Entity::Sprite(EntityType type) {
 
 Entity* Entity::Brick(int brick_type) {
     Entity* brick = Entity::Sprite(ENTITY_TYPE_BRICK);
-    TextureAtlas* breaking_atlas = ResourceLoader::getTextureAtlas("Breaking");
     switch (brick_type) {
         case 0: {
             brick->dead = true;

@@ -37,13 +37,7 @@
 *.ilk
 
 # c-build
-build_cl/
-build_gcc/
+build_*/
 c_build/
-*.ps1
-!bootstrap.ps1
-!Libraries/glfw/
-!Libraries/glad/
 ckg/
 GameMath/
-c_build_dependency_cache_*.json

@@ -120,3 +120,8 @@ procedures_config = {
 manager: Manager = Manager(cc, pc, procedures_config)
 manager.build_project()
 # ------------------------------------------------------------------------------------
+
+# --     
+COPY_FILE_TO_DIR("./Libraries/glfw/lib-static-ucrt", "glfw3.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
+COPY_FILE_TO_DIR("./Libraries/assimp/bin/Debug", "assimp-vc143-mtd.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
+# --

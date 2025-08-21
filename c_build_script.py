@@ -67,13 +67,6 @@ else:
     ]
 
 
-glfw_lib_path = "../../Libraries/glfw/" 
-if cc.compiler_name == "cl":
-    glfw_lib_path += "lib-static-ucrt/glfw3dll.lib"
-else:
-    glfw_lib_path += "lib-mingw-w64/libglfw3dll.a"
-
-
 build_postfix = f"build_{cc.compiler_name}/{C_BUILD_BUILD_TYPE()}"
 
 libs = [
@@ -84,11 +77,8 @@ libs = [
     f"../../ckg/{build_postfix}/{GET_LIB_NAME(cc, "ckg")}",
     f"../../GameMath/{build_postfix}/{GET_LIB_NAME(cc, "gm")}",
     f"../../IOD/{build_postfix}/{GET_LIB_NAME(cc, "IOD")}",
-    f"../../Libraries/assimp/{GET_LIB_NAME(cc, "assimp-vc143-mtd")}",
-    glfw_lib_path
+    f"../../Vendor/glfw/bin/macos/lib-arm64/libglfw3.a",
 ]
-
-C_BUILD_COMPILER_NAME
 
 procedures_config = {
     "OpenGL_TechDemo": ProcedureConfig(
@@ -98,7 +88,7 @@ procedures_config = {
             "../../Source/*.cpp",
             "../../Source/Loader/*.cpp",
             "../../Source/ShaderPrograms/*.cpp",
-            "../../Libraries/glad/src/glad.c"
+            "../../Vendor/glad/src/glad.c"
         ],
         additional_libs = libs,
         include_paths = [
@@ -108,11 +98,11 @@ procedures_config = {
             "../../ckg",
             "../../GameMath",
             "../../IOD",
-            "../../Libraries",
-            "../../Libraries/stb",
-            "../../Libraries/glad/include", 
-            "../../Libraries/glfw",
-            "../../Libraries/assimp/include",
+            "../../Vendor",
+            "../../Vendor/stb",
+            "../../Vendor/glad/include", 
+            "../../Vendor/glfw",
+            "../../Vendor/assimp/include",
         ],
     )
 }
@@ -122,6 +112,6 @@ manager.build_project()
 # ------------------------------------------------------------------------------------
 
 # --     
-COPY_FILE_TO_DIR("./Libraries/glfw/lib-static-ucrt", "glfw3.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
-COPY_FILE_TO_DIR("./Libraries/assimp/bin/Debug", "assimp-vc143-mtd.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
+#COPY_FILE_TO_DIR("./Libraries/glfw/lib-static-ucrt", "glfw3.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
+#COPY_FILE_TO_DIR("./Libraries/assimp/bin/Debug", "assimp-vc143-mtd.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
 # --

@@ -1,5 +1,5 @@
 #include <ckg.h>
-#include <material.hpp>
+#include <Material.hpp>
 
 Material::Material() {
     this->opacity = 1.0f;

@@ -70,15 +70,28 @@ else:
 build_postfix = f"build_{cc.compiler_name}/{C_BUILD_BUILD_TYPE()}"
 
 libs = [
-    GET_LIB_FLAG(cc, "Kernel32"),
-    GET_LIB_FLAG(cc, "User32"),
-    GET_LIB_FLAG(cc, "Gdi32"),
-    GET_LIB_FLAG(cc, "OpenGL32"),
     f"../../ckg/{build_postfix}/{GET_LIB_NAME(cc, "ckg")}",
     f"../../GameMath/{build_postfix}/{GET_LIB_NAME(cc, "gm")}",
     f"../../IOD/{build_postfix}/{GET_LIB_NAME(cc, "IOD")}",
     f"../../Vendor/glfw/bin/macos/lib-arm64/libglfw3.a",
+    f"../../Vendor/assimp/bin/macos/libassimp.dylib",
 ]
+
+if IS_WINDOWS():
+    libs += [
+        GET_LIB_FLAG(cc, "Kernel32"),
+        GET_LIB_FLAG(cc, "User32"),
+        GET_LIB_FLAG(cc, "Gdi32"),
+        GET_LIB_FLAG(cc, "OpenGL32"),
+    ]
+elif IS_DARWIN():
+    libs += [
+        "-framework OpenGL",
+        "-framework Cocoa",
+        "-framework IOKit",
+        "-framework CoreFoundation",
+    ]
+
 
 procedures_config = {
     "OpenGL_TechDemo": ProcedureConfig(
@@ -104,6 +117,9 @@ procedures_config = {
             "../../Vendor/glfw",
             "../../Vendor/assimp/include",
         ],
+        compiler_inject_into_args=[
+            "-Wl,-rpath,@executable_path"
+        ]
     )
 }
 
@@ -112,6 +128,5 @@ manager.build_project()
 # ------------------------------------------------------------------------------------
 
 # --     
-#COPY_FILE_TO_DIR("./Libraries/glfw/lib-static-ucrt", "glfw3.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
-#COPY_FILE_TO_DIR("./Libraries/assimp/bin/Debug", "assimp-vc143-mtd.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
+COPY_FILE_TO_DIR("./Vendor/assimp/bin/macos", "libassimp.6.dylib", f"{build_postfix}")
 # --

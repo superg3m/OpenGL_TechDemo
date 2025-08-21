@@ -63,13 +63,13 @@ GLFWwindow* GameState::initalizeWindow() {
     glfwSetCursorPos(window, GameState::WINDOW_WIDTH / 2.0f, GameState::WINDOW_HEIGHT / 2.0f);
 
     IOD_GLFW_BIND_MOUSE_MOVE_CALLBACK([](GLFWwindow *window, double mouse_x, double mouse_y) {
-        local_persist bool previous_frame_mouse_was_captured = true;
+        static bool previous_frame_mouse_was_captured = true;
         if (!GameState::mouse_captured) { 
             previous_frame_mouse_was_captured = false;
         }
         
-        local_persist float last_mouse_x = mouse_x;
-        local_persist float last_mouse_y = mouse_y;
+        static float last_mouse_x = mouse_x;
+        static float last_mouse_y = mouse_y;
 
         float xoffset = mouse_x - last_mouse_x;
         float yoffset = last_mouse_y - mouse_y;
@@ -125,7 +125,7 @@ GM_Matrix4 GameState::getProjectionMatrix() {
 }
 
 u64 GameState::getReferenceID() {
-    local_persist u64 referenceID = 0;
+    static u64 referenceID = 0;
     return referenceID++;
 }
 
@@ -281,7 +281,7 @@ void GameState::initalizeInputBindings() {
             // GameState::mouse_captured = !GameState::mouse_captured;
             // glfwSetInputMode((GLFWwindow*)IOD::glfw_window_instance, GLFW_CURSOR, GameState::mouse_captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 
-            // local_persist bool useGamma = true;
+            // static bool useGamma = true;
             // this->basic_shader.setBool("uGamma", useGamma);
             // useGamma = !useGamma;
         }
@@ -409,7 +409,7 @@ void GameState::update(GLFWwindow* window, float dt) {
         GameState::picker.update(this->getProjectionMatrix(), GameState::camera.get_view_matrix());
     }
 
-    float smallest_distance = FLT_MAX;
+    float smallest_distance = __FLT_MAX__;
     const auto intersection_test = [&smallest_distance](std::vector<Mesh*>& meshes) {
         for (Mesh* mesh : meshes) {
             float ray_length = 1000.0f;

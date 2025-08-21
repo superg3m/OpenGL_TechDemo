@@ -189,19 +189,12 @@ void GameState::initalizeResources() {
     knight->setEulerAngles(0, 0, 0);
     GameState::meshes.push_back(knight);
     */
-   
-    GM_Vec3 backpackBasePosition = GM_Vec3(-10.0f, 0.0f, 100.0f);   
-
-    for (int i = 0; i < 100; i++) {
-        GM_Vec3 cannonicalPosition = backpackBasePosition;
-        cannonicalPosition.z -= i * 2;
-
-        Mesh* backpack = new Mesh("../../assets/backpack/backpack.obj", TEXTURE_VERTICAL_FLIP);
-        backpack->setPosition(cannonicalPosition);
-        backpack->setScale(0.5f);
-        backpack->setEulerAngles(0, 90, 0);
-        // GameState::meshes.push_back(backpack);
-    }
+    
+    Mesh* backpack = new Mesh("../../assets/backpack/backpack.obj", TEXTURE_VERTICAL_FLIP);
+    backpack->setPosition(-5.0f, 0.0f, 2.0f);
+    backpack->setScale(0.5f);
+    backpack->setEulerAngles(0, 0, 0);
+    GameState::meshes.push_back(backpack);
 
     Mesh* window_transparent =  new Mesh(Geometry::Quad());
     window_transparent->setPosition(GM_Vec3(-3.0f,  0.0f, 2.0f));
@@ -209,7 +202,7 @@ void GameState::initalizeResources() {
     window_transparent->setEulerAngles(0, 90, 0);
     window_transparent->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(WINDOW);
     window_transparent->materials[0].opacity = 0.55f;
-    // GameState::transparent_meshes.push_back(window_transparent);
+    GameState::transparent_meshes.push_back(window_transparent);
 
     Mesh* window_transparent2 = new Mesh(Geometry::Quad());
     window_transparent2->setPosition(GM_Vec3(0.0f,  0.0f, 5.0f));
@@ -217,7 +210,7 @@ void GameState::initalizeResources() {
     window_transparent2->setEulerAngles(0, 0, 0);
     window_transparent2->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(WINDOW);
     window_transparent2->materials[0].opacity = 0.25f;
-    // GameState::transparent_meshes.push_back(window_transparent2);
+    GameState::transparent_meshes.push_back(window_transparent2);
 
     for (int i = 0; i < ArrayCount(primitivePositions); i++) {
         Mesh* cube = (rand() % 2 == 0) ? new Mesh(Geometry::Cube()) : new Mesh(Geometry::Sphere(16));
@@ -227,7 +220,7 @@ void GameState::initalizeResources() {
         cube->materials[0].color = GM_Vec3(0.14f, 1.0f, 0.84f);
         cube->materials[0].textures[TEXTURE_TYPE_DIFFUSE] = TextureLoader::getTexture(CRATE2);
         cube->materials[0].textures[TEXTURE_TYPE_SPECULAR] = TextureLoader::getTexture(CRATE2_SPECULAR);
-        // GameState::meshes.push_back(cube);
+        GameState::meshes.push_back(cube);
     }
 
     for (int i = 0; i < ArrayCount(pointLightPositions); i++) {

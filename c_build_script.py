@@ -128,5 +128,5 @@ manager.build_project()
 # ------------------------------------------------------------------------------------
 
 # --     
-COPY_FILE_TO_DIR("./Vendor/assimp/bin/macos", "libassimp.6.dylib", f"{build_postfix}")
+COPY_FILE_TO_DIR("./Vendor/assimp/bin/macos", "libassimp.6.dylib", build_postfix)
 # --

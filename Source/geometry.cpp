@@ -1,4 +1,4 @@
-#include <geometry.hpp>
+#include <Geometry.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>

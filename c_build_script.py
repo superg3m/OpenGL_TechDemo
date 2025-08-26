@@ -98,9 +98,7 @@ procedures_config = {
         build_directory = f"./{build_postfix}",
         output_name = f"OpenGL_TechDemo.exe",
         source_files = [
-            "../../Source/*.cpp",
-            "../../Source/Loader/*.cpp",
-            "../../Source/ShaderPrograms/*.cpp",
+            "../../Source/**/*.cpp",
             "../../Vendor/glad/src/glad.c"
         ],
         additional_libs = libs,

@@ -191,8 +191,8 @@ void GameState::initalizeResources() {
     */
     
     Mesh* backpack = new Mesh("../../assets/backpack/backpack.obj", TEXTURE_VERTICAL_FLIP);
-    backpack->setPosition(0.0f, 0.0f, 2.0f);
-    backpack->setScale(0.25f);
+    backpack->setPosition(0.0f, 0.0f, 3.0f);
+    backpack->setScale(0.20f);
     backpack->setEulerAngles(0, 0, 0);
     GameState::meshes.push_back(backpack);
 

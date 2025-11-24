@@ -31,7 +31,6 @@ struct Geometry {
     static Geometry AABB();
     static Geometry Cube();
     static Geometry Sphere(int segments);
-    static Geometry Model(const char* path);
 
     void setup(VertexAttributeFlag flags, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indicies);
 };

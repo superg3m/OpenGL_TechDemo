@@ -25,7 +25,6 @@ struct MeshEntry {
     unsigned int base_vertex  = 0; // offset to next vertex in the vertex buffer
     unsigned int base_index   = 0; // offset to next index in the index buffer
     unsigned int material_index = INVALID_MATERIAL;
-    GM_Matrix4 absolute_transform;
 };
 
 struct Mesh {

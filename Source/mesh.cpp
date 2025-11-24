@@ -93,7 +93,7 @@ Mesh::Mesh(const std::string &path, unsigned int texture_flags, unsigned int ass
     MeshLoader::registerMesh(path, *this);
 }
 
-MeshEntry Mesh::processMesh(aiMesh* ai_mesh, const aiScene* scene, GM_Matrix4 absolute_transform) {
+MeshEntry Mesh::processMesh(aiMesh* ai_mesh, const aiScene* scene, GM_Matrix4 parent_transform) {
     MeshEntry entry;
     entry.base_vertex = (unsigned int)this->vertices.size();
     entry.base_index = (unsigned int)this->indices.size();
@@ -108,12 +108,12 @@ MeshEntry Mesh::processMesh(aiMesh* ai_mesh, const aiScene* scene, GM_Matrix4 ab
         for (unsigned int j = 0; j < ai_mesh->mNumVertices; j++) {
             const aiVector3D& ai_position = ai_mesh->mVertices[j];
 
-            GM_Vec4 transformed_position = absolute_transform * GM_Vec4(ai_position.x, ai_position.y, ai_position.z, 1.0f);
+            GM_Vec4 transformed_position = parent_transform * GM_Vec4(ai_position.x, ai_position.y, ai_position.z, 1.0f);
             v.aPosition = GM_Vec3(transformed_position.x, transformed_position.y, transformed_position.z);
 
             if (ai_mesh->mNormals) {
                 const aiVector3D& pNormal = ai_mesh->mNormals[j];
-                GM_Vec4 transformed_normal = absolute_transform * GM_Vec4(pNormal.x, pNormal.y, pNormal.z, 0.0f); // W component is 0 for vectors
+                GM_Vec4 transformed_normal = parent_transform * GM_Vec4(pNormal.x, pNormal.y, pNormal.z, 0.0f); // W component is 0 for vectors
                 v.aNormal = GM_Vec3(transformed_normal.x, transformed_normal.y, transformed_normal.z).normalize(); // Normalize after transform
             } else {
                 aiVector3D Normal(0.0f, 1.0f, 0.0f);
@@ -385,7 +385,7 @@ void Mesh::draw(ShaderBase &shader, bool useMaterial) {
             unsigned int material_index = entry.material_index;
             shader.setMaterial(this->materials[material_index]);
         }
-
+        
         if (entry.index_count > 0) {
             glDrawElementsBaseVertex(
                 draw_type, entry.index_count, 

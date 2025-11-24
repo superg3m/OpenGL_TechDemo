@@ -44,13 +44,13 @@ static const char* texture_to_string[TEXTURE_COUNT] = {
 struct Material {
     std::string name;
     GLTextureID textures[TEXTURE_COUNT];
-    GM_Vec3 color = GM_Vec3(1);
+    GM_Vec3 color = GM_Vec3(1.0f);
     float shininess = 32.0f;
     float opacity = 1.0f;
 
-    GM_Vec3 ambient_color  = GM_Vec3(0);
-    GM_Vec3 diffuse_color  = GM_Vec3(0);
-    GM_Vec3 specular_color = GM_Vec3(0);
+    GM_Vec3 ambient_color  = GM_Vec3(0.0f);
+    GM_Vec3 diffuse_color  = GM_Vec3(0.0f);
+    GM_Vec3 specular_color = GM_Vec3(0.0f);
 
     Material();
 

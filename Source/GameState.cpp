@@ -1,4 +1,5 @@
 #include <GameState.hpp>
+#include <float.h>
 
 GM_Matrix4 GameState::projection;
 unsigned int GameState::WINDOW_WIDTH;
@@ -402,7 +403,7 @@ void GameState::update(GLFWwindow* window, float dt) {
         GameState::picker.update(this->getProjectionMatrix(), GameState::camera.get_view_matrix());
     }
 
-    float smallest_distance = __FLT_MAX__;
+    float smallest_distance = INFINITY;
     const auto intersection_test = [&smallest_distance](std::vector<Mesh*>& meshes) {
         for (Mesh* mesh : meshes) {
             float ray_length = 1000.0f;

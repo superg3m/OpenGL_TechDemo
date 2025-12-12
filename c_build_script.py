@@ -67,7 +67,10 @@ common_libs = [
 
 platform_libs = []
 if IS_WINDOWS():
-    glfw_lib = "../../Vendor/glfw/bin/windows/lib-static-ucrt/glfw3dll.lib" if cc.compiler_name == "cl" else "../../Vendor/glfw/bin/windows/glfw/lib-mingw-w64/libglfw3dll.a"
+    COPY_FILE_TO_DIR("./Vendor/assimp/bin/windows", "assimp-vc143-mtd.dll", build_postfix)
+    COPY_FILE_TO_DIR("./Vendor/glfw/bin/windows/lib-static-ucrt", "glfw3.dll", build_postfix)
+    
+    glfw_lib = f"../../Vendor/glfw/bin/windows/lib-static-ucrt/{GET_LIB_NAME(cc, 'glfw3dll')}"
     platform_libs += [
         GET_LIB_FLAG(cc, "Kernel32"),
         GET_LIB_FLAG(cc, "User32"),
@@ -77,6 +80,7 @@ if IS_WINDOWS():
         glfw_lib
     ]
 elif IS_DARWIN():
+    COPY_FILE_TO_DIR("./Vendor/assimp/bin/macos", "libassimp.6.dylib", build_postfix)
     platform_libs += [
         "-framework OpenGL",
         "-framework Cocoa",

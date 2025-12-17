@@ -21,11 +21,11 @@ pc: ProjectConfig = ProjectConfig(
     project_name = "OpenGL_TechDemo",
     project_dependencies = [
         Dependency(name="ckg", branch_name="CompleteRewrite"),
-        Dependency(name="GameMath", branch_name="Rework"),
-        Dependency(name="IOD")
+        Dependency(name="GameMath", branch_name="main"),
+        Dependency(name="IOD", branch_name="Legacy")
     ],
     project_debug_with_visual_studio = True,
-    project_rebuild_project_dependencies = False,
+    project_rebuild_project_dependencies = True,
     project_executable_names = ["OpenGL_TechDemo.exe"]
 )
 

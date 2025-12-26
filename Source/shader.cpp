@@ -14,7 +14,7 @@ typedef struct ShaderDescriptor {
     const char* path;
 } ShaderDescriptor;
 
-internal void checkCompileError(unsigned int shaderID, const char* type) {
+static void checkCompileError(unsigned int shaderID, const char* type) {
     int success;
     char info_log[1024];
     if (!ckg_str_equal(type, ckg_cstr_length(type), CKG_LIT_ARG("PROGRAM"))) {
@@ -34,7 +34,7 @@ internal void checkCompileError(unsigned int shaderID, const char* type) {
     }
 }
 
-internal ShaderType shaderTypeFromExtension(const char* shader_source_path) {
+static ShaderType shaderTypeFromExtension(const char* shader_source_path) {
     u64 shader_path_length = ckg_cstr_length(shader_source_path);
     s64 extension_index = ckg_str_last_index_of(shader_source_path, shader_path_length, CKG_LIT_ARG("."));
     ckg_assert_msg(extension_index != -1, "Missing extension (.vert, .frag)\n");

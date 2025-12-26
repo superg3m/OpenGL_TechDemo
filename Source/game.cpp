@@ -67,7 +67,7 @@ GM_Matrix4 Game::getProjectionMatrix() {
 }
 
 u64 Game::getReferenceID() {
-    local_persist u64 referenceID = 0;
+    static u64 referenceID = 0;
     return referenceID++;
 }
 
@@ -76,7 +76,7 @@ void create_brick(GameLevel* level, float grid_cell_width, float grid_cell_hiegh
     // TODO(Jovanni): I hate the fact that you have to declare all of this
     Entity* brick = Entity::Brick(brick_type);
     
-    local_persist int brick_index = 0;
+    static int brick_index = 0;
     brick->setPosition(GM_Vec3(x_offset, y_offset, 0));
     brick->setScale(GM_Vec3(grid_cell_width, grid_cell_hieght, 1));
     x_offset += grid_cell_width;

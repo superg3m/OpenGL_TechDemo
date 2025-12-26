@@ -40,7 +40,7 @@ cc: CompilerConfig = CompilerConfig(
     compiler_disable_specific_warnings = [""],
     compiler_treat_warnings_as_errors = True,
     compiler_disable_warnings  = False,
-    compiler_disable_sanitizer = True
+    compiler_enable_sanitizer = False
 )
 
 if IS_WINDOWS() and not C_BUILD_IS_DEPENDENCY():
@@ -111,5 +111,5 @@ manager.build_project()
 
 # --     
 COPY_FILE_TO_DIR("./Libraries/glfw/lib-static-ucrt", "glfw3.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
-COPY_FILE_TO_DIR("./Libraries/assimp/bin/Debug", "assimp-vc143-mtd.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
+# COPY_FILE_TO_DIR("./Libraries/assimp/bin/Debug", "assimp-vc143-mtd.dll", f"./build_cl/{C_BUILD_BUILD_TYPE()}")
 # --
